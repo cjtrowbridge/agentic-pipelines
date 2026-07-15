@@ -286,6 +286,9 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 10.11 Require explicit bounded model context windows.
     - [x] 10.11.1 Require every LLM stage to declare `num_ctx` separately from `num_predict`, sized from measured request and completion budgets rather than the model's advertised maximum context.
       - [x] 10.11.1.1 Document and test the context/KV-cache distinction and include a safe, tunable API-sample default.
+  - [x] 10.12 Require bounded corrective retries for failed model stages.
+    - [x] 10.12.1 Require visible, finite retries that report transport and output-contract failures and provide corrective feedback without silently accepting invalid output.
+      - [x] 10.12.1.1 Document and test the retry/rejection-feedback rule.
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 

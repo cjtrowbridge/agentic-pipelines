@@ -36,6 +36,15 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("never mistake `num_predict` for a context/KV-cache limit", prompts)
         self.assertIn("disable it for clear, constrained transformations", prompts)
 
+    def test_prompt_rule_requires_bounded_corrective_retries(self) -> None:
+        text = Path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("finite retry budget", text)
+        self.assertIn("parse/schema/validator rejection", text)
+        self.assertIn("never silently normalize an invalid model result", text)
+        prompts = Path("playbooks/how_to_build_pipeline_prompts.md").read_text(encoding="utf-8")
+        self.assertIn("finite stage retry budget", prompts)
+        self.assertIn("include that reason with the unchanged original inputs", prompts)
+
     def test_bootstrap_requires_a_tracked_host_api_sample(self) -> None:
         text = Path("playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md").read_text(encoding="utf-8")
         self.assertIn("tracked root `api.sample.yaml`", text)
