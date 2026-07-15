@@ -11,7 +11,7 @@ The host pipeline definition, local-inference playbook if preflight fails, CLI h
 2. Discover entities and inspect counts without source mutation.
 3. Confirm the runner will visibly report each material stage. Model-backed stages must show completed/remaining query counts, static-template and assembled-request sizes, elapsed time, and an elapsed-time-based ETA; discovery, skips, validation, promotion, rendering, failures, and final outcomes must also be visible without printing credentials or protected inputs.
 4. Dry-run eligible selection, then invoke a bounded entity/time-limited run.
-5. On interruption, verify durable state before resuming; do not assume leased work succeeded.
+5. On Ctrl+C, require the runner to report a controlled interruption and return exit status 130. Verify durable state before resuming; do not assume leased work succeeded.
 6. Keep scheduler runtime below interval and reject overlapping locks.
 7. Review summary, quarantines, and post-run report before promotion or retry.
 8. Run `analyze` only when deterministic cohort/metric reports need semantic interpretation; review its advisory output before any change.

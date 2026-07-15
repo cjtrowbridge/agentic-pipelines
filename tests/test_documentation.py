@@ -17,6 +17,13 @@ class DocumentationTests(unittest.TestCase):
         design = Path("playbooks/how_to_design_a_pipeline.md").read_text(encoding="utf-8")
         self.assertIn("derived text—not the PDF", design)
 
+    def test_ctrl_c_rule_requires_controlled_exit(self) -> None:
+        text = Path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("Ctrl+C as a controlled interruption", text)
+        self.assertIn("exit with status 130", text)
+        operation = Path("playbooks/how_to_operate_and_resume_a_pipeline.md").read_text(encoding="utf-8")
+        self.assertIn("return exit status 130", operation)
+
     def test_bootstrap_requires_a_tracked_host_api_sample(self) -> None:
         text = Path("playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md").read_text(encoding="utf-8")
         self.assertIn("tracked root `api.sample.yaml`", text)

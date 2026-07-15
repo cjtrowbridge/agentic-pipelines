@@ -48,6 +48,7 @@ If a listed playbook is absent, use the framework-change route rather than subst
 - Every pipeline README must begin with a concise explanation of the pipeline, followed immediately by an explanation of every supported pipeline entry point before setup or deeper reference material.
 - Every pipeline script must emit operator-visible progress for each material stage. For model work, report completed and remaining query counts, static-template and assembled-request sizes, elapsed time, and an ETA derived from elapsed time; also report discovery, skips, validation, rendering/promotion, failures, and final outcomes without exposing credentials or protected inputs.
 - Never provide a PDF directly to an LLM. Deterministically convert each PDF source to a linked Markdown/text derivative first, validate or record the conversion, and provide only the derived text to model prompts.
+- Pipeline scripts must handle Ctrl+C as a controlled interruption: report it visibly, preserve truthful state for unfinished work, and exit with status 130 without reporting interrupted work as successful.
 
 ## Framework changes
 
