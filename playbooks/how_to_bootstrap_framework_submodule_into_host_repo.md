@@ -1,4 +1,4 @@
-# Playbook: Bootstrap Pipelines into a Host Repository
+# Playbook: Bootstrap Agentic Pipelines into a Host Repository
 
 ## Use when
 Adding this framework to a host for the first time.

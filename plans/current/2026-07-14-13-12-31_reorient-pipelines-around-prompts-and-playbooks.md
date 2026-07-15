@@ -1,20 +1,20 @@
 ---
 plan_id: 2026-07-14-13-12-31_reorient-pipelines-around-prompts-and-playbooks
-title: Reorient Pipelines Around Prompts and Playbooks
+title: Reorient Agentic Pipelines Around Prompts and Playbooks
 summary: Make concise prompts and task-specific playbooks the primary product while retaining the local runtime as shared supporting infrastructure.
 status: current
 created_at: 2026-07-14-13-12-31
 ---
 
-# Reorient Pipelines Around Prompts and Playbooks
+# Reorient Agentic Pipelines Around Prompts and Playbooks
 
 Key: `[ ]` pending task, `[x]` completed task, `[?]` needs validation, `[-]` closed task
 
 ## Outcome
 
-Pipelines will become a progressively disclosed prompt-and-playbook framework. Root instructions will explain the universal project model and route agents to the one playbook relevant to their current task. Playbooks will load only the prompts, templates, references, and commands needed for that task. The existing Python runtime, API primitive, SQLite state, thread capture, validators, and reports will remain reusable execution infrastructure beneath this prompt-first product surface.
+Agentic Pipelines will become a progressively disclosed prompt-and-playbook framework. Root instructions will explain the universal project model and route agents to the one playbook relevant to their current task. Playbooks will load only the prompts, templates, references, and commands needed for that task. The existing Python runtime, API primitive, SQLite state, thread capture, validators, and reports will remain reusable execution infrastructure beneath this prompt-first product surface.
 
-Pipelines are deterministic programs first. Agents must use trusted tools, parsers, queries, shell commands, and small programs for every step they can perform reliably. An LLM is permitted only for a narrowly justified semantic transformation or judgment, receives the minimum necessary context, and is bounded by exact schemas, requirement-specific validation, finite attempts, evidence, and fail-closed routing. Broad acceptance criteria may not substitute for proof of the declared goal and invariants.
+Agentic Pipelines are deterministic programs first. Agents must use trusted tools, parsers, queries, shell commands, and small programs for every step they can perform reliably. An LLM is permitted only for a narrowly justified semantic transformation or judgment, receives the minimum necessary context, and is bounded by exact schemas, requirement-specific validation, finite attempts, evidence, and fail-closed routing. Broad acceptance criteria may not substitute for proof of the declared goal and invariants.
 
 ## Supersession
 
@@ -128,7 +128,7 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
     - [x] 3.4.2 Add or adapt `playbooks/how_to_change_the_pipelines_framework.md`.
       - [x] 3.4.2.1 Keep plan/journal/verification requirements specific to framework mutation rather than loading them for ordinary pipeline runs.
   - [x] 3.5 Retire or adapt legacy playbooks.
-    - [x] 3.5.1 Retain routed Pipelines procedures and remove unrelated agent, assimilation, downtime, tool-wrapper, roadmap, kickoff, and duplicate commit/review playbooks.
+    - [x] 3.5.1 Retain routed Agentic Pipelines procedures and remove unrelated agent, assimilation, downtime, tool-wrapper, roadmap, kickoff, and duplicate commit/review playbooks.
       - [x] 3.5.1.1 Remove legacy multi-board/HUD/agents-only routes from the active catalog after preserving reusable checklist principles in the root `TODO.md` and checkpoint guidance.
 
 ## 4. Build the canonical prompt library
@@ -263,6 +263,8 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 10.3 Create an `agents`-to-`pipelines` migration guide.
     - [x] 10.3.1 Cover submodule/router changes, host synthesis, journal/TODO retention, old maintenance removal, API/state setup, verification, and rollback.
       - [x] 10.3.1.1 Add documentation tests for required migration boundaries and explicit manual decisions.
+  - [x] 10.4 Rename project-identity references from Pipelines to Agentic Pipelines.
+    - [x] 10.4.1 Update documentation titles and self-references while preserving generic pipeline terminology, stable plan identifiers, and the `./pipelines` submodule path.
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 

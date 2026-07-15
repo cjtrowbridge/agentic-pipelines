@@ -1,4 +1,4 @@
-# Playbook: Change the Pipelines Framework
+# Playbook: Change the Agentic Pipelines Framework
 
 ## Use when
 

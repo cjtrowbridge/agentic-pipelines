@@ -1,7 +1,7 @@
-# Playbook: Update Pipelines and Synthesize Host Overrides
+# Playbook: Update Agentic Pipelines and Synthesize Host Overrides
 
 ## Use when
-Updating a host’s `./pipelines` submodule and integrating upstream prompt/playbook/schema changes.
+Updating a host’s `./pipelines` Agentic Pipelines submodule and integrating upstream prompt/playbook/schema changes.
 
 ## Load
 Old upstream revision, new upstream revision, host-owned/customized artifacts, migration notes, and this playbook only; load affected task playbooks when validation requires them.

@@ -1,10 +1,10 @@
-# Pipelines Agent Instructions
+# Agentic Pipelines Agent Instructions
 
 ## Purpose
 
-Pipelines is a prompt-first framework for designing, operating, reviewing, and improving local agentic pipelines. Prompts and task-specific playbooks are the primary product; templates and references provide shared contracts; runtime code is supporting execution infrastructure.
+Agentic Pipelines is a prompt-first framework for designing, operating, reviewing, and improving local agentic pipelines. Prompts and task-specific playbooks are the primary product; templates and references provide shared contracts; runtime code is supporting execution infrastructure.
 
-Pipelines are deterministic programs first. Use ordinary code, parsers, queries, shell tools, and exact validators for every step they can correctly perform. Introduce an LLM only for a narrowly defined transformation or judgment that cannot be implemented reliably with deterministic logic, and bound that call by explicit inputs, outputs, invariants, failure behavior, evidence, and validation.
+Agentic Pipelines are deterministic programs first. Use ordinary code, parsers, queries, shell tools, and exact validators for every step they can correctly perform. Introduce an LLM only for a narrowly defined transformation or judgment that cannot be implemented reliably with deterministic logic, and bound that call by explicit inputs, outputs, invariants, failure behavior, evidence, and validation.
 
 Load only the detail required for the current task. Do not read every playbook, prompt, or reference by default.
 
@@ -29,7 +29,7 @@ For combined tasks, follow dependency order: design before building prompts; con
 | Investigate one problematic entity | `playbooks/how_to_investigate_a_pipeline_entity.md` |
 | Review failure or performance analysis | `playbooks/how_to_review_post_run_analysis.md` |
 | Approve and retry a failure cohort | `playbooks/how_to_approve_and_retry_a_failure_cohort.md` |
-| Bootstrap or update Pipelines in a host | `playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md` or `playbooks/how_to_update_submodule_and_synthesize_host_overrides.md` |
+| Bootstrap or update Agentic Pipelines in a host | `playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md` or `playbooks/how_to_update_submodule_and_synthesize_host_overrides.md` |
 | Change this framework | `playbooks/how_to_change_the_pipelines_framework.md` |
 
 If a listed playbook is absent, use the framework-change route rather than substituting unrelated legacy instructions.

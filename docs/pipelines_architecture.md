@@ -1,8 +1,8 @@
-# Pipelines Architecture Contract
+# Agentic Pipelines Architecture Contract
 
 ## Purpose
 
-`pipelines` is a submodule-ready framework for constructing and operating long-running, local-inference production pipelines. A cloud model may help design a pipeline; the local model performs the high-volume work. The framework must make each processed entity resumable, auditable, reviewable, and recoverable.
+Agentic Pipelines is a submodule-ready framework for constructing and operating long-running, local-inference production pipelines. A cloud model may help design a pipeline; the local model performs the high-volume work. The framework must make each processed entity resumable, auditable, reviewable, and recoverable.
 
 The initial delivery is intentionally single-host and Ollama-compatible. It does not depend on a cloud API, a hosted database, a web UI, or a distributed scheduler.
 
@@ -42,7 +42,7 @@ The upstream framework ships a `TODO.md` template, but never overwrites a host's
 
 ## Retained, replaced, and newly introduced framework concepts
 
-| Earlier framework concept | Pipelines treatment |
+| Earlier framework concept | Agentic Pipelines treatment |
 | --- | --- |
 | Plan-governed repository changes | Retained. Plans authorize framework or host changes. |
 | Journal | Retained. It is the append-only human/agent metaconversation and checkpoint memory, not a machine event log. |

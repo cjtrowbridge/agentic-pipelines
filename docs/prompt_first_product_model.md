@@ -2,7 +2,7 @@
 
 ## North star
 
-Pipelines is primarily a library of concise, complete prompts and task-specific playbooks for designing, operating, reviewing, and improving local agentic pipelines. Templates and references supply shared contracts and concepts. Runtime code is a reusable execution substrate beneath that product surface.
+Agentic Pipelines is primarily a library of concise, complete prompts and task-specific playbooks for designing, operating, reviewing, and improving local agentic pipelines. Templates and references supply shared contracts and concepts. Runtime code is a reusable execution substrate beneath that product surface.
 
 An agent should load the universal router, identify its task, and then load only the playbook and supporting artifacts required for that task. An agent configuring Ollama does not need cohort-remediation procedure; an agent reviewing one entity does not need framework-maintenance or host-bootstrap policy.
 
@@ -89,7 +89,7 @@ Framework updates may propose prompt improvements through synthesis. They may no
 | “Resume yesterday's run.” | Operation/resume playbook; pipeline definition; runtime command reference |
 | “Why did this entity fail?” | Entity-investigation playbook; only that entity's state/evidence trail |
 | “Improve the failures from this run.” | Post-run review playbook followed, if approved, by cohort-retry playbook |
-| “Change how Pipelines routes agents.” | Framework-change playbook; active plan; relevant router/playbook artifacts |
+| “Change how Agentic Pipelines routes agents.” | Framework-change playbook; active plan; relevant router/playbook artifacts |
 
 Passing these scenarios means each agent can identify a minimum sufficient context set. It does not impose an arbitrary universal word count; concision is judged by absence of unrelated procedure and duplicated explanation while retaining all required constraints.
 

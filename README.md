@@ -1,10 +1,10 @@
-# Pipelines
+# Agentic Pipelines
 
-Pipelines is a prompt-first framework for using scarce cloud intelligence to design durable local-inference processes, then using abundant local compute to execute, review, repair, and analyze work at scale.
+Agentic Pipelines is a prompt-first framework for using scarce cloud intelligence to design durable local-inference processes, then using abundant local compute to execute, review, repair, and analyze work at scale.
 
 Its primary reusable assets are concise prompts and task-specific playbooks. The Python runtime, Ollama-compatible API adapter, SQLite state, validators, thread capture, and reports are shared supporting infrastructure.
 
-Pipelines are mostly ordinary deterministic automation. File discovery, parsing, filtering, routing, comparison, validation, state transitions, and promotion should use code or standard tools such as shell commands whenever they can. An LLM belongs only at a narrow step that genuinely requires semantic interpretation or generation. Every such step receives the minimum necessary context and is constrained by a precise output contract, deterministic gates, finite attempts, and captured evidence.
+Agentic Pipelines are mostly ordinary deterministic automation. File discovery, parsing, filtering, routing, comparison, validation, state transitions, and promotion should use code or standard tools such as shell commands whenever they can. An LLM belongs only at a narrow step that genuinely requires semantic interpretation or generation. Every such step receives the minimum necessary context and is constrained by a precise output contract, deterministic gates, finite attempts, and captured evidence.
 
 ## How agents use the framework
 

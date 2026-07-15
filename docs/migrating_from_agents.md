@@ -1,4 +1,4 @@
-# Migrating from Agents to Pipelines
+# Migrating from Agents to Agentic Pipelines
 
 Use this only for an existing host that mounted the former framework.
 
