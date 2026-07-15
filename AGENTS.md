@@ -49,7 +49,7 @@ If a listed playbook is absent, use the framework-change route rather than subst
 - Every pipeline script must emit operator-visible progress for each material stage. For model work, report completed and remaining query counts, static-template and assembled-request sizes, elapsed time, and an ETA derived from elapsed time; also report discovery, skips, validation, rendering/promotion, failures, and final outcomes without exposing credentials or protected inputs.
 - Never provide a PDF directly to an LLM. Deterministically convert each PDF source to a linked Markdown/text derivative first, validate or record the conversion, and provide only the derived text to model prompts.
 - Pipeline scripts must handle Ctrl+C as a controlled interruption: report it visibly, preserve truthful state for unfinished work, and exit with status 130 without reporting interrupted work as successful.
-- Every LLM stage must declare a completion-token limit. Reasoning is opt-in and needs a stage-specific justification; default to non-reasoning for clear, constrained, example-rich transformations that the model can execute directly.
+- Every LLM stage must declare both a completion-token limit (`num_predict`) and a context-window limit (`num_ctx`), sized from a measured maximum request plus its completion budget; `num_predict` does not limit context/KV-cache allocation. Reasoning is opt-in and needs a stage-specific justification; default to non-reasoning for clear, constrained, example-rich transformations that the model can execute directly.
 
 ## Framework changes
 

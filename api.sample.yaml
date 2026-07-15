@@ -27,8 +27,12 @@ request:
 # Applied to every request unless a pipeline stage supplies an allowed override.
 generation:
   temperature: 0.2
-  # Every LLM stage needs a bounded completion. Tune this to the host artifact.
+  # Every LLM stage needs bounded completion and context budgets. Calculate
+  # num_ctx from the largest measured assembled request plus num_predict; do not
+  # rely on the model's native maximum context or confuse num_predict with it.
+  # Tune both values to the host artifact and available model memory.
   num_predict: 2048
+  num_ctx: 16384
 
 # Literal strings to redact from captured prompts, responses, errors, and logs.
 redaction:

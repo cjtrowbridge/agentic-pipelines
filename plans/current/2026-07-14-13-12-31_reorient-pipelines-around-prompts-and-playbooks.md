@@ -283,6 +283,9 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 10.10 Require bounded responses and explicit reasoning decisions.
     - [x] 10.10.1 Require every LLM stage to declare a completion-token limit and explicitly justify reasoning; default to non-reasoning for clear, example-rich transformations.
       - [x] 10.10.1.1 Document and test the prompt-policy rule and expose top-level thinking control through the shared API primitive.
+  - [x] 10.11 Require explicit bounded model context windows.
+    - [x] 10.11.1 Require every LLM stage to declare `num_ctx` separately from `num_predict`, sized from measured request and completion budgets rather than the model's advertised maximum context.
+      - [x] 10.11.1.1 Document and test the context/KV-cache distinction and include a safe, tunable API-sample default.
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 

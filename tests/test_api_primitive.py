@@ -16,6 +16,14 @@ class ApiPrimitiveTests(unittest.TestCase):
         self.assertIs(payload["think"], False)
         self.assertNotIn("think", payload["options"])
 
+    def test_request_preserves_separate_context_and_completion_limits(self) -> None:
+        config = ApiConfig(
+            **{**self.config().__dict__, "generation": {"num_predict": 2048, "num_ctx": 20480}}
+        )
+        options = InferenceRequest(messages=[{"role": "user", "content": "hello"}]).payload(config)["options"]
+        self.assertEqual(options["num_predict"], 2048)
+        self.assertEqual(options["num_ctx"], 20480)
+
     def config(self) -> ApiConfig:
         return ApiConfig(
             path=Path("api.yaml"),

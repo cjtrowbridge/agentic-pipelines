@@ -27,9 +27,13 @@ class DocumentationTests(unittest.TestCase):
     def test_prompt_rule_requires_limits_and_reasoning_justification(self) -> None:
         text = Path("AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("completion-token limit", text)
+        self.assertIn("context-window limit (`num_ctx`)", text)
+        self.assertIn("`num_predict` does not limit context/KV-cache allocation", text)
         self.assertIn("Reasoning is opt-in", text)
         prompts = Path("playbooks/how_to_build_pipeline_prompts.md").read_text(encoding="utf-8")
         self.assertIn("completion-token limit", prompts)
+        self.assertIn("context-window limit (`num_ctx`)", prompts)
+        self.assertIn("never mistake `num_predict` for a context/KV-cache limit", prompts)
         self.assertIn("disable it for clear, constrained transformations", prompts)
 
     def test_bootstrap_requires_a_tracked_host_api_sample(self) -> None:
