@@ -274,6 +274,9 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 10.7 Require observable progress from pipeline scripts.
     - [x] 10.7.1 Require visible stage progress, completed/remaining model-query counts, elapsed time, an elapsed-time-based ETA, prompt sizes, and outcome summaries without exposing secrets.
       - [x] 10.7.1.1 Add the execution-policy rule and operation guidance, with documentation coverage.
+  - [x] 10.8 Prohibit direct PDF inputs to LLM stages.
+    - [x] 10.8.1 Require deterministic PDF-to-Markdown conversion with source/derived linkage before any model call; model prompts may consume only the derived text.
+      - [x] 10.8.1.1 Add the invariant, pipeline-design guidance, and documentation coverage.
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 

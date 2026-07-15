@@ -10,7 +10,7 @@ Turning a user goal into an entity-oriented pipeline proposal or package.
 1. Separate stated requirements, discovered facts, inferences, and unresolved user decisions.
 2. Define entity identity, source snapshot, goal state, allowed changes, and protected invariants.
 3. For every transformation or decision, try a trusted tool, parser/query/script, and deterministic routing rule before proposing inference.
-4. Permit an LLM stage only when its required semantic work cannot be performed reliably by deterministic logic; record that justification and minimize its inputs and authority.
+4. Permit an LLM stage only when its required semantic work cannot be performed reliably by deterministic logic; record that justification and minimize its inputs and authority. Convert PDF sources to linked Markdown/text derivatives deterministically before the stage, and make the derived text—not the PDF—the declared prompt input.
 5. Define specific deterministic gates around inference, then finite repair, quarantine, and human-decision paths. Never compensate for uncertain model behavior with broad acceptance criteria.
 6. Order preconditions and validators so impossible or unsafe entities fail before consuming inference, while valid entities pass only with requirement-specific evidence.
 7. Define evidence, retention, promotion, rollback, scheduling, and post-run analysis.
