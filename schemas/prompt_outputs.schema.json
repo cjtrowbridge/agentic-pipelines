@@ -1,0 +1,261 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pipelines.prompt-outputs.v1",
+  "$defs": {
+    "nonempty_string": {"type": "string", "minLength": 1},
+    "string_list": {"type": "array", "items": {"type": "string"}},
+    "finding": {
+      "type": "object",
+      "required": ["id", "description", "evidence"],
+      "properties": {
+        "id": {"$ref": "#/$defs/nonempty_string"},
+        "description": {"$ref": "#/$defs/nonempty_string"},
+        "evidence": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "pipeline_goal_report": {
+      "type": "object",
+      "required": ["goal_state", "scale", "allowed_changes", "protected_content", "operating_constraints", "acceptance_expectations", "human_escalation_boundary", "repository_facts", "inferences", "unresolved_decisions"],
+      "properties": {
+        "goal_state": {"$ref": "#/$defs/nonempty_string"},
+        "scale": {"type": "object"},
+        "allowed_changes": {"$ref": "#/$defs/string_list"},
+        "protected_content": {"$ref": "#/$defs/string_list"},
+        "operating_constraints": {"$ref": "#/$defs/string_list"},
+        "acceptance_expectations": {"$ref": "#/$defs/string_list"},
+        "human_escalation_boundary": {"$ref": "#/$defs/string_list"},
+        "repository_facts": {"$ref": "#/$defs/string_list"},
+        "inferences": {"$ref": "#/$defs/string_list"},
+        "unresolved_decisions": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "entity_contract": {
+      "type": "object",
+      "required": ["identity_rule", "source", "snapshot", "goal_state", "allowed_changes", "protected_invariants", "terminal_states"],
+      "properties": {
+        "identity_rule": {"$ref": "#/$defs/nonempty_string"},
+        "source": {"type": "object"},
+        "snapshot": {"type": "object"},
+        "goal_state": {"$ref": "#/$defs/nonempty_string"},
+        "allowed_changes": {"$ref": "#/$defs/string_list"},
+        "protected_invariants": {"$ref": "#/$defs/string_list"},
+        "terminal_states": {"type": "array", "items": {"enum": ["accepted", "promoted", "quarantined", "human_required"]}}
+      },
+      "additionalProperties": false
+    },
+    "invariant_catalog": {
+      "type": "object",
+      "required": ["invariants", "unresolved"],
+      "properties": {
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "description", "verification", "failure_action"],
+            "properties": {
+              "id": {"$ref": "#/$defs/nonempty_string"},
+              "description": {"$ref": "#/$defs/nonempty_string"},
+              "verification": {"enum": ["deterministic", "semantic", "human"]},
+              "failure_action": {"enum": ["repair", "quarantine", "human_required"]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "unresolved": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "stage_design": {
+      "type": "object",
+      "required": ["stages", "terminal_states"],
+      "properties": {
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "mechanism", "inputs", "output", "validation", "retry_budget", "next_states"],
+            "properties": {
+              "id": {"$ref": "#/$defs/nonempty_string"},
+              "mechanism": {"enum": ["tool", "parser", "script", "query", "heuristic", "llm", "human"]},
+              "llm_justification": {"type": ["string", "null"]},
+              "inputs": {"$ref": "#/$defs/string_list"},
+              "output": {"$ref": "#/$defs/nonempty_string"},
+              "validation": {"$ref": "#/$defs/string_list"},
+              "retry_budget": {"type": "integer", "minimum": 0},
+              "next_states": {"$ref": "#/$defs/string_list"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "terminal_states": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "validation_matrix": {
+      "type": "object",
+      "required": ["requirements", "golden_fixtures", "quality_measurement"],
+      "properties": {
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["requirement_id", "method", "acceptance", "failure_code", "failure_action", "evidence"],
+            "properties": {
+              "requirement_id": {"$ref": "#/$defs/nonempty_string"},
+              "method": {"enum": ["deterministic", "semantic", "human"]},
+              "acceptance": {"$ref": "#/$defs/nonempty_string"},
+              "failure_code": {"$ref": "#/$defs/nonempty_string"},
+              "failure_action": {"enum": ["repair", "quarantine", "human_required"]},
+              "evidence": {"$ref": "#/$defs/nonempty_string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "golden_fixtures": {"$ref": "#/$defs/string_list"},
+        "quality_measurement": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "pipeline_design_audit": {
+      "type": "object",
+      "required": ["verdict", "defects", "risks", "inferences", "user_decisions"],
+      "properties": {
+        "verdict": {"enum": ["pass", "revise", "blocked"]},
+        "defects": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "risks": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "inferences": {"$ref": "#/$defs/string_list"},
+        "user_decisions": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "staged_pipeline_package": {
+      "type": "object",
+      "required": ["pipeline_definition", "prompt_files", "validators", "evaluation_fixtures", "scheduler_example", "evidence_policy", "rollback_notes", "goal_traceability", "missing_inputs"],
+      "properties": {
+        "pipeline_definition": {"type": "object"},
+        "prompt_files": {"type": "array", "items": {"type": "object"}},
+        "validators": {"type": "array", "items": {"type": "object"}},
+        "evaluation_fixtures": {"type": "array", "items": {"type": "object"}},
+        "scheduler_example": {"type": "string"},
+        "evidence_policy": {"type": "object"},
+        "rollback_notes": {"$ref": "#/$defs/string_list"},
+        "goal_traceability": {"type": "array", "items": {"type": "object"}},
+        "missing_inputs": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "versioned_prompt": {
+      "type": "object",
+      "required": ["id", "version", "model_role", "inputs", "output", "body"],
+      "properties": {
+        "id": {"pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$", "type": "string"},
+        "version": {"pattern": "^\\d+\\.\\d+\\.\\d+$", "type": "string"},
+        "model_role": {"enum": ["worker", "self_reviewer", "reviewer", "repairer", "adjudicator", "analyzer", "designer"]},
+        "inputs": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+        "output": {"$ref": "#/$defs/nonempty_string"},
+        "body": {"$ref": "#/$defs/nonempty_string"}
+      },
+      "additionalProperties": false
+    },
+    "versioned_worker_prompt": {"$ref": "#/$defs/versioned_prompt"},
+    "versioned_self_review_prompt": {"$ref": "#/$defs/versioned_prompt"},
+    "versioned_reviewer_prompt": {"$ref": "#/$defs/versioned_prompt"},
+    "versioned_repair_prompt": {"$ref": "#/$defs/versioned_prompt"},
+    "versioned_adjudicator_prompt": {"$ref": "#/$defs/versioned_prompt"},
+    "versioned_failure_analysis_prompt": {"$ref": "#/$defs/versioned_prompt"},
+    "versioned_performance_analysis_prompt": {"$ref": "#/$defs/versioned_prompt"},
+    "reviewed_prompt": {
+      "type": "object",
+      "required": ["verdict", "prompt", "removed", "preserved_constraints", "issues"],
+      "properties": {
+        "verdict": {"enum": ["pass", "revise", "reject_deterministic_job"]},
+        "prompt": {"type": ["object", "null"]},
+        "removed": {"$ref": "#/$defs/string_list"},
+        "preserved_constraints": {"$ref": "#/$defs/string_list"},
+        "issues": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "worker_result": {
+      "type": "object",
+      "required": ["status", "candidate", "reason"],
+      "properties": {
+        "status": {"enum": ["candidate", "unable"]},
+        "candidate": {"type": ["string", "null"]},
+        "reason": {"type": ["string", "null"]}
+      },
+      "allOf": [
+        {"if": {"properties": {"status": {"const": "candidate"}}}, "then": {"properties": {"candidate": {"type": "string", "minLength": 1}}}},
+        {"if": {"properties": {"status": {"const": "unable"}}}, "then": {"properties": {"reason": {"type": "string", "minLength": 1}}}}
+      ],
+      "additionalProperties": false
+    },
+    "reviewer_verdict": {
+      "type": "object",
+      "required": ["verdict", "confidence", "violations", "recommended_action"],
+      "properties": {
+        "verdict": {"enum": ["pass", "fail", "uncertain"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "violations": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "recommended_action": {"enum": ["accept", "repair", "quarantine", "human_required"]}
+      },
+      "additionalProperties": false
+    },
+    "repair_result": {
+      "type": "object",
+      "required": ["status", "candidate", "addressed", "unresolved"],
+      "properties": {
+        "status": {"enum": ["repaired", "unable"]},
+        "candidate": {"type": ["string", "null"]},
+        "addressed": {"$ref": "#/$defs/string_list"},
+        "unresolved": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "adjudication_result": {
+      "type": "object",
+      "required": ["action", "reason", "confidence"],
+      "properties": {
+        "action": {"enum": ["accept", "repair", "rerun", "quarantine", "human_required"]},
+        "reason": {"$ref": "#/$defs/nonempty_string"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "validator_evidence": {
+      "type": "object",
+      "required": ["passed", "results"],
+      "properties": {
+        "passed": {"type": "boolean"},
+        "results": {"type": "array", "items": {"type": "object", "required": ["id", "passed", "code", "detail"], "properties": {"id": {"type": "string"}, "passed": {"type": "boolean"}, "code": {"type": "string"}, "detail": {"type": "string"}, "metrics": {"type": "object"}}, "additionalProperties": false}}
+      },
+      "additionalProperties": false
+    },
+    "entity_failure_analysis": {
+      "type": "object",
+      "required": ["observations", "first_failing_gate", "hypotheses", "unknowns", "recommended_action"],
+      "properties": {"observations": {"$ref": "#/$defs/string_list"}, "first_failing_gate": {"type": "string"}, "hypotheses": {"type": "array", "items": {"type": "object"}}, "unknowns": {"$ref": "#/$defs/string_list"}, "recommended_action": {"type": "string"}},
+      "additionalProperties": false
+    },
+    "cohort_failure_analysis": {
+      "type": "object",
+      "required": ["cohort_id", "shared_observations", "counterexamples", "hypotheses", "evidence_gaps", "confidence"],
+      "properties": {"cohort_id": {"type": "string"}, "shared_observations": {"$ref": "#/$defs/string_list"}, "counterexamples": {"$ref": "#/$defs/string_list"}, "hypotheses": {"type": "array", "items": {"type": "object"}}, "evidence_gaps": {"$ref": "#/$defs/string_list"}, "confidence": {"type": "number", "minimum": 0, "maximum": 1}},
+      "additionalProperties": false
+    },
+    "remediation_proposal": {
+      "type": "object",
+      "required": ["cohort_id", "observed_problem", "hypothesized_cause", "proposed_change", "regression_fixture", "sample_scope", "retry_recommendation", "authority"],
+      "properties": {"cohort_id": {"type": "string"}, "observed_problem": {"type": "string"}, "hypothesized_cause": {"type": "string"}, "proposed_change": {"type": "string"}, "regression_fixture": {"type": "string"}, "sample_scope": {"type": "string"}, "retry_recommendation": {"type": "string"}, "authority": {"const": "advisory_only"}},
+      "additionalProperties": false
+    },
+    "performance_analysis": {
+      "type": "object",
+      "required": ["observed_metrics", "calculated_metrics", "hypotheses", "unknowns", "recommendations"],
+      "properties": {"observed_metrics": {"type": "object"}, "calculated_metrics": {"type": "object"}, "hypotheses": {"type": "array", "items": {"type": "object"}}, "unknowns": {"$ref": "#/$defs/string_list"}, "recommendations": {"$ref": "#/$defs/string_list"}},
+      "additionalProperties": false
+    }
+  }
+}

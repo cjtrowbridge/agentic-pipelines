@@ -1,0 +1,25 @@
+schema_version: 1
+status: staged
+pipeline_definition: pipeline.yaml
+goal_traceability:
+  - requirement: Repair ambiguous Markdown structure.
+    stage: worker
+    verification: deterministic structure gates followed by independent semantic review
+  - requirement: Preserve front matter exactly.
+    stage: deterministic validation
+    verification: parsed source and candidate front matter equality
+  - requirement: Preserve prose meaning.
+    stage: reviewer
+    verification: bounded semantic verdict after deterministic validation
+  - requirement: Fail safely when intended meaning is unavailable.
+    stage: worker
+    verification: unable result produces terminal quarantine
+prompt_files: [prompts/worker.md, prompts/reviewer.md, prompts/repair.md, prompts/failure-analysis.md, prompts/remediation.md, prompts/performance.md]
+validator_files: []
+fixture_manifest: fixtures.yaml
+api_sample: api.sample.yaml
+scheduler_example: scheduler.example.txt
+rollback_notes:
+  - Promotion is disabled in the reference package.
+  - Accepted artifacts remain separate from fixture sources.
+unresolved_decisions: []

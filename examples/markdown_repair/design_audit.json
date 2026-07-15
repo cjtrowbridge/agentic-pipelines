@@ -1,0 +1,18 @@
+{
+  "verdict": "pass",
+  "defects": [],
+  "risks": [
+    {
+      "id": "local-model-calibration",
+      "description": "Fake-provider behavior is verified, but real local-model schema compliance and semantic quality remain unmeasured.",
+      "evidence": ["tests/test_reference_pipeline.py", "TODO.md"]
+    }
+  ],
+  "inferences": [
+    "Ambiguous Markdown boundary repair and meaning-preservation review justify the package's bounded LLM stages."
+  ],
+  "user_decisions": [
+    "Select and calibrate a local model before enabling broad execution.",
+    "Keep promotion disabled until the bounded Ollama fixture run is reviewed."
+  ]
+}

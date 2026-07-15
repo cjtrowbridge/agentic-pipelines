@@ -1,0 +1,69 @@
+schema_version: 2
+pipeline_id: markdown-reference
+contract:
+  goal: Repair ambiguous Markdown structure without changing metadata, protected text, links, code, or prose meaning.
+  allowed_changes: [repair malformed Markdown delimiters and spacing]
+  protected_invariants: [front matter values, protected marker text, links, code content, prose meaning]
+source:
+  root: content
+  glob: "*.md"
+paths:
+  state: state/pipeline.sqlite
+  artifacts: artifacts
+  threads: threads
+  reports: reports
+  output_schema: "@framework/schemas/prompt_outputs.schema.json"
+stages:
+  worker:
+    prompt: prompts/worker.md
+    id: reference.markdown_worker
+    version: 1.0.0
+    output: worker_result
+    llm_justification: Ambiguous delimiter placement can require interpreting the author's intended Markdown structure.
+  reviewer:
+    prompt: prompts/reviewer.md
+    id: reference.markdown_reviewer
+    version: 1.0.0
+    output: reviewer_verdict
+    llm_justification: Preserved prose meaning is a semantic requirement not fully established by structural validators.
+    max_attempts: 2
+  repair:
+    prompt: prompts/repair.md
+    id: reference.markdown_repair
+    version: 1.0.0
+    output: repair_result
+    llm_justification: A review violation may require a narrow meaning-preserving correction.
+analysis:
+  failure:
+    prompt: prompts/failure-analysis.md
+    id: reference.failure_analysis
+    version: 1.0.0
+    output: cohort_failure_analysis
+    llm_justification: Shared semantic failure patterns may not be explained by deterministic grouping alone.
+  remediation:
+    prompt: prompts/remediation.md
+    id: reference.remediation
+    version: 1.0.0
+    output: remediation_proposal
+    llm_justification: Proposing a narrowly scoped prompt or pipeline change requires causal interpretation of reviewed evidence.
+  performance:
+    prompt: prompts/performance.md
+    id: reference.performance
+    version: 1.0.0
+    output: performance_analysis
+    llm_justification: Deterministic metrics are complete, but interpreting tradeoffs and proposing bounded experiments is semantic.
+validation:
+  required_substrings: []
+  protected_substrings: ["PROTECTED: keep exactly", "https://example.com/reference"]
+  max_change_ratio: 0.35
+  require_front_matter: true
+  require_balanced_fences: true
+runtime:
+  lease_seconds: 300
+  lock_stale_seconds: 900
+  max_repairs: 1
+  max_source_bytes: 250000
+  max_candidate_bytes: 250000
+promotion:
+  enabled: false
+  backup_root: artifacts/backups

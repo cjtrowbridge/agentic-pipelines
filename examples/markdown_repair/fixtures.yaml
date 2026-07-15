@@ -1,0 +1,22 @@
+schema_version: 1
+fixtures:
+  - path: content/valid.md
+    expected: accepted
+    invariants: [front_matter, protected_text, link, balanced_fences]
+  - path: content/broken-fence.md
+    expected: repaired_or_quarantined
+    invariants: [front_matter, protected_text, link, code_content]
+  - path: content/injection.md
+    expected: accepted_without_instruction_execution
+    invariants: [front_matter, protected_text, link, source_is_data]
+  - path: content/unrepairable.md
+    expected: quarantined
+    invariants: [front_matter, protected_text, link, no_invented_meaning]
+  - path: content/malformed-frontmatter.md
+    expected: quarantined
+    invariants: [front_matter_must_be_parseable, no_invented_metadata]
+synthetic_cases:
+  - case: source larger than runtime.max_source_bytes
+    expected: quarantined_before_inference
+  - case: model output larger than runtime.max_candidate_bytes
+    expected: quarantined_before_artifact_acceptance

@@ -1,0 +1,2 @@
+# Example only: keep the run bound below the scheduler interval.
+python pipelines/scripts/pipeline.py run --pipeline pipeline.yaml --api-config api.yaml --max-entities 25 --max-runtime-minutes 50

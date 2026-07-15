@@ -1,0 +1,60 @@
+schema_version: 2
+pipeline_id: markdown-repair
+
+contract:
+  goal: Repair only declared Markdown structural defects.
+  allowed_changes: [repair malformed Markdown structure]
+  protected_invariants: [front matter values, prose meaning, links, code content]
+
+source:
+  root: content
+  glob: "**/*.md"
+
+paths:
+  state: state/pipeline.sqlite
+  artifacts: artifacts
+  threads: threads
+  reports: reports
+  output_schema: "@framework/schemas/prompt_outputs.schema.json"
+
+stages:
+  worker:
+    prompt: prompts/worker.md
+    id: host.markdown_worker
+    version: 1.0.0
+    output: worker_result
+    llm_justification: Some malformed structures require interpreting the author's intended Markdown boundary.
+    max_attempts: 1
+  reviewer:
+    prompt: prompts/reviewer.md
+    id: host.markdown_reviewer
+    version: 1.0.0
+    output: reviewer_verdict
+    llm_justification: Meaning preservation cannot be completely established by structural validators.
+    max_attempts: 2
+    max_attempts: 1
+  repair:
+    prompt: prompts/repair.md
+    id: host.markdown_repair
+    version: 1.0.0
+    output: repair_result
+    llm_justification: A focused semantic repair may be needed after a specific review violation.
+    max_attempts: 1
+
+validation:
+  required_substrings: []
+  protected_substrings: []
+  max_change_ratio: 0.30
+  require_front_matter: true
+  require_balanced_fences: true
+
+runtime:
+  lease_seconds: 900
+  lock_stale_seconds: 3600
+  max_repairs: 1
+  max_source_bytes: 1000000
+  max_candidate_bytes: 1000000
+
+promotion:
+  enabled: false
+  backup_root: artifacts/backups

@@ -1,0 +1,11 @@
+schema_version: 1
+status: staged
+pipeline_definition: pipeline.yaml
+goal_traceability: []
+prompt_files: []
+validator_files: []
+fixture_manifest: fixtures.yaml
+api_sample: api.sample.yaml
+scheduler_example: scheduler.example.txt
+rollback_notes: []
+unresolved_decisions: []

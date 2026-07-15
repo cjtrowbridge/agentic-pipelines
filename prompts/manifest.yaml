@@ -1,0 +1,10 @@
+schema_version: 1
+output_schema: ../schemas/prompt_outputs.schema.json
+catalogs:
+  design: design
+  generate: generate
+  execute: execute
+  analyze: analyze
+required_metadata: [id, version, kind, model_role, inputs, output]
+allowed_kinds: [pipeline-building, pipeline-running]
+allowed_model_roles: [designer, worker, self_reviewer, reviewer, repairer, adjudicator, analyzer]

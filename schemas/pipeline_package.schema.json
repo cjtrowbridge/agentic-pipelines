@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pipelines.package.v1",
+  "type": "object",
+  "required": ["schema_version", "status", "pipeline_definition", "goal_traceability", "prompt_files", "validator_files", "fixture_manifest", "api_sample", "scheduler_example", "rollback_notes", "unresolved_decisions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "status": {"const": "staged"},
+    "pipeline_definition": {"type": "string", "minLength": 1},
+    "goal_traceability": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["requirement", "stage", "verification"],
+        "properties": {"requirement": {"type": "string"}, "stage": {"type": "string"}, "verification": {"type": "string"}},
+        "additionalProperties": false
+      }
+    },
+    "prompt_files": {"type": "array", "items": {"type": "string"}, "minItems": 1, "uniqueItems": true},
+    "validator_files": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "fixture_manifest": {"type": "string"},
+    "api_sample": {"type": "string"},
+    "scheduler_example": {"type": "string"},
+    "rollback_notes": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "unresolved_decisions": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

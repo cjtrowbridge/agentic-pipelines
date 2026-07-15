@@ -1,0 +1,15 @@
+# Local pipeline configuration and runtime evidence
+api.yaml
+state/
+runs/
+threads/
+artifacts/
+failures/
+reports/
+
+# Python tooling
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+

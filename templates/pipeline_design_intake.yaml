@@ -1,0 +1,11 @@
+schema_version: 1
+goal_state: ""
+entity_source: ""
+scale: {estimated_entities: null, typical_bytes: null, maximum_bytes: null}
+allowed_changes: []
+protected_content: []
+operating_constraints: []
+local_model_constraints: []
+acceptance_expectations: []
+human_escalation_boundary: []
+unresolved_decisions: []
