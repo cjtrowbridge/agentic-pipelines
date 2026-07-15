@@ -45,6 +45,14 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("finite stage retry budget", prompts)
         self.assertIn("include that reason with the unchanged original inputs", prompts)
 
+    def test_execution_rule_requires_persisted_retry_reports(self) -> None:
+        text = Path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("persist a structured, non-secret run report", text)
+        self.assertIn("every rejection/retry reason", text)
+        operation = Path("playbooks/how_to_operate_and_resume_a_pipeline.md").read_text(encoding="utf-8")
+        self.assertIn("persisted structured run report", operation)
+        self.assertIn("root cause", operation)
+
     def test_bootstrap_requires_a_tracked_host_api_sample(self) -> None:
         text = Path("playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md").read_text(encoding="utf-8")
         self.assertIn("tracked root `api.sample.yaml`", text)

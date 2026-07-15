@@ -289,6 +289,9 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 10.12 Require bounded corrective retries for failed model stages.
     - [x] 10.12.1 Require visible, finite retries that report transport and output-contract failures and provide corrective feedback without silently accepting invalid output.
       - [x] 10.12.1.1 Document and test the retry/rejection-feedback rule.
+  - [x] 10.13 Require structured run reports for retry-root-cause learning.
+    - [x] 10.13.1 Require persisted non-secret per-run reports covering selection, model attempts, evidence paths, retries/rejections, stage outcomes, and actionable root-cause signals.
+      - [x] 10.13.1.1 Document and test the report requirement in the execution policy and operating playbook.
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 
