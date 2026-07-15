@@ -6,6 +6,18 @@ Its primary reusable assets are concise prompts and task-specific playbooks. The
 
 Agentic Pipelines are mostly ordinary deterministic automation. File discovery, parsing, filtering, routing, comparison, validation, state transitions, and promotion should use code or standard tools such as shell commands whenever they can. An LLM belongs only at a narrow step that genuinely requires semantic interpretation or generation. Every such step receives the minimum necessary context and is constrained by a precise output contract, deterministic gates, finite attempts, and captured evidence.
 
+## Pipeline entry points
+
+All commands run from the host repository root, where the framework is normally mounted at `./pipelines`. Start with the command matching the smallest action you need:
+
+- `python pipelines/scripts/validate_pipeline_package.py path/to/staged-package`: validate a proposed pipeline package without inference or source mutation.
+- `python pipelines/scripts/pipeline.py preflight --api-config api.yaml`: validate the local, ignored API configuration before a model-backed operation.
+- `python pipelines/scripts/pipeline.py discover ...`: register source or contract changes using deterministic discovery only.
+- `python pipelines/scripts/pipeline.py run ...`: perform a bounded, resumable pipeline run; it invokes local inference only for declared LLM stages.
+- `python pipelines/scripts/pipeline.py inspect-entity ...`: inspect state, evidence, and disposition for one entity without operating on unrelated entities.
+- `python pipelines/scripts/pipeline.py report ...` and `analyze ...`: produce deterministic run reporting or bounded advisory analysis; `analyze` requires local API configuration when it invokes its declared analysis prompt.
+- `python pipelines/scripts/pipeline.py retry-cohort ...` and `rollback-entity ...`: perform the explicit recovery actions described in the operation/retry playbooks.
+
 ## How agents use the framework
 
 Start with `AGENTS.md`. It explains the universal model and routes the current task to one playbook. That playbook names the minimum prompts, templates, references, evidence, and commands to load. Agents should not read unrelated workflows by default.

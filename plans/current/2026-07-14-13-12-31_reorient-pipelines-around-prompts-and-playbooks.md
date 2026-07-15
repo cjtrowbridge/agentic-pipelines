@@ -265,6 +265,9 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
       - [x] 10.3.1.1 Add documentation tests for required migration boundaries and explicit manual decisions.
   - [x] 10.4 Rename project-identity references from Pipelines to Agentic Pipelines.
     - [x] 10.4.1 Update documentation titles and self-references while preserving generic pipeline terminology, stable plan identifiers, and the `./pipelines` submodule path.
+  - [x] 10.5 Establish and demonstrate the README entry-point documentation convention.
+    - [x] 10.5.1 Require every pipeline README to place a concise pipeline explanation before an explanation of every supported pipeline entry point.
+      - [x] 10.5.1.1 Add the convention to the framework README and verify the documented catalog stays present.
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 

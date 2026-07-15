@@ -45,6 +45,7 @@ If a listed playbook is absent, use the framework-change route rather than subst
 - Preserve host and user work. Never overwrite customized prompts, `TODO.md`, journal text, plans, runtime data, or credentials during framework updates.
 - Repository mutations require an approved active plan. Diagnose/report requests are read-only unless the user asks for changes.
 - Keep documentation and executable contracts consistent with implemented behavior.
+- Every pipeline README must begin with a concise explanation of the pipeline, followed immediately by an explanation of every supported pipeline entry point before setup or deeper reference material.
 
 ## Framework changes
 

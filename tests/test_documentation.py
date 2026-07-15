@@ -3,6 +3,15 @@ import unittest
 
 
 class DocumentationTests(unittest.TestCase):
+    def test_readme_explains_pipeline_entry_points_after_introduction(self) -> None:
+        text = Path("README.md").read_text(encoding="utf-8")
+        heading = "## Pipeline entry points"
+        self.assertIn(heading, text)
+        self.assertLess(text.index("Agentic Pipelines is"), text.index(heading))
+        self.assertLess(text.index(heading), text.index("## How agents use the framework"))
+        for command in ("validate_pipeline_package.py", "preflight", "discover", "run", "inspect-entity", "report", "analyze", "retry-cohort", "rollback-entity"):
+            self.assertIn(command, text)
+
     def test_migration_guide_names_required_boundaries(self) -> None:
         text = Path("docs/migrating_from_agents.md").read_text(encoding="utf-8")
         for term in ("./pipelines", "AGENTS.md", "TODO.md", "journal", "api.yaml", "schema version 2", "rollback", "LLM stage"):
