@@ -3,6 +3,12 @@ import unittest
 
 
 class DocumentationTests(unittest.TestCase):
+    def test_bootstrap_requires_a_tracked_host_api_sample(self) -> None:
+        text = Path("playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md").read_text(encoding="utf-8")
+        self.assertIn("tracked root `api.sample.yaml`", text)
+        self.assertIn("copied from the framework sample", text)
+        self.assertIn("only `api.yaml` is ignored", text)
+
     def test_readme_explains_pipeline_entry_points_after_introduction(self) -> None:
         text = Path("README.md").read_text(encoding="utf-8")
         heading = "## Pipeline entry points"

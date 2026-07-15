@@ -63,6 +63,7 @@ host/
 â”œâ”€â”€ AGENTS.md           # routes to ./pipelines/AGENTS.md
 â”œâ”€â”€ TODO.md             # sole host-owned human checklist
 â”œâ”€â”€ pipeline.yaml       # host pipeline definition
+â”œâ”€â”€ api.sample.yaml     # tracked host configuration template
 â”œâ”€â”€ api.yaml            # ignored local endpoint/credentials
 â”œâ”€â”€ prompts/            # host-owned/customized runtime prompts
 â”œâ”€â”€ plans/              # host change plans
@@ -77,7 +78,7 @@ The framework never overwrites host-owned prompts, `TODO.md`, plans, journal, cr
 
 ## Local inference configuration
 
-Copy `api.sample.yaml` to ignored `api.yaml`, supply the local Ollama-compatible endpoint/model and any local gateway credential, then run:
+During framework bootstrap, copy the framework `api.sample.yaml` to a tracked `api.sample.yaml` in the host root. The operator then copies that host sample to ignored `api.yaml`, supplies the local Ollama-compatible endpoint/model and any local gateway credential, and runs:
 
 ```powershell
 python pipelines/scripts/pipeline.py preflight --api-config api.yaml
