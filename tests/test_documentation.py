@@ -3,6 +3,13 @@ import unittest
 
 
 class DocumentationTests(unittest.TestCase):
+    def test_pipeline_progress_rule_requires_query_counts_and_eta(self) -> None:
+        text = Path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("completed and remaining query counts", text)
+        self.assertIn("static-template and assembled-request sizes", text)
+        self.assertIn("ETA derived from elapsed time", text)
+        self.assertIn("without exposing credentials or protected inputs", text)
+
     def test_bootstrap_requires_a_tracked_host_api_sample(self) -> None:
         text = Path("playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md").read_text(encoding="utf-8")
         self.assertIn("tracked root `api.sample.yaml`", text)

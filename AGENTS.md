@@ -46,6 +46,7 @@ If a listed playbook is absent, use the framework-change route rather than subst
 - Repository mutations require an approved active plan. Diagnose/report requests are read-only unless the user asks for changes.
 - Keep documentation and executable contracts consistent with implemented behavior.
 - Every pipeline README must begin with a concise explanation of the pipeline, followed immediately by an explanation of every supported pipeline entry point before setup or deeper reference material.
+- Every pipeline script must emit operator-visible progress for each material stage. For model work, report completed and remaining query counts, static-template and assembled-request sizes, elapsed time, and an ETA derived from elapsed time; also report discovery, skips, validation, rendering/promotion, failures, and final outcomes without exposing credentials or protected inputs.
 
 ## Framework changes
 

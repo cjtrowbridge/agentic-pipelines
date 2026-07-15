@@ -9,13 +9,14 @@ The host pipeline definition, local-inference playbook if preflight fails, CLI h
 ## Procedure
 1. Run definition/API/storage/prompt/schema preflight.
 2. Discover entities and inspect counts without source mutation.
-3. Dry-run eligible selection, then invoke a bounded entity/time-limited run.
-4. On interruption, verify durable state before resuming; do not assume leased work succeeded.
-5. Keep scheduler runtime below interval and reject overlapping locks.
-6. Review summary, quarantines, and post-run report before promotion or retry.
-7. Run `analyze` only when deterministic cohort/metric reports need semantic interpretation; review its advisory output before any change.
-8. Use `retry-cohort` only with the reviewed report and exact approved cohort ID.
-9. Use `rollback-entity` only as an explicit operator action; it verifies current and backup hashes before restoring the recorded source.
+3. Confirm the runner will visibly report each material stage. Model-backed stages must show completed/remaining query counts, static-template and assembled-request sizes, elapsed time, and an elapsed-time-based ETA; discovery, skips, validation, promotion, rendering, failures, and final outcomes must also be visible without printing credentials or protected inputs.
+4. Dry-run eligible selection, then invoke a bounded entity/time-limited run.
+5. On interruption, verify durable state before resuming; do not assume leased work succeeded.
+6. Keep scheduler runtime below interval and reject overlapping locks.
+7. Review summary, quarantines, and post-run report before promotion or retry.
+8. Run `analyze` only when deterministic cohort/metric reports need semantic interpretation; review its advisory output before any change.
+9. Use `retry-cohort` only with the reviewed report and exact approved cohort ID.
+10. Use `rollback-entity` only as an explicit operator action; it verifies current and backup hashes before restoring the recorded source.
 
 ## Stop conditions
 Failed preflight, unexplained state migration, active conflicting runner, unsafe paths, missing evidence, or exceeded failure threshold.

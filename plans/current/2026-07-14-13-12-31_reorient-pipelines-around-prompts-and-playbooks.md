@@ -271,6 +271,9 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 10.6 Require host deployments to retain a root API configuration sample.
     - [x] 10.6.1 Make bootstrap copy the framework's non-secret `api.sample.yaml` to the host root, keep the sample tracked, and reserve ignored `api.yaml` for operator-local values.
       - [x] 10.6.1.1 Document and test the host API-sample requirement in the deployment instructions.
+  - [x] 10.7 Require observable progress from pipeline scripts.
+    - [x] 10.7.1 Require visible stage progress, completed/remaining model-query counts, elapsed time, an elapsed-time-based ETA, prompt sizes, and outcome summaries without exposing secrets.
+      - [x] 10.7.1.1 Add the execution-policy rule and operation guidance, with documentation coverage.
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 
