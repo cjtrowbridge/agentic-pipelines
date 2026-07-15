@@ -34,6 +34,7 @@ class InferenceRequest:
     messages: Sequence[Mapping[str, str]]
     model: str | None = None
     generation: Mapping[str, Any] = field(default_factory=dict)
+    think: bool | str | None = None
     response_format: str | Mapping[str, Any] | None = None
     stage: str = "unspecified"
     run_id: str = "unassigned"
@@ -59,6 +60,10 @@ class InferenceRequest:
             "stream": False,
             "options": {**config.generation, **self.generation},
         }
+        if self.think is not None:
+            if not isinstance(self.think, (bool, str)):
+                raise ValueError("InferenceRequest.think must be a boolean, thinking level, or None")
+            payload["think"] = self.think
         if self.response_format is not None:
             payload["format"] = self.response_format
         return payload

@@ -11,6 +11,11 @@ from pipeline_runtime.thread_capture import ThreadCaptureWriter
 
 
 class ApiPrimitiveTests(unittest.TestCase):
+    def test_request_supports_top_level_thinking_control(self) -> None:
+        payload = InferenceRequest(messages=[{"role": "user", "content": "hello"}], think=False).payload(self.config())
+        self.assertIs(payload["think"], False)
+        self.assertNotIn("think", payload["options"])
+
     def config(self) -> ApiConfig:
         return ApiConfig(
             path=Path("api.yaml"),

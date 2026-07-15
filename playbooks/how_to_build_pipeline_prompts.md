@@ -8,7 +8,7 @@ The relevant generator under `prompts/generate/`, `references/prompt_authoring.m
 
 ## Procedure
 1. Reject the prompt request if a trusted tool, parser, query, shell command, or small program can reliably perform the job.
-2. Give a necessary LLM call one semantic job, declared minimal inputs, allowed transformation, protected invariants, exact output schema, and stop conditions.
+2. Give a necessary LLM call one semantic job, declared minimal inputs, allowed transformation, protected invariants, exact output schema, a completion-token limit, and stop conditions. Treat reasoning as opt-in: require a stage-specific justification, and disable it for clear, constrained transformations with representative examples.
 3. Keep governance and repeated project exposition out of runtime prompts.
 4. Keep reviewers independent from worker hidden reasoning.
 5. Version the prompt, validate metadata/schema references, and run compression/completeness review.

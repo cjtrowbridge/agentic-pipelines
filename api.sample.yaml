@@ -27,6 +27,8 @@ request:
 # Applied to every request unless a pipeline stage supplies an allowed override.
 generation:
   temperature: 0.2
+  # Every LLM stage needs a bounded completion. Tune this to the host artifact.
+  num_predict: 2048
 
 # Literal strings to redact from captured prompts, responses, errors, and logs.
 redaction:

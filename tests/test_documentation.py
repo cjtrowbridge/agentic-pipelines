@@ -24,6 +24,14 @@ class DocumentationTests(unittest.TestCase):
         operation = Path("playbooks/how_to_operate_and_resume_a_pipeline.md").read_text(encoding="utf-8")
         self.assertIn("return exit status 130", operation)
 
+    def test_prompt_rule_requires_limits_and_reasoning_justification(self) -> None:
+        text = Path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("completion-token limit", text)
+        self.assertIn("Reasoning is opt-in", text)
+        prompts = Path("playbooks/how_to_build_pipeline_prompts.md").read_text(encoding="utf-8")
+        self.assertIn("completion-token limit", prompts)
+        self.assertIn("disable it for clear, constrained transformations", prompts)
+
     def test_bootstrap_requires_a_tracked_host_api_sample(self) -> None:
         text = Path("playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md").read_text(encoding="utf-8")
         self.assertIn("tracked root `api.sample.yaml`", text)

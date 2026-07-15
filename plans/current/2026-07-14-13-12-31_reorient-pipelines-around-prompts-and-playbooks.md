@@ -280,6 +280,9 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 10.9 Require controlled Ctrl+C interruption handling.
     - [x] 10.9.1 Require pipeline scripts to report interruption, preserve truthful completion state, and return exit code 130 without treating interrupted work as successful.
       - [x] 10.9.1.1 Add the execution-policy rule, operation guidance, and documentation coverage.
+  - [x] 10.10 Require bounded responses and explicit reasoning decisions.
+    - [x] 10.10.1 Require every LLM stage to declare a completion-token limit and explicitly justify reasoning; default to non-reasoning for clear, example-rich transformations.
+      - [x] 10.10.1.1 Document and test the prompt-policy rule and expose top-level thinking control through the shared API primitive.
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 
