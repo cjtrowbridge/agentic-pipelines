@@ -32,6 +32,18 @@ class BootstrapTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 within(root, root.parent / "outside")
 
+    def test_bootstrap_installs_declared_playwright_browser_locally(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            requirement = root / "requirements.txt"
+            requirement.write_text("example==1\n", encoding="utf-8")
+            target = root / ".agentic-pipelines" / "dependencies"
+            with patch("scripts.bootstrap_pipeline_environment.dependencies_available", return_value=True), patch("scripts.bootstrap_pipeline_environment.subprocess.run") as run:
+                bootstrap(root, target, [requirement], ["example"], ["chromium"])
+
+            self.assertEqual(run.call_args.args[0][-2:], ["install", "chromium"])
+            self.assertEqual(run.call_args.kwargs["env"]["PLAYWRIGHT_BROWSERS_PATH"], str(root / ".agentic-pipelines" / "playwright-browsers"))
+
 
 if __name__ == "__main__":
     unittest.main()

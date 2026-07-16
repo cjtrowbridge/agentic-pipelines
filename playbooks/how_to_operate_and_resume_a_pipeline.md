@@ -7,7 +7,7 @@ Discovering, dry-running, processing, stopping, resuming, or scheduling entities
 The host pipeline definition, local-inference playbook if preflight fails, CLI help, and current run summary. Do not load design prompts during ordinary operation.
 
 ## Procedure
-1. Run bootstrap first: verify the framework is available and install declared requirements only into the ignored host-local dependency directory. Then run definition/API/storage/prompt/schema preflight. Do not process source or invoke a model when bootstrap fails.
+1. Run bootstrap first: verify the framework is available and install declared requirements and declared local runtime dependencies only into ignored host-local directories. Then run definition/API/storage/prompt/schema preflight. Do not process source or invoke a model when bootstrap fails.
 2. Discover entities and inspect counts without source mutation.
 3. Confirm the runner will visibly report each material stage. Model-backed stages must show completed/remaining query counts, static-template and assembled-request sizes, elapsed time, and an elapsed-time-based ETA; discovery, skips, validation, promotion, rendering, failures, and final outcomes must also be visible without printing credentials or protected inputs.
 4. Dry-run eligible selection, then invoke a bounded entity/time-limited run.

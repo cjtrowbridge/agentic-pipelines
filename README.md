@@ -18,10 +18,10 @@ All commands run from the host repository root, where the framework is normally 
 - `python pipelines/scripts/pipeline.py report ...` and `analyze ...`: produce deterministic run reporting or bounded advisory analysis; `analyze` requires local API configuration when it invokes its declared analysis prompt.
 - `python pipelines/scripts/pipeline.py retry-cohort ...` and `rollback-entity ...`: perform the explicit recovery actions described in the operation/retry playbooks.
 
-Every host pipeline must bootstrap before its own imports or source work: ensure the pinned framework is available, install only its declared requirements into an ignored host-local dependency directory, then run preflight. The reusable helper supports that contract without modifying system Python:
+Every host pipeline must bootstrap before its own imports or source work: ensure the pinned framework is available, install only its declared requirements and declared local runtime dependencies into ignored host-local directories, then run preflight. The reusable helper supports that contract without modifying system Python:
 
 ```powershell
-python pipelines/scripts/bootstrap_pipeline_environment.py --host-root . --requirements requirements-pipeline.txt --requirements pipelines/requirements.txt --check-module yaml
+python pipelines/scripts/bootstrap_pipeline_environment.py --host-root . --requirements requirements-pipeline.txt --requirements pipelines/requirements.txt --check-module yaml --playwright-browser chromium
 ```
 
 ## How agents use the framework

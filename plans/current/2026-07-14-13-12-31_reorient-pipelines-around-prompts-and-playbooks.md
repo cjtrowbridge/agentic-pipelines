@@ -293,7 +293,7 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
     - [x] 10.13.1 Require persisted non-secret per-run reports covering selection, model attempts, evidence paths, retries/rejections, stage outcomes, and actionable root-cause signals.
       - [x] 10.13.1.1 Document and test the report requirement in the execution policy and operating playbook.
   - [x] 10.14 Require dependency bootstrap before every pipeline operation.
-    - [x] 10.14.1 Define bootstrap as the first pipeline stage: verify framework availability, install declared requirements only into an ignored host-local dependency directory, and fail before source/model work when bootstrap cannot complete.
+    - [x] 10.14.1 Define bootstrap as the first pipeline stage: verify framework availability, install declared requirements and local runtime dependencies only into ignored host-local directories, and fail before source/model work when bootstrap cannot complete.
       - [x] 10.14.1.1 Provide a reusable deterministic bootstrap helper with fingerprinted requirements, safe path handling, and tests.
     - [x] 10.14.2 Document the bootstrap contract in the root invariant, operation guidance, and public entry-point documentation.
 

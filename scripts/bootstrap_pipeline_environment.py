@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -40,12 +41,16 @@ def dependencies_available(target: Path, modules: Sequence[str]) -> bool:
         sys.path[:] = original
 
 
-def bootstrap(host_root: Path, target: Path, requirements: Sequence[Path], modules: Sequence[str]) -> bool:
+def bootstrap(
+    host_root: Path, target: Path, requirements: Sequence[Path], modules: Sequence[str],
+    playwright_browsers: Sequence[str] = (),
+) -> bool:
     metadata = target.parent / "bootstrap.json"
+    browser_root = target.parent / "playwright-browsers"
     expected = fingerprint(requirements)
     if metadata.exists() and dependencies_available(target, modules):
         recorded = json.loads(metadata.read_text(encoding="utf-8"))
-        if recorded.get("fingerprint") == expected:
+        if recorded.get("fingerprint") == expected and recorded.get("playwright_browsers", []) == list(playwright_browsers) and (not playwright_browsers or browser_root.exists()):
             print(f"bootstrap: dependencies are current in {target.relative_to(host_root)}")
             return False
     target.mkdir(parents=True, exist_ok=True)
@@ -56,7 +61,14 @@ def bootstrap(host_root: Path, target: Path, requirements: Sequence[Path], modul
     subprocess.run(command, check=True)
     if not dependencies_available(target, modules):
         raise RuntimeError("declared dependencies installed but required modules are unavailable")
-    metadata.write_text(json.dumps({"fingerprint": expected, "requirements": [str(path.relative_to(host_root)) for path in requirements]}, indent=2) + "\n", encoding="utf-8")
+    if playwright_browsers:
+        environment = os.environ.copy()
+        environment["PYTHONPATH"] = str(target) + os.pathsep + environment.get("PYTHONPATH", "")
+        environment["PLAYWRIGHT_BROWSERS_PATH"] = str(browser_root)
+        for browser in playwright_browsers:
+            print(f"bootstrap: installing Playwright {browser} browser in {browser_root.relative_to(host_root)}")
+            subprocess.run([sys.executable, "-m", "playwright", "install", browser], check=True, env=environment)
+    metadata.write_text(json.dumps({"fingerprint": expected, "requirements": [str(path.relative_to(host_root)) for path in requirements], "playwright_browsers": list(playwright_browsers)}, indent=2) + "\n", encoding="utf-8")
     print("bootstrap: dependencies are ready")
     return True
 
@@ -67,6 +79,7 @@ def main() -> int:
     parser.add_argument("--target", type=Path, default=Path(".agentic-pipelines/dependencies"))
     parser.add_argument("--requirements", type=Path, action="append", required=True)
     parser.add_argument("--check-module", action="append", default=[])
+    parser.add_argument("--playwright-browser", action="append", default=[])
     args = parser.parse_args()
     host_root = args.host_root.resolve()
     target = within(host_root, host_root / args.target)
@@ -74,7 +87,7 @@ def main() -> int:
     missing = [path for path in requirements if not path.is_file()]
     if missing:
         parser.error("missing requirements file(s): " + ", ".join(str(path) for path in missing))
-    bootstrap(host_root, target, requirements, args.check_module)
+    bootstrap(host_root, target, requirements, args.check_module, args.playwright_browser)
     return 0
 
 
