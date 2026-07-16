@@ -53,6 +53,16 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("persisted structured run report", operation)
         self.assertIn("root cause", operation)
 
+    def test_bootstrap_is_required_before_pipeline_operation(self) -> None:
+        text = Path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("Bootstrap is the first stage", text)
+        self.assertIn("Never alter system Python", text)
+        operation = Path("playbooks/how_to_operate_and_resume_a_pipeline.md").read_text(encoding="utf-8")
+        self.assertIn("Run bootstrap first", operation)
+        self.assertIn("Do not process source", operation)
+        readme = Path("README.md").read_text(encoding="utf-8")
+        self.assertIn("bootstrap_pipeline_environment.py", readme)
+
     def test_bootstrap_requires_a_tracked_host_api_sample(self) -> None:
         text = Path("playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md").read_text(encoding="utf-8")
         self.assertIn("tracked root `api.sample.yaml`", text)
