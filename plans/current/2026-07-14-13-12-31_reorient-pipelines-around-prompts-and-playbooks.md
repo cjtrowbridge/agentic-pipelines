@@ -318,6 +318,14 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
 
 ## 12. Verification, release, and plan closure
 
+## 13. Default entity-scoped interactive LLM sessions
+
+- [x] 13. Make every entity's pipeline run a single interactive LLM session by default.
+  - [x] 13.1 Add the universal policy: retain an entity's stable context and prior model output, then append concise validator/reviewer feedback on each next session step.
+    - [x] 13.1.1 Define compelling exceptions, including intentionally independent review, security/isolation boundaries, and provider limitations that prevent a safe session.
+  - [x] 13.2 Update prompt-building and pipeline-operation guidance to distinguish a session step from a transport/schema retry and require bounded session-step budgets.
+  - [x] 13.3 Add focused policy/documentation coverage and record the framework checkpoint in the journal.
+
 - [?] 12. Demonstrate that the reorientation is complete and internally consistent; automated verification passes and operator-local gates keep the plan current.
   - [x] 12.1 Run structural verification.
     - [x] 12.1.1 Validate prompt/package schemas, imports, playbook routes, root authority, catalogs, provider boundary, migration references, and ignored paths.

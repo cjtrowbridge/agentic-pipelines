@@ -13,10 +13,11 @@ The host pipeline definition, local-inference playbook if preflight fails, CLI h
 4. Dry-run eligible selection, then invoke a bounded entity/time-limited run.
 5. On Ctrl+C, require the runner to report a controlled interruption and return exit status 130. Verify durable state before resuming; do not assume leased work succeeded.
 6. Keep scheduler runtime below interval and reject overlapping locks.
-7. Review the persisted structured run report, summary, quarantines, and post-run report before promotion or retry. The run report must identify every retry/rejection with its concise cause and evidence path so remediation targets the root cause rather than normalizing repeated retries.
-8. Run `analyze` only when deterministic cohort/metric reports need semantic interpretation; review its advisory output before any change.
-9. Use `retry-cohort` only with the reviewed report and exact approved cohort ID.
-10. Use `rollback-entity` only as an explicit operator action; it verifies current and backup hashes before restoring the recorded source.
+7. Run each entity as one bounded interactive LLM session by default: retain stable context and prior output, then append concise trusted review feedback. Record session ID, step count, and retries separately. A fresh session needs a declared compelling reason: independent review, security/isolation, or provider limits.
+8. Review the persisted structured run report, summary, quarantines, and post-run report before promotion or retry. Identify every session step and retry/rejection with its concise cause and evidence path so remediation targets the root cause.
+9. Run `analyze` only when deterministic cohort/metric reports need semantic interpretation; review its advisory output before any change.
+10. Use `retry-cohort` only with the reviewed report and exact approved cohort ID.
+11. Use `rollback-entity` only as an explicit operator action; it verifies current and backup hashes before restoring the recorded source.
 
 ## Stop conditions
 Failed preflight, unexplained state migration, active conflicting runner, unsafe paths, missing evidence, or exceeded failure threshold.

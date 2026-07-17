@@ -45,6 +45,15 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("finite stage retry budget", prompts)
         self.assertIn("include that reason with the unchanged original inputs", prompts)
 
+    def test_entity_instances_default_to_interactive_sessions(self) -> None:
+        text = Path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("one interactive LLM session by default", text)
+        self.assertIn("distinguish session steps from transport/schema retries", text)
+        prompts = Path("playbooks/how_to_build_pipeline_prompts.md").read_text(encoding="utf-8")
+        self.assertIn("finite session-step budget", prompts)
+        operation = Path("playbooks/how_to_operate_and_resume_a_pipeline.md").read_text(encoding="utf-8")
+        self.assertIn("Record session ID, step count, and retries separately", operation)
+
     def test_execution_rule_requires_persisted_retry_reports(self) -> None:
         text = Path("AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("persist a structured, non-secret run report", text)
