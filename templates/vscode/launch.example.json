@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "REPLACE PIPELINE: Main",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "bash \"${workspaceFolder}/PATH_TO_HOST_BOOTSTRAP.sh\" REPLACE_MAIN_ENTRYPOINT",
+      "windows": {
+        "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${workspaceFolder}\\PATH_TO_HOST_BOOTSTRAP.ps1\" REPLACE_MAIN_ENTRYPOINT"
+      },
+      "cwd": "${workspaceFolder}",
+      "presentation": {
+        "group": "pipeline",
+        "order": 1
+      }
+    }
+  ]
+}

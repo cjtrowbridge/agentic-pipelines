@@ -18,6 +18,8 @@ All commands run from the host repository root, where the framework is normally 
 - `python pipelines/scripts/pipeline.py report ...` and `analyze ...`: produce deterministic run reporting or bounded advisory analysis; `analyze` requires local API configuration when it invokes its declared analysis prompt.
 - `python pipelines/scripts/pipeline.py retry-cohort ...` and `rollback-entity ...`: perform the explicit recovery actions described in the operation/retry playbooks.
 
+These commands describe the framework reference runtime; an importing project may expose different interactive operations. Every host-declared operator entrypoint must have a host-owned VS Code task, and exactly one ordinary main entrypoint must be the primary Run/Debug play action. Both invoke the host's appropriate platform-native prerequisite/bootstrap script before its actual pipeline command. See `playbooks/how_to_set_up_pipeline_entrypoints_in_vscode.md`; the files under `templates/vscode/` are adaptable examples, not installable defaults. Direct commands remain available for CI, schedulers, and other automation.
+
 Every host pipeline must bootstrap before its own imports or source work: ensure the pinned framework is available, install only its declared requirements and declared local runtime dependencies into ignored host-local directories, then run preflight. The reusable helper supports that contract without modifying system Python:
 
 ```powershell

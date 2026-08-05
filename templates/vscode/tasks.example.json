@@ -1,0 +1,81 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "pipelineDefinition",
+      "type": "promptString",
+      "description": "REPLACE: host pipeline definition path"
+    },
+    {
+      "id": "entityId",
+      "type": "promptString",
+      "description": "REPLACE: entity identifier required by the example inspect entrypoint"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "REPLACE PIPELINE: Main",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/PATH_TO_HOST_BOOTSTRAP.sh",
+        "REPLACE_MAIN_ENTRYPOINT",
+        "--pipeline",
+        "${input:pipelineDefinition}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\PATH_TO_HOST_BOOTSTRAP.ps1",
+          "REPLACE_MAIN_ENTRYPOINT",
+          "--pipeline",
+          "${input:pipelineDefinition}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "REPLACE PIPELINE: Inspect Entity",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/PATH_TO_HOST_BOOTSTRAP.sh",
+        "REPLACE_INSPECT_ENTRYPOINT",
+        "--pipeline",
+        "${input:pipelineDefinition}",
+        "--entity",
+        "${input:entityId}"
+      ],
+      "windows": {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "${workspaceFolder}\\PATH_TO_HOST_BOOTSTRAP.ps1",
+          "REPLACE_INSPECT_ENTRYPOINT",
+          "--pipeline",
+          "${input:pipelineDefinition}",
+          "--entity",
+          "${input:entityId}"
+        ]
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false
+      },
+      "problemMatcher": []
+    }
+  ]
+}

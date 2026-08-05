@@ -9,10 +9,10 @@ Old upstream revision, new upstream revision, host-owned/customized artifacts, m
 ## Procedure
 1. Record the old submodule revision, host status, and rollback command.
 2. Update the submodule pointer without changing host-owned files.
-3. Three-way compare old upstream, new upstream, and current host for affected prompts, playbooks, templates, schemas, shims, and configuration samples.
+3. Three-way compare old upstream, new upstream, and current host for affected prompts, playbooks, templates, schemas, shims, configuration samples, and relevant VS Code entrypoint examples/policy.
 4. Classify each change as safe upstream adoption, host preservation, synthesized proposal, migration, or explicit conflict.
 5. Present conflicts and behavior-changing prompt/schema decisions for user approval before applying them.
-6. Preserve host `TODO.md`, journal/plans, customized prompts/validators, `api.yaml`, state, artifacts, threads, failures, runs, and reports.
+6. Preserve host `TODO.md`, journal/plans, customized prompts/validators, `.vscode/tasks.json`, `.vscode/launch.json`, native bootstrap scripts, `api.yaml`, state, artifacts, threads, failures, runs, and reports. Never install upstream VS Code examples over host files.
 7. Apply approved synthesis, migrations, and router updates.
 8. Validate prompt IDs/versions, pipeline compatibility, shims, API preflight, ignored paths, tests, and rollback viability.
 

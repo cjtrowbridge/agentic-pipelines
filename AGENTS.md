@@ -30,6 +30,7 @@ For combined tasks, follow dependency order: design before building prompts; con
 | Review failure or performance analysis | `playbooks/how_to_review_post_run_analysis.md` |
 | Approve and retry a failure cohort | `playbooks/how_to_approve_and_retry_a_failure_cohort.md` |
 | Bootstrap or update Agentic Pipelines in a host | `playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md` or `playbooks/how_to_update_submodule_and_synthesize_host_overrides.md` |
+| Set up or review host VS Code pipeline entrypoints | `playbooks/how_to_set_up_pipeline_entrypoints_in_vscode.md` |
 | Change this framework | `playbooks/how_to_change_the_pipelines_framework.md` |
 
 If a listed playbook is absent, use the framework-change route rather than substituting unrelated legacy instructions.
@@ -54,6 +55,7 @@ If a listed playbook is absent, use the framework-change route rather than subst
 - Treat each entity's instance of a pipeline as one interactive LLM session by default: submit stable entity context once, retain the prior model output, and append concise trusted validator/reviewer feedback for the next bounded session step. Start a fresh session only for a declared compelling reason, such as independent review, a security/isolation boundary, or a provider limitation; distinguish session steps from transport/schema retries in evidence and telemetry.
 - Every pipeline run must persist a structured, non-secret run report. Record selection, material stages, each model attempt with prompt sizes and thread evidence paths, every rejection/retry reason, render/promotion outcomes, final status, duration, and the actionable root-cause signal needed to reduce future retries.
 - Bootstrap is the first stage of every pipeline operation. Verify framework availability and install only declared requirements and declared local runtime dependencies into ignored host-local directories before importing pipeline dependencies or touching source/model state; fail visibly if bootstrap cannot complete. Never alter system Python as part of bootstrap.
+- Every operator entrypoint declared by a host pipeline must be a visible task in the host-owned `.vscode/tasks.json`. Exactly one host-selected ordinary, non-recovery entrypoint must be the primary play action in host-owned `.vscode/launch.json`. Both surfaces must enter an appropriate host-owned platform-native prerequisite/bootstrap script before the actual pipeline command. The host owns its commands, paths, arguments, prerequisites, dependency mechanism, scripts, and supported platforms; direct commands remain available for CI, schedulers, and other automation. Use `playbooks/how_to_set_up_pipeline_entrypoints_in_vscode.md` to create or review this surface.
 
 ## Framework changes
 
