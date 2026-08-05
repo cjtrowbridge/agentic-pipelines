@@ -2,7 +2,7 @@
 plan_id: 2026-08-04-19-00-27_host-owned-vscode-pipeline-entrypoints
 title: Require Host-Owned VS Code Pipeline Entrypoints
 summary: Establish a concise framework policy and playbook requiring every host pipeline entrypoint to be a VS Code task and its main entrypoint to be a bootstrap-backed play action.
-status: current
+status: past
 created_at: 2026-08-04-19-00-27
 ---
 
@@ -30,7 +30,7 @@ The framework owns the mandatory policy, setup/review playbook, minimal adaptabl
 
 ## Baseline and non-goals
 
-- Local `main` was restored to `2c6eddb` before this plan was created. The premature implementation commits remain recoverable on `recovery/vscode-entrypoints-before-cleanup`, and the prior worktree is preserved in `stash@{0}`.
+- Local `main` was restored to `2c6eddb` before this plan was created. The premature commits and worktree were preserved during recovery, inspected after replacement commits `2b2b243` and `90984db` became durable, and then removed under Section 8.
 - The discarded proposal is retained in Git history but is not an active or archived implementation plan.
 - This plan does not create a universal pipeline command inventory, mandate wrapper filenames, install machine-wide prerequisites, select package managers, prescribe a virtual environment or requirements filename, generate managed sections in host files, or introduce a second bootstrap subsystem.
 - This plan does not make this framework repository's own `.vscode` directory a downstream template. Dogfooding the policy here requires a separate host-specific decision.
@@ -94,15 +94,15 @@ The framework owns the mandatory policy, setup/review playbook, minimal adaptabl
   - [x] 7.2 Confirm the play action invokes its example main wrapper exactly once and exposes prerequisite and pipeline output visibly.
   - [x] 7.3 Run the complete automated suite and review the diff for obsolete universal-wrapper, generic-installer, duplicate-bootstrap, fixed-inventory, and host-overwrite assumptions.
   - [x] 7.4 Update checklist states with evidence, regenerate plan indexes, record the journal checkpoint, and propose task-scoped commits before committing or pushing.
-- [ ] 8. Remove temporary recovery references after the replacement is durable.
-  - [ ] 8.1 Confirm the approved replacement implementation and plan evidence are committed and no retained change depends on the rejected commits or abandoned worktree.
-  - [ ] 8.2 Inspect `recovery/vscode-entrypoints-before-cleanup` one final time, confirm it contains no unique work to retain, and delete the recovery branch.
-  - [ ] 8.3 Locate the stash by its message `recovery: pre-cleanup vscode entrypoint worktree`, inspect it one final time, confirm it contains no unique work to retain, and drop that exact stash entry without relying on a potentially shifted stash index.
-  - [ ] 8.4 Verify the recovery branch and named stash are absent and the active worktree, committed history, tests, plan evidence, and indexes remain intact.
+- [x] 8. Remove temporary recovery references after the replacement is durable.
+  - [x] 8.1 Confirm the approved replacement implementation and plan evidence are committed and no retained change depends on the rejected commits or abandoned worktree.
+  - [x] 8.2 Inspect `recovery/vscode-entrypoints-before-cleanup` one final time, confirm it contains no unique work to retain, and delete the recovery branch.
+  - [x] 8.3 Locate the stash by its message `recovery: pre-cleanup vscode entrypoint worktree`, inspect it one final time, confirm it contains no unique work to retain, and drop that exact stash entry without relying on a potentially shifted stash index.
+  - [x] 8.4 Verify the recovery branch and named stash are absent and the active worktree, committed history, tests, plan evidence, and indexes remain intact.
 
 ## Delivery checkpoints
 
 - [x] A. Approve and deliver the mandatory invariant and host-oriented playbook in Sections 1–2.
 - [x] B. Deliver the adaptable examples and lifecycle documentation in Sections 3–4.
 - [x] C. Complete deterministic and operator verification in Section 5.
-- [ ] D. Remove the temporary recovery branch and stash only after the replacement is committed and verified.
+- [x] D. Remove the temporary recovery branch and stash only after the replacement is committed and verified.
