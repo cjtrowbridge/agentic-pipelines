@@ -2,7 +2,7 @@
 plan_id: 2026-07-14-13-12-31_reorient-pipelines-around-prompts-and-playbooks
 title: Reorient Agentic Pipelines Around Prompts and Playbooks
 summary: Make concise prompts and task-specific playbooks the primary product while retaining the local runtime as shared supporting infrastructure.
-status: current
+status: past
 created_at: 2026-07-14-13-12-31
 ---
 
@@ -200,7 +200,7 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
 
 ## 7. Reposition and complete the shared runtime substrate
 
-- [?] 7. Make the runtime faithfully execute prompt-defined contracts; execution and recovery are implemented, while retention/compression remains open below.
+- [-] 7. Make the runtime faithfully execute prompt-defined contracts; execution and recovery are implemented, while the remaining retention/compression work is intentionally closed at archival.
   - [x] 7.1 Refactor provisional runtime code for maintainability and contract fidelity.
     - [x] 7.1.1 Replace compressed implementations with clear typed modules, transactional migrations, and bounded error handling.
       - [x] 7.1.1.1 Preserve existing behavior and expand regression coverage during the rewrite.
@@ -215,9 +215,9 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 7.4 Complete scheduler-safe operation.
     - [x] 7.4.1 Add run IDs, locks, leases, stale recovery, bounded selection, interruption state, resume, changed-contract discovery, and cohort retry.
       - [x] 7.4.1.1 Test lock overlap, stale recovery, duplicate discovery, changed source/prompt safety, promotion rollback, and cohort isolation.
-  - [ ] 7.5 Complete evidence linking and retention.
+  - [-] 7.5 Complete evidence linking and retention.
     - [x] 7.5.1 Link source hash, contract/prompt hash, thread capture, candidate, validation, attempt, transition, promotion, cohort, and report through stable IDs.
-      - [ ] 7.5.1.1 Implement configured redaction, retention, compression, cleanup audit, and evidence-integrity verification.
+      - [-] 7.5.1.1 Implement configured redaction, retention, compression, cleanup audit, and evidence-integrity verification.
 
 ## 8. Make post-run learning a prompt-driven pipeline phase
 
@@ -299,22 +299,22 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
 
 ## 11. Prove the complete paradigm with a Markdown repair pipeline
 
-- [?] 11. Validate the product from user goal through post-run learning; the fake-provider vertical slice passes and operator-local calibration remains.
+- [-] 11. Validate the product from user goal through post-run learning; the fake-provider vertical slice passes, while the remaining operator-local calibration work is intentionally closed at archival.
   - [x] 11.1 Create a representative fixture corpus.
     - [x] 11.1.1 Include valid, malformed-front-matter, broken-fence, protected, size-bound, prompt-injection, and unrepairable cases.
       - [x] 11.1.1.1 Label required invariants and acceptable outcome classes without overfitting prose.
   - [x] 11.2 Use only the documented design route to produce the staged package.
     - [x] 11.2.1 Record loaded artifacts, deterministic/LLM placement decisions, package outputs, traceability, and design audit.
       - [x] 11.2.1.1 Confirm no operation, migration, maintenance, or retry playbook is needed during design.
-  - [?] 11.3 Execute with a fake provider; acceptance, repair, quarantine, analysis, retry, locking, stale recovery, and rollback pass, while full process interruption and configured adjudication need integration coverage.
-    - [?] 11.3.1 Cover accepted, rejected, repaired, quarantined, recovered, and cohort-retried paths; configured adjudication and process interruption remain release gates.
+  - [-] 11.3 Execute with a fake provider; acceptance, repair, quarantine, analysis, retry, locking, stale recovery, and rollback pass, while the remaining process-interruption and configured-adjudication integration coverage is intentionally closed at archival.
+    - [-] 11.3.1 Cover accepted, rejected, repaired, quarantined, recovered, and cohort-retried paths; configured adjudication and process interruption remain release gates.
       - [x] 11.3.1.1 Inspect source safety, state/attempt evidence, prompt hashes, threads, reports, promotion records, and cohort isolation.
-  - [?] 11.4 Execute an opt-in local Ollama smoke test; blocked only on operator-local model/configuration.
-    - [ ] 11.4.1 Use ignored credentials/configuration and a bounded fixture batch.
-      - [ ] 11.4.1.1 Verify redaction, structured outputs, runtime compatibility, throughput, quality, and clean Git exclusions against the real model.
-  - [?] 11.5 Exercise post-run improvement; cohort analysis, advisory proposal, and scoped retry work, but measured improvement after an approved change remains.
-    - [?] 11.5.1 Generate deterministic cohorts, advisory remediation, and retry only the selected cohort; apply one reviewed change after real-model evidence exists.
-      - [ ] 11.5.1.1 Confirm improved outcomes without golden-set regression or unrelated-entity changes.
+  - [-] 11.4 Execute an opt-in local Ollama smoke test; blocked only on operator-local model/configuration.
+    - [-] 11.4.1 Use ignored credentials/configuration and a bounded fixture batch.
+      - [-] 11.4.1.1 Verify redaction, structured outputs, runtime compatibility, throughput, quality, and clean Git exclusions against the real model.
+  - [-] 11.5 Exercise post-run improvement; cohort analysis, advisory proposal, and scoped retry work, but measured improvement after an approved change remains.
+    - [-] 11.5.1 Generate deterministic cohorts, advisory remediation, and retry only the selected cohort; apply one reviewed change after real-model evidence exists.
+      - [-] 11.5.1.1 Confirm improved outcomes without golden-set regression or unrelated-entity changes.
 
 ## 12. Verification, release, and plan closure
 
@@ -326,12 +326,12 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 13.2 Update prompt-building and pipeline-operation guidance to distinguish a session step from a transport/schema retry and require bounded session-step budgets.
   - [x] 13.3 Add focused policy/documentation coverage and record the framework checkpoint in the journal.
 
-- [?] 12. Demonstrate that the reorientation is complete and internally consistent; automated verification passes and operator-local gates keep the plan current.
+- [x] 12. Demonstrate that the reorientation is complete and internally consistent; automated verification passes, and the remaining operator-local gates are intentionally closed at archival.
   - [x] 12.1 Run structural verification.
     - [x] 12.1.1 Validate prompt/package schemas, imports, playbook routes, root authority, catalogs, provider boundary, migration references, and ignored paths.
       - [x] 12.1.1.1 Fail on removed-system references in active product files, missing prompts, duplicate IDs, placeholder schemas, or provider calls outside the adapter.
-  - [?] 12.2 Run behavioral verification; all available automated tests pass, with real Ollama and process-interruption gates outstanding.
-    - [?] 12.2.1 Run unit/integration coverage for redaction, contract invalidation, cohorts, reference flow, locks, stale recovery, source safety, and rollback.
+  - [-] 12.2 Run behavioral verification; all available automated tests pass, with real Ollama and process-interruption gates outstanding.
+    - [-] 12.2.1 Run unit/integration coverage for redaction, contract invalidation, cohorts, reference flow, locks, stale recovery, source safety, and rollback.
       - [x] 12.2.1.1 Record commands, coverage, and remaining gates in `docs/release_readiness.md`.
   - [x] 12.3 Run progressive-disclosure verification.
     - [x] 12.3.1 Verify routed playbooks are concise/structured and prompts reject undeclared context.
@@ -339,17 +339,17 @@ This plan supersedes `2026-07-14-11-57-14_build-local-agentic-pipelines-framewor
   - [x] 12.4 Review documentation and repository state.
     - [x] 12.4.1 Document implemented behavior, explicit limitations, local-only config, and ignored runtime evidence.
       - [x] 12.4.1.1 Review status, removed maintenance material, journal linkage, migration rollback, and lack of baseline commit.
-  - [ ] 12.5 Close the implementation plan.
-    - [ ] 12.5.1 Mark every item completed, validated, or intentionally closed with evidence.
-      - [ ] 12.5.1.1 Archive this plan, regenerate indexes, append the final journal checkpoint, and present the user with a commit/push proposal.
+  - [x] 12.5 Close the implementation plan.
+    - [x] 12.5.1 Mark every item completed, validated, or intentionally closed with evidence.
+      - [x] 12.5.1.1 Archive this plan, regenerate indexes, append the final journal checkpoint, and present the user with a commit/push proposal.
 
 ## Delivery checkpoints
 
 - [x] A. Approve Sections 0-1: plan reconciliation and prompt-first product contract.
 - [x] B. Deliver Sections 2-5: concise router, task playbooks, prompt library, and prompt contracts.
-- [?] C. Deliver Sections 6-8: generation, execution, and learning are delivered; retention/compression remains.
+- [-] C. Deliver Sections 6-8: generation, execution, and learning are delivered; retention/compression is intentionally closed at archival.
 - [x] D. Deliver Sections 9-10: journal/TODO/maintenance migration and host documentation.
-- [?] E. Deliver Sections 11-12: fake-provider reference and release report are delivered; local calibration and final closure remain.
+- [-] E. Deliver Sections 11-12: fake-provider reference and release report are delivered; local calibration is intentionally closed at archival.
 
 ## Expected file groups
 
