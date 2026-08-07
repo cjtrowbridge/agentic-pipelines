@@ -9,7 +9,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 5
 
 
 class StateError(RuntimeError):
@@ -135,6 +135,28 @@ class StateStore:
                 "accepted_path TEXT", "prompt_hash TEXT", "run_id TEXT", "lease_owner TEXT", "lease_expires TEXT"
             ):
                 self._add_column("entities", declaration)
+            for declaration in (
+                "request_bytes INTEGER",
+                "response_bytes INTEGER",
+                "context_limit INTEGER",
+                "completion_limit INTEGER",
+                "reasoning_mode TEXT",
+                "failure_class TEXT",
+                "authority TEXT",
+                "validator_name TEXT",
+                "retry_disposition TEXT",
+                "provider TEXT",
+                "model TEXT",
+                "generation_config_json TEXT",
+                "transport_attempts INTEGER",
+                "transport_retry_json TEXT",
+                "prompt_tokens INTEGER",
+                "completion_tokens INTEGER",
+                "prompt_template_bytes INTEGER",
+                "session_id TEXT",
+                "session_step INTEGER",
+            ):
+                self._add_column("attempts", declaration)
             if "created_at" not in self._columns("transitions"):
                 self._add_column("transitions", "created_at TEXT")
                 self.connection.execute("UPDATE transitions SET created_at=? WHERE created_at IS NULL", (_stamp(),))
@@ -227,18 +249,100 @@ class StateStore:
                 self._transition(row["id"], "leased", "retry_eligible", "lease_expired")
         return len(rows)
 
-    def begin_attempt(self, attempt_id: str, run_id: str, entity_id: str, stage: str, prompt_id: str, prompt_version: str, prompt_hash: str) -> None:
+    def begin_attempt(
+        self,
+        attempt_id: str,
+        run_id: str,
+        entity_id: str,
+        stage: str,
+        prompt_id: str,
+        prompt_version: str,
+        prompt_hash: str,
+        *,
+        request_bytes: int | None = None,
+        prompt_template_bytes: int | None = None,
+        context_limit: int | None = None,
+        completion_limit: int | None = None,
+        reasoning_mode: str | None = None,
+        provider: str | None = None,
+        model: str | None = None,
+        generation_config: dict[str, Any] | None = None,
+        session_id: str | None = None,
+        session_step: int | None = None,
+    ) -> None:
         with self.connection:
             self.connection.execute(
-                "INSERT INTO attempts(id,run_id,entity_id,stage,prompt_id,prompt_version,prompt_hash,status,started_at) VALUES(?,?,?,?,?,?,?,'running',?)",
-                (attempt_id, run_id, entity_id, stage, prompt_id, prompt_version, prompt_hash, _stamp()),
+                """INSERT INTO attempts(
+                       id,run_id,entity_id,stage,prompt_id,prompt_version,prompt_hash,status,started_at,
+                       request_bytes,prompt_template_bytes,context_limit,completion_limit,reasoning_mode,provider,model,
+                       generation_config_json,session_id,session_step
+                   ) VALUES(?,?,?,?,?,?,?,'running',?,?,?,?,?,?,?,?,?,?,?)""",
+                (
+                    attempt_id,
+                    run_id,
+                    entity_id,
+                    stage,
+                    prompt_id,
+                    prompt_version,
+                    prompt_hash,
+                    _stamp(),
+                    request_bytes,
+                    prompt_template_bytes,
+                    context_limit,
+                    completion_limit,
+                    reasoning_mode,
+                    provider,
+                    model,
+                    json.dumps(generation_config or {}, sort_keys=True),
+                    session_id,
+                    session_step,
+                ),
             )
 
-    def finish_attempt(self, attempt_id: str, status: str, *, thread: str | None = None, artifact: str | None = None, error: tuple[str, str] | None = None) -> None:
+    def finish_attempt(
+        self,
+        attempt_id: str,
+        status: str,
+        *,
+        thread: str | None = None,
+        artifact: str | None = None,
+        error: tuple[str, str] | None = None,
+        response_bytes: int | None = None,
+        failure_class: str | None = None,
+        authority: str | None = None,
+        validator_name: str | None = None,
+        retry_disposition: str | None = None,
+        transport_attempts: int | None = None,
+        transport_retry_events: list[dict[str, Any]] | None = None,
+        prompt_tokens: int | None = None,
+        completion_tokens: int | None = None,
+    ) -> None:
         with self.connection:
             self.connection.execute(
-                "UPDATE attempts SET status=?,thread_path=?,artifact_path=?,error_code=?,error_detail=?,finished_at=? WHERE id=?",
-                (status, thread, artifact, error[0] if error else None, error[1] if error else None, _stamp(), attempt_id),
+                """UPDATE attempts SET status=?,thread_path=COALESCE(?,thread_path),artifact_path=COALESCE(?,artifact_path),
+                   error_code=COALESCE(?,error_code),error_detail=COALESCE(?,error_detail),response_bytes=COALESCE(?,response_bytes),
+                   failure_class=COALESCE(?,failure_class),authority=COALESCE(?,authority),validator_name=COALESCE(?,validator_name),
+                   retry_disposition=COALESCE(?,retry_disposition),transport_attempts=COALESCE(?,transport_attempts),
+                   transport_retry_json=COALESCE(?,transport_retry_json),prompt_tokens=COALESCE(?,prompt_tokens),
+                   completion_tokens=COALESCE(?,completion_tokens),finished_at=? WHERE id=?""",
+                (
+                    status,
+                    thread,
+                    artifact,
+                    error[0] if error else None,
+                    error[1] if error else None,
+                    response_bytes,
+                    failure_class,
+                    authority,
+                    validator_name,
+                    retry_disposition,
+                    transport_attempts,
+                    json.dumps(transport_retry_events, sort_keys=True) if transport_retry_events is not None else None,
+                    prompt_tokens,
+                    completion_tokens,
+                    _stamp(),
+                    attempt_id,
+                ),
             )
 
     def record_validation(self, run_id: str, entity_id: str, attempt_id: str, passed: bool, evidence: dict[str, Any], path: str) -> None:
@@ -247,6 +351,16 @@ class StateStore:
                 "INSERT INTO validator_results(run_id,entity_id,attempt_id,passed,evidence_json,evidence_path,created_at) VALUES(?,?,?,?,?,?,?)",
                 (run_id, entity_id, attempt_id, int(passed), json.dumps(evidence, sort_keys=True), path, _stamp()),
             )
+
+    def attempt_evidence(self, attempt_id: str) -> dict[str, Any]:
+        attempt = self.connection.execute("SELECT * FROM attempts WHERE id=?", (attempt_id,)).fetchone()
+        validation = self.connection.execute(
+            "SELECT evidence_path FROM validator_results WHERE attempt_id=? ORDER BY id DESC LIMIT 1", (attempt_id,)
+        ).fetchone()
+        return {
+            "attempt": dict(attempt) if attempt else {},
+            "validation_evidence_path": validation["evidence_path"] if validation else None,
+        }
 
     def prepare_promotion(self, promotion_id: str, entity_id: str, original_hash: str, candidate_hash: str, backup_path: str) -> None:
         with self.connection:
@@ -302,6 +416,17 @@ class StateStore:
             "promotions": [dict(item) for item in self.connection.execute("SELECT * FROM promotion_records WHERE entity_id=? ORDER BY created_at", (entity_id,))],
         }
 
+    def run_evidence(self, run_id: str) -> dict[str, Any]:
+        run = self.connection.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone()
+        if not run:
+            raise StateError(f"unknown run: {run_id}")
+        return {
+            "run": dict(run),
+            "entities": [dict(item) for item in self.connection.execute("SELECT * FROM entities WHERE run_id=? ORDER BY id", (run_id,))],
+            "attempts": [dict(item) for item in self.connection.execute("SELECT * FROM attempts WHERE run_id=? ORDER BY started_at,id", (run_id,))],
+            "validations": [dict(item) for item in self.connection.execute("SELECT * FROM validator_results WHERE run_id=? ORDER BY id", (run_id,))],
+        }
+
     def failure_cohorts(self) -> list[dict[str, Any]]:
         rows = self.connection.execute("SELECT * FROM entities WHERE state='quarantined' ORDER BY id").fetchall()
         grouped: dict[str, dict[str, Any]] = {}
@@ -346,12 +471,12 @@ class StateStore:
             if row["finished_at"]:
                 stage["total_seconds"] += max((datetime.fromisoformat(row["finished_at"]) - datetime.fromisoformat(row["started_at"])).total_seconds(), 0)
         for stage in by_stage.values():
-            count = stage.get("completed", 0) + stage.get("failed", 0)
+            count = sum(value for key, value in stage.items() if key != "total_seconds" and isinstance(value, int))
             stage["mean_seconds"] = stage["total_seconds"] / count if count else None
         total_entities = self.connection.execute("SELECT COUNT(*) FROM entities").fetchone()[0]
         remaining = self.connection.execute("SELECT COUNT(*) FROM entities WHERE state IN ('discovered','retry_eligible','leased')").fetchone()[0]
         attempt_count = len(attempts)
-        failed_attempts = sum(1 for row in attempts if row["status"] == "failed")
+        failed_attempts = sum(1 for row in attempts if row["status"] in {"failed", "rejected"})
         terminal = run["accepted"] + run["quarantined"]
         return {
             "run_id": run["id"],

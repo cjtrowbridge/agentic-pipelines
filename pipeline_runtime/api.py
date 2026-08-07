@@ -27,6 +27,9 @@ class InferenceError(RuntimeError):
         self.retryable = retryable
         self.status_code = status_code
         self.capture_path: Path | None = None
+        self.raw_content: str | None = None
+        self.attempts = 0
+        self.retry_events: list[dict[str, Any]] = []
 
 
 @dataclass(frozen=True)
@@ -76,6 +79,7 @@ class InferenceResponse:
     elapsed_seconds: float
     attempts: int
     usage: Mapping[str, int | float] = field(default_factory=dict)
+    retry_events: tuple[Mapping[str, Any], ...] = ()
     capture_path: Path | None = None
 
 
@@ -123,6 +127,11 @@ class InferenceClient:
         self._thread_writer = thread_writer
         self._is_cancelled = is_cancelled or (lambda: False)
 
+    @property
+    def config(self) -> ApiConfig:
+        """Expose non-secret request policy/generation metadata for run evidence."""
+        return self._config
+
     def invoke(self, inference_request: InferenceRequest) -> InferenceResponse:
         payload = inference_request.payload(self._config)
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -135,6 +144,7 @@ class InferenceClient:
         endpoint = f"{self._config.endpoint}/api/chat"
         started = time.monotonic()
         last_error: InferenceError | None = None
+        retry_events: list[dict[str, Any]] = []
         for attempt in range(1, self._config.request.max_attempts + 1):
             if self._is_cancelled():
                 last_error = InferenceError("local inference request cancelled", retryable=False)
@@ -153,20 +163,49 @@ class InferenceClient:
                     ssl_context,
                 )
                 response = self._parse_response(status, response_body, started, attempt)
+                response = InferenceResponse(
+                    response.content,
+                    response.raw,
+                    response.elapsed_seconds,
+                    response.attempts,
+                    response.usage,
+                    tuple(retry_events),
+                )
                 capture = self._capture(inference_request, payload, response=response, error=None)
-                return InferenceResponse(response.content, response.raw, response.elapsed_seconds, response.attempts, response.usage, capture)
+                return InferenceResponse(
+                    response.content,
+                    response.raw,
+                    response.elapsed_seconds,
+                    response.attempts,
+                    response.usage,
+                    response.retry_events,
+                    capture,
+                )
             except InferenceError as exc:
                 last_error = exc
+                exc.attempts = attempt
+                event: dict[str, Any] = {
+                    "attempt": attempt,
+                    "failure": self._safe_message(exc),
+                    "status_code": exc.status_code,
+                    "retryable": exc.retryable,
+                }
                 if not exc.retryable or attempt == self._config.request.max_attempts:
+                    event["disposition"] = "terminal"
+                    retry_events.append(event)
                     break
                 delay = min(
                     self._config.request.max_backoff_seconds,
                     self._config.request.initial_backoff_seconds * (2 ** (attempt - 1)),
                 )
                 delay *= 0.75 + (self._random() * 0.5)
+                event["disposition"] = "retry"
+                event["delay_seconds"] = delay
+                retry_events.append(event)
                 LOGGER.warning("Retrying local inference stage=%s attempt=%s after %.2fs: %s", inference_request.stage, attempt, delay, self._safe_message(exc))
                 self._sleeper(delay)
         assert last_error is not None
+        last_error.retry_events = retry_events
         last_error.capture_path = self._capture(inference_request, payload, response=None, error=last_error)
         raise last_error
 
@@ -179,16 +218,24 @@ class InferenceClient:
         try:
             raw = json.loads(text)
         except json.JSONDecodeError as exc:
-            raise InferenceError("local inference returned non-JSON response", retryable=status >= 500, status_code=status) from exc
+            failure = InferenceError("local inference returned non-JSON response", retryable=status >= 500, status_code=status)
+            failure.raw_content = text
+            raise failure from exc
         if not isinstance(raw, dict):
-            raise InferenceError("local inference returned a non-object JSON response", retryable=False, status_code=status)
+            failure = InferenceError("local inference returned a non-object JSON response", retryable=False, status_code=status)
+            failure.raw_content = text
+            raise failure
         if status < 200 or status >= 300:
             message = raw.get("error") if isinstance(raw.get("error"), str) else f"HTTP {status}"
-            raise InferenceError(f"local inference request failed: {message}", retryable=status in {408, 429} or status >= 500, status_code=status)
+            failure = InferenceError(f"local inference request failed: {message}", retryable=status in {408, 429} or status >= 500, status_code=status)
+            failure.raw_content = text
+            raise failure
         message = raw.get("message")
         content = message.get("content") if isinstance(message, dict) else None
         if not isinstance(content, str):
-            raise InferenceError("local inference response is missing message.content", retryable=False, status_code=status)
+            failure = InferenceError("local inference response is missing message.content", retryable=False, status_code=status)
+            failure.raw_content = text
+            raise failure
         return InferenceResponse(
             content=content,
             raw=raw,
@@ -222,10 +269,13 @@ class InferenceClient:
             response_payload=response.raw if response else None,
             elapsed_seconds=response.elapsed_seconds if response else None,
             usage=response.usage if response else None,
+            retry_events=response.retry_events if response else error.retry_events if error else (),
             error={
                 "message": self._safe_message(error),
                 "retryable": error.retryable,
                 "status_code": error.status_code,
+                "attempts": error.attempts,
+                "raw_content": error.raw_content,
             } if error else None,
             provider=self._config.provider,
             endpoint=self._config.endpoint,

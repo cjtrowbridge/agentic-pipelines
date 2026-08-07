@@ -2,7 +2,7 @@
 
 A prompt owns one model job. Include only: objective, declared inputs, protected invariants, permitted action, exact output contract, and stop/uncertainty behavior.
 
-Before writing a prompt, prove that the job requires an LLM. Prefer a trusted tool, parser, query, shell command, or small program whenever it can perform the step reliably. A model is appropriate only for a narrow semantic transformation or judgment whose ambiguity cannot be removed deterministically. Do not use inference for file selection, routing, parsing, counting, comparison, state transitions, policy, promotion, or other exact operations.
+Before writing a prompt, prove that the job requires an LLM. Prefer a trusted tool, parser, query, shell command, or small program whenever it can establish the required property exactly. A model is appropriate only for a narrow semantic transformation or judgment whose ambiguity cannot be removed through an explicit representation. Do not use inference for exact file selection, exact routing, parsing, counting, state transitions, policy enforcement, promotion, or other mechanically decidable operations. Comparison, extraction, matching, ranking, and selection may still be semantic when correctness depends on meaning; do not replace them with deterministic proxies that merely look rigorous. Apply `deterministic_and_semantic_authority.md`.
 
 Put procedures in playbooks, shared concepts in references, output shapes in schemas/templates, and deterministic rules in code/configuration. Link those artifacts; do not restate them.
 
@@ -15,6 +15,7 @@ Review every prompt for:
 - machine-readable output validated before state changes;
 - critical constraints preserved after compression.
 - the job cannot be replaced by deterministic logic, and the prompt receives no context beyond that job.
+- retry feedback is a concise trusted summary linked to preserved evidence, not a rejected artifact re-ingested as instructions.
 
 Prefer a shorter prompt only when it remains behaviorally complete. Concision is the removal of irrelevant or duplicated context, not the removal of safeguards.
 

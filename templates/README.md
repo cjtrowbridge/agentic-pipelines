@@ -1,5 +1,7 @@
 # Templates
 
+`run_report.md`, `rejected_artifact_record.md`, and `pipeline_conformance_report.md` expose the required human-facing execution and migration evidence. Hosts may adapt presentation and paths but must preserve the corresponding schemas, trust boundaries, and required fields.
+
 `vscode/` contains non-installable, placeholder-marked examples for host-owned VS Code tasks, one primary play action, and platform-native prerequisite/bootstrap scripts. Use the owning VS Code entrypoint playbook before adapting them.
 
 - `pipeline_design_intake.yaml`: unresolved goal-to-pipeline intake.

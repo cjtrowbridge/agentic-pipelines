@@ -49,7 +49,7 @@ analysis:
   performance:
     prompt: prompts/performance.md
     id: reference.performance
-    version: 1.0.0
+    version: 2.0.0
     output: performance_analysis
     llm_justification: Deterministic metrics are complete, but interpreting tradeoffs and proposing bounded experiments is semantic.
 validation:

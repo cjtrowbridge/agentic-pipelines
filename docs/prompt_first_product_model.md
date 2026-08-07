@@ -29,6 +29,8 @@ For each proposed stage, choose the least powerful sufficient mechanism in this 
 4. LLM call, only when the task requires interpretation or generation that the earlier mechanisms cannot reliably provide;
 5. explicit human decision when neither code nor bounded inference can meet the required confidence.
 
+“Sufficient” means able to establish the actual property from declared evidence. Deterministic preference does not authorize lexical, statistical, embedding, or handcrafted proxies to issue semantic verdicts. Exact computation has authority over declared representations; bounded semantic judgment has authority over meaning; explicit humans retain policy and material ambiguity. See `references/deterministic_and_semantic_authority.md`.
+
 An LLM stage must state why inference is necessary, the smallest entity/context it may see, its exact output schema, protected invariants, deterministic preconditions and postconditions, finite retry/repair behavior, and its quarantine or human-escalation path. Passing broad criteria such as nonempty output, general similarity, or model confidence is never enough to establish correctness. Acceptance must trace to the goal and protected invariants through specific validators or an explicitly acknowledged semantic/human decision.
 
 Design each entity path to pass specific evidence-backed gates or fail quickly. Reject missing inputs, unsafe paths, impossible invariants, oversized context, and malformed source before inference. After inference, parse the declared schema and run the cheapest authoritative validators first. A failure may route to one bounded repair, quarantine, or a human; it must not be converted into success by weakening acceptance criteria to raise throughput.
@@ -48,6 +50,8 @@ These are invoked repeatedly through the shared local API primitive. Their scope
 Pipeline-running prompts cannot change pipeline definitions, code, credentials, validation policy, retry cohorts, or source artifacts directly. The runtime applies only declared transitions and promotion rules after validation.
 
 Runtime prompts receive only the fields required for their one inference job. Deterministic stages do not load prompts at all.
+
+Every runtime preserves a structured report, a human-readable execution narrative, and separately inspectable rejected candidates. These artifacts expose the complete attempt trajectory so later agents can reduce avoidable loops at the earliest responsible layer. Rejected candidates remain ignored, untrusted evidence and cannot become source, examples, prompt instructions, rendered finals, or promotable output. See `references/run_evidence_and_continuous_improvement.md`.
 
 ## Information ownership
 

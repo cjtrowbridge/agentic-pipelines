@@ -43,11 +43,12 @@ def main() -> int:
         item.add_argument("--pipeline", type=Path, default=Path("pipeline.yaml"))
         if command in {"run", "analyze"}:
             item.add_argument("--api-config", type=Path, default=Path("api.yaml"))
-        if command == "analyze":
-            item.add_argument("--run-id")
+        if command == "run":
             item.add_argument("--max-entities", type=int, default=25)
             item.add_argument("--max-runtime-minutes", type=float, default=50)
             item.add_argument("--dry-run", action="store_true")
+        elif command == "analyze":
+            item.add_argument("--run-id")
         elif command == "inspect-entity":
             item.add_argument("entity_id")
         elif command == "retry-cohort":
@@ -70,7 +71,10 @@ def main() -> int:
         if args.command == "discover":
             print(json.dumps({"new_or_changed": runner.discover()}))
         elif args.command == "run":
-            print(json.dumps(runner.run(args.max_entities, args.max_runtime_minutes, args.dry_run), indent=2))
+            result = runner.run(args.max_entities, args.max_runtime_minutes, args.dry_run)
+            print(json.dumps(result, indent=2))
+            if result.get("status") == "interrupted":
+                return 130
         elif args.command == "inspect-entity":
             print(json.dumps(runner.inspect(args.entity_id), indent=2))
         elif args.command == "report":

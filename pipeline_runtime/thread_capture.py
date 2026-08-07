@@ -46,6 +46,7 @@ class ThreadCaptureWriter:
         response_payload: Mapping[str, Any] | None,
         elapsed_seconds: float | None,
         usage: Mapping[str, int | float] | None,
+        retry_events: tuple[Mapping[str, Any], ...] | list[Mapping[str, Any]],
         error: Mapping[str, Any] | None,
         provider: str,
         endpoint: str,
@@ -75,6 +76,7 @@ class ThreadCaptureWriter:
             "response": response_payload,
             "elapsed_seconds": elapsed_seconds,
             "usage": usage or {},
+            "retry_events": list(retry_events),
             "error": error,
             "redaction": {"configured_sensitive_value_count": len(tuple(value for value in sensitive_values if value))},
         }

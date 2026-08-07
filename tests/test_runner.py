@@ -88,7 +88,73 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(2, len(list((root / "threads").rglob("*.json"))))
             self.assertTrue(list((root / "artifacts" / "evidence").rglob("*.json")))
             self.assertTrue(Path(result["report"]).exists())
+            self.assertTrue(Path(result["human_report"]).exists())
+            report = json.loads(Path(result["report"]).read_text(encoding="utf-8"))
+            self.assertEqual("succeeded", report["execution_status"])
+            self.assertEqual("test", report["attempts"][0]["model"])
             runner.close()
+
+    def test_dry_run_and_empty_summary_both_write_valid_reports(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            runner = PipelineRunner(load_definition(host(root)))
+            summary_path = runner.report()
+            self.assertEqual("current-summary", json.loads(summary_path.read_text(encoding="utf-8"))["run_id"])
+            (root / "src" / "resume.2.rejected.md").write_text("untrusted", encoding="utf-8")
+            self.assertEqual(1, runner.discover())
+            result = runner.run(1, 1, dry_run=True)
+            self.assertEqual("no_op", json.loads(Path(result["report"]).read_text(encoding="utf-8"))["execution_status"])
+            self.assertTrue(Path(result["human_report"]).exists())
+            runner.close()
+
+    def test_malformed_model_output_is_saved_as_rejected_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            definition = load_definition(host(root))
+            client = InferenceClient(config(), transport=lambda *_args: (200, b'{"message":{"content":"not-json"}}'), thread_writer=ThreadCaptureWriter(definition.thread_root))
+            runner = PipelineRunner(definition, client)
+            runner.discover()
+            result = runner.run(1, 1)
+            report = json.loads(Path(result["report"]).read_text(encoding="utf-8"))
+            self.assertEqual("failed", report["execution_status"])
+            self.assertEqual(1, len(report["rejected_artifacts"]))
+            rejected = Path(report["rejected_artifacts"][0]["path"])
+            self.assertIn("not-json", rejected.read_text(encoding="utf-8"))
+            self.assertIn("## Rejection record", rejected.read_text(encoding="utf-8"))
+            runner.close()
+
+    def test_failure_and_interruption_terminal_paths_finalize_reports(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            failure_root = Path(temporary) / "failure"
+            failure_root.mkdir()
+            failed = PipelineRunner(load_definition(host(failure_root)))
+            failed.discover()
+
+            def fail(*_args: object) -> None:
+                raise RuntimeError("deliberate test failure")
+
+            failed._process = fail  # type: ignore[method-assign]
+            with self.assertRaisesRegex(RuntimeError, "deliberate"):
+                failed.run(1, 1)
+            failure_reports = list((failure_root / "reports").glob("run-*.json"))
+            self.assertEqual(1, len(failure_reports))
+            self.assertEqual("failed", json.loads(failure_reports[0].read_text(encoding="utf-8"))["execution_status"])
+            failed.close()
+
+            interrupt_root = Path(temporary) / "interrupt"
+            interrupt_root.mkdir()
+            interrupted = PipelineRunner(load_definition(host(interrupt_root)))
+            interrupted.discover()
+
+            def stop(*_args: object) -> None:
+                raise KeyboardInterrupt
+
+            interrupted._process = stop  # type: ignore[method-assign]
+            result = interrupted.run(1, 1)
+            self.assertEqual("interrupted", result["status"])
+            report = json.loads(Path(result["report"]).read_text(encoding="utf-8"))
+            self.assertEqual("interrupted", report["execution_status"])
+            interrupted.close()
 
     def test_promotion_refuses_a_changed_source(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

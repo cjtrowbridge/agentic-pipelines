@@ -62,6 +62,26 @@ class ApiPrimitiveTests(unittest.TestCase):
             self.assertNotIn("top-secret", capture.read_text(encoding="utf-8"))
             self.assertEqual(capture, response.capture_path)
 
+    def test_transport_retries_are_preserved_in_capture(self) -> None:
+        calls = 0
+
+        def transport(_url: str, _body: bytes, _headers: object, _timeout: float, _context: object) -> tuple[int, bytes]:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                return 503, b'{"error":"busy source-secret"}'
+            return 200, b'{"message":{"content":"ok"}}'
+
+        configured = ApiConfig(**{**self.config().__dict__, "request": RequestPolicy(max_attempts=2)})
+        with tempfile.TemporaryDirectory() as temporary:
+            client = InferenceClient(configured, transport=transport, sleeper=lambda _seconds: None, random_source=lambda: 0.5, thread_writer=ThreadCaptureWriter(Path(temporary)))
+            response = client.invoke(InferenceRequest(messages=[{"role": "user", "content": "hello"}], stage="worker", run_id="run-1", entity_id="entity-1", entity_revision="rev-1", attempt_id="attempt-1"))
+            self.assertEqual(2, response.attempts)
+            self.assertEqual("retry", response.retry_events[0]["disposition"])
+            stored = json.loads(response.capture_path.read_text(encoding="utf-8"))
+            self.assertEqual(1, len(stored["retry_events"]))
+            self.assertNotIn("source-secret", response.capture_path.read_text(encoding="utf-8"))
+
 
 if __name__ == "__main__":
     unittest.main()

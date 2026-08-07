@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pipelines.package.v1",
+  "$id": "pipelines.package.v2",
   "type": "object",
   "required": ["schema_version", "status", "pipeline_definition", "goal_traceability", "prompt_files", "validator_files", "fixture_manifest", "api_sample", "scheduler_example", "rollback_notes", "unresolved_decisions"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"enum": [1, 2]},
     "status": {"const": "staged"},
     "pipeline_definition": {"type": "string", "minLength": 1},
     "goal_traceability": {
@@ -23,7 +23,57 @@
     "api_sample": {"type": "string"},
     "scheduler_example": {"type": "string"},
     "rollback_notes": {"type": "array", "items": {"type": "string"}, "minItems": 1},
-    "unresolved_decisions": {"type": "array", "items": {"type": "string"}}
+    "unresolved_decisions": {"type": "array", "items": {"type": "string"}},
+    "governance": {
+      "type": "object",
+      "required": ["framework_revision", "authority_policy", "accepted_exceptions"],
+      "properties": {
+        "framework_revision": {"type": "string", "minLength": 1},
+        "authority_policy": {"const": "deterministic-semantic-human-v1"},
+        "accepted_exceptions": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "authority_matrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "property", "property_class", "mechanism", "authority", "proof_basis", "heuristic_role", "evidence", "repair_owner", "escalation"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "property": {"type": "string", "minLength": 1},
+          "property_class": {"enum": ["representational", "semantic", "human_policy"]},
+          "mechanism": {"enum": ["tool", "parser", "script", "query", "heuristic", "llm", "human"]},
+          "authority": {"enum": ["deterministic", "semantic_model", "human", "none"]},
+          "proof_basis": {"enum": ["schema", "explicit_representation", "exact_domain_rule", "provenance", "semantic_rubric", "human_policy"]},
+          "heuristic_role": {"enum": ["none", "candidate_generation", "prioritization", "anomaly_detection", "review_routing", "escalation"]},
+          "evidence": {"type": "string", "minLength": 1},
+          "repair_owner": {"enum": ["deterministic", "semantic_model", "human", "none"]},
+          "escalation": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "evidence_policy": {
+      "type": "object",
+      "required": ["machine_report", "human_report", "rejected_artifact_pattern", "rejected_artifact_retention", "excluded_from", "failure_if_unwritable"],
+      "properties": {
+        "machine_report": {"type": "string", "minLength": 1},
+        "human_report": {"type": "string", "minLength": 1},
+        "rejected_artifact_pattern": {"type": "string", "minLength": 1},
+        "rejected_artifact_retention": {"type": "string", "minLength": 1},
+        "excluded_from": {"type": "array", "minItems": 6, "uniqueItems": true, "items": {"enum": ["git", "source_discovery", "example_retrieval", "prompt_assembly", "rendering", "promotion", "semantic_evidence"]}},
+        "failure_if_unwritable": {"const": true}
+      },
+      "additionalProperties": false
+    }
   },
+  "allOf": [
+    {
+      "if": {"properties": {"schema_version": {"const": 2}}},
+      "then": {"required": ["governance", "authority_matrix", "evidence_policy"]}
+    }
+  ],
   "additionalProperties": false
 }

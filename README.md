@@ -4,7 +4,7 @@ Agentic Pipelines is a prompt-first framework for using scarce cloud intelligenc
 
 Its primary reusable assets are concise prompts and task-specific playbooks. The Python runtime, Ollama-compatible API adapter, SQLite state, validators, thread capture, and reports are shared supporting infrastructure.
 
-Agentic Pipelines are mostly ordinary deterministic automation. File discovery, parsing, filtering, routing, comparison, validation, state transitions, and promotion should use code or standard tools such as shell commands whenever they can. An LLM belongs only at a narrow step that genuinely requires semantic interpretation or generation. Every such step receives the minimum necessary context and is constrained by a precise output contract, deterministic gates, finite attempts, and captured evidence.
+Agentic Pipelines are mostly ordinary deterministic automation. Exact discovery, parsing, filtering, routing, validation, state transitions, and promotion use code or standard tools whenever they can establish the required property. Meaning, entailment, equivalence, relevance, and qualitative fitness use bounded semantic or human judgment; deterministic heuristics may route those questions but cannot issue semantic verdicts. Every model step receives minimum necessary context and is constrained by a precise output contract, exact gates, finite attempts, and captured evidence.
 
 ## Pipeline entry points
 
@@ -53,6 +53,10 @@ user goal
 
 All model calls use one local API primitive and can produce redacted thread evidence. Workers write staged candidates; only declared validation and promotion may alter destinations.
 
+Every execution also produces a machine report and human-readable run narrative, including success, failure, interruption, partial, resumed, and no-op outcomes. Each rejected generated candidate is saved separately with an appended explanation of the rejecting authority, code, reason, evidence, and retry disposition. These ignored artifacts make retry loops and first-pass friction visible to later agents; they are untrusted evidence and can never become source material, examples, prompt instructions, rendered final output, or promotable content. See `references/run_evidence_and_continuous_improvement.md`.
+
+After a governance-changing framework update, use `playbooks/how_to_audit_existing_pipeline_conformance.md` to inventory a host pipeline’s authority assignments and evidence behavior. The audit produces findings and a proposed host remediation plan without rewriting host-owned files.
+
 Before integration, validate a generated package without inference or source mutation:
 
 ```powershell
@@ -98,7 +102,7 @@ Deterministic commands such as `discover`, `inspect-entity`, and `report` do not
 
 ## Current status
 
-The router, focused playbooks, typed prompt catalog, strict output schemas, staged-package validator, shared local API, redacted evidence capture, schema-v2 stateful runner, deterministic validation, bounded semantic review/repair, safe promotion, failure cohorts, advisory post-run analysis, and fake-provider Markdown reference pipeline are implemented. A real local Ollama smoke test and broader model calibration remain operator-local validation work tracked under `plans/current/`.
+The router, focused playbooks, typed prompt catalog, authority/evidence contracts, staged-package validator, shared local API, rejected-candidate preservation, machine and human run reports, redacted thread capture, schema-v3 stateful runner, exact validation, bounded semantic review/repair, safe promotion, failure cohorts, advisory trajectory analysis, consumer conformance review, and fake-provider Markdown reference pipeline are implemented. A real local Ollama smoke test and broader model calibration remain operator-local validation work tracked under `plans/current/`.
 
 ## Key paths
 

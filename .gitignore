@@ -6,6 +6,9 @@ threads/
 artifacts/
 failures/
 reports/
+*.rejected.md
+*.rejected.json
+*.rejected.txt
 
 # Python tooling
 __pycache__/

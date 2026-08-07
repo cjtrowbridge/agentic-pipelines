@@ -2,6 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "pipelines.prompt-outputs.v1",
   "$defs": {
+    "property_class": {"enum": ["representational", "semantic", "human_policy"]},
+    "mechanism": {"enum": ["tool", "parser", "script", "query", "heuristic", "llm", "human"]},
+    "authority": {"enum": ["deterministic", "semantic_model", "human", "none"]},
+    "heuristic_role": {"enum": ["none", "candidate_generation", "prioritization", "anomaly_detection", "review_routing", "escalation"]},
+    "proof_basis": {"enum": ["schema", "explicit_representation", "exact_domain_rule", "provenance", "semantic_rubric", "human_policy"]},
     "nonempty_string": {"type": "string", "minLength": 1},
     "string_list": {"type": "array", "items": {"type": "string"}},
     "finding": {
@@ -75,14 +80,20 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "mechanism", "inputs", "output", "validation", "retry_budget", "next_states"],
+            "required": ["id", "property_class", "mechanism", "authority", "proof_basis", "heuristic_role", "inputs", "output", "evidence", "validation", "repair_owner", "retry_budget", "next_states"],
             "properties": {
               "id": {"$ref": "#/$defs/nonempty_string"},
-              "mechanism": {"enum": ["tool", "parser", "script", "query", "heuristic", "llm", "human"]},
+              "property_class": {"$ref": "#/$defs/property_class"},
+              "mechanism": {"$ref": "#/$defs/mechanism"},
+              "authority": {"$ref": "#/$defs/authority"},
+              "proof_basis": {"$ref": "#/$defs/proof_basis"},
+              "heuristic_role": {"$ref": "#/$defs/heuristic_role"},
               "llm_justification": {"type": ["string", "null"]},
               "inputs": {"$ref": "#/$defs/string_list"},
               "output": {"$ref": "#/$defs/nonempty_string"},
+              "evidence": {"$ref": "#/$defs/nonempty_string"},
               "validation": {"$ref": "#/$defs/string_list"},
+              "repair_owner": {"enum": ["deterministic", "semantic_model", "human", "none"]},
               "retry_budget": {"type": "integer", "minimum": 0},
               "next_states": {"$ref": "#/$defs/string_list"}
             },
@@ -101,14 +112,21 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["requirement_id", "method", "acceptance", "failure_code", "failure_action", "evidence"],
+            "required": ["requirement_id", "property_class", "mechanism", "authority", "proof_basis", "heuristic_role", "acceptance", "failure_code", "failure_action", "evidence", "materiality", "repair_owner", "escalation"],
             "properties": {
               "requirement_id": {"$ref": "#/$defs/nonempty_string"},
-              "method": {"enum": ["deterministic", "semantic", "human"]},
+              "property_class": {"$ref": "#/$defs/property_class"},
+              "mechanism": {"$ref": "#/$defs/mechanism"},
+              "authority": {"$ref": "#/$defs/authority"},
+              "proof_basis": {"$ref": "#/$defs/proof_basis"},
+              "heuristic_role": {"$ref": "#/$defs/heuristic_role"},
               "acceptance": {"$ref": "#/$defs/nonempty_string"},
               "failure_code": {"$ref": "#/$defs/nonempty_string"},
               "failure_action": {"enum": ["repair", "quarantine", "human_required"]},
-              "evidence": {"$ref": "#/$defs/nonempty_string"}
+              "evidence": {"$ref": "#/$defs/nonempty_string"},
+              "materiality": {"enum": ["low", "medium", "high"]},
+              "repair_owner": {"enum": ["deterministic", "semantic_model", "human", "none"]},
+              "escalation": {"$ref": "#/$defs/nonempty_string"}
             },
             "additionalProperties": false
           }
@@ -127,6 +145,55 @@
         "risks": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
         "inferences": {"$ref": "#/$defs/string_list"},
         "user_decisions": {"$ref": "#/$defs/string_list"}
+      },
+      "additionalProperties": false
+    },
+    "pipeline_conformance_report": {
+      "type": "object",
+      "required": ["framework_revision", "host_scope", "inventory", "findings", "conforming_decisions", "accepted_exceptions", "unknowns", "remediation_plan", "no_change_justified", "authority"],
+      "properties": {
+        "framework_revision": {"$ref": "#/$defs/nonempty_string"},
+        "host_scope": {"$ref": "#/$defs/nonempty_string"},
+        "inventory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "host_artifact", "property", "property_class", "mechanism", "authority", "classification", "evidence"],
+            "properties": {
+              "id": {"$ref": "#/$defs/nonempty_string"},
+              "host_artifact": {"$ref": "#/$defs/nonempty_string"},
+              "property": {"$ref": "#/$defs/nonempty_string"},
+              "property_class": {"$ref": "#/$defs/property_class"},
+              "mechanism": {"$ref": "#/$defs/mechanism"},
+              "authority": {"$ref": "#/$defs/authority"},
+              "classification": {"enum": ["exact_validation", "deterministic_normalization", "heuristic_routing", "semantic_judgment", "human_decision", "misassigned_authority", "unknown"]},
+              "evidence": {"$ref": "#/$defs/string_list"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+        "conforming_decisions": {"$ref": "#/$defs/string_list"},
+        "accepted_exceptions": {"$ref": "#/$defs/string_list"},
+        "unknowns": {"$ref": "#/$defs/string_list"},
+        "remediation_plan": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["finding_id", "earliest_responsible_layer", "proposed_change", "expected_benefit", "regression_risk", "required_fixture"],
+            "properties": {
+              "finding_id": {"$ref": "#/$defs/nonempty_string"},
+              "earliest_responsible_layer": {"enum": ["input", "prompt", "context", "schema", "normalizer", "validator_authority", "semantic_review", "provider", "orchestration", "goal"]},
+              "proposed_change": {"$ref": "#/$defs/nonempty_string"},
+              "expected_benefit": {"$ref": "#/$defs/nonempty_string"},
+              "regression_risk": {"$ref": "#/$defs/nonempty_string"},
+              "required_fixture": {"$ref": "#/$defs/nonempty_string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "no_change_justified": {"type": "boolean"},
+        "authority": {"const": "advisory_only"}
       },
       "additionalProperties": false
     },
@@ -253,8 +320,16 @@
     },
     "performance_analysis": {
       "type": "object",
-      "required": ["observed_metrics", "calculated_metrics", "hypotheses", "unknowns", "recommendations"],
-      "properties": {"observed_metrics": {"type": "object"}, "calculated_metrics": {"type": "object"}, "hypotheses": {"type": "array", "items": {"type": "object"}}, "unknowns": {"$ref": "#/$defs/string_list"}, "recommendations": {"$ref": "#/$defs/string_list"}},
+      "required": ["observations", "observed_metrics", "calculated_metrics", "hypotheses", "unknowns", "recommendations", "no_change_justified"],
+      "properties": {
+        "observations": {"$ref": "#/$defs/string_list"},
+        "observed_metrics": {"type": "object"},
+        "calculated_metrics": {"type": "object"},
+        "hypotheses": {"type": "array", "items": {"type": "object"}},
+        "unknowns": {"$ref": "#/$defs/string_list"},
+        "recommendations": {"type": "array", "items": {"type": "object"}},
+        "no_change_justified": {"type": "boolean"}
+      },
       "additionalProperties": false
     }
   }

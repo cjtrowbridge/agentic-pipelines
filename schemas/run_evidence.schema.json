@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pipelines.run-evidence.v2",
+  "type": "object",
+  "required": ["schema_version", "governance_version", "pipeline_id", "run_id", "execution_status", "learning_status", "started_at", "finished_at", "summary", "attempts", "rejected_artifacts", "observations", "metrics", "hypotheses", "recommendations"],
+  "properties": {
+    "schema_version": {"const": 2},
+    "governance_version": {"const": "deterministic-semantic-human-v1"},
+    "pipeline_id": {"type": "string", "minLength": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "execution_status": {"enum": ["running", "succeeded", "partially_succeeded", "failed", "interrupted", "bounded_stop", "no_op"]},
+    "learning_status": {"enum": ["not_required", "pending", "completed", "skipped", "failed"]},
+    "started_at": {"type": ["string", "null"]},
+    "finished_at": {"type": ["string", "null"]},
+    "summary": {"type": "object"},
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["attempt_id", "entity_id", "stage", "status", "failure_class", "authority", "explanation", "started_at", "finished_at"],
+        "properties": {
+          "attempt_id": {"type": "string"},
+          "entity_id": {"type": "string"},
+          "stage": {"type": "string"},
+          "status": {"type": "string"},
+          "failure_class": {"enum": ["none", "transport", "parse", "schema", "deterministic", "heuristic_escalation", "semantic", "human", "interruption", "orchestration"]},
+          "authority": {"enum": ["deterministic", "semantic_model", "human", "none"]},
+          "validator_or_reviewer": {"type": ["string", "null"]},
+          "explanation": {"type": ["string", "null"]},
+          "thread_path": {"type": ["string", "null"]},
+          "artifact_path": {"type": ["string", "null"]},
+          "started_at": {"type": ["string", "null"]},
+          "finished_at": {"type": ["string", "null"]}
+        },
+        "additionalProperties": true
+      }
+    },
+    "rejected_artifacts": {"type": "array", "items": {"type": "object"}},
+    "observations": {"type": "array", "items": {"type": "string"}},
+    "metrics": {"type": "object"},
+    "hypotheses": {"type": "array", "items": {"type": "object"}},
+    "recommendations": {"type": "array", "items": {"type": "object"}}
+  },
+  "additionalProperties": true
+}

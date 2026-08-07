@@ -13,8 +13,17 @@ import uuid
 from pathlib import Path
 from typing import Any, Mapping
 
+from jsonschema import Draft202012Validator
+
 from .api import InferenceClient, InferenceError, InferenceRequest
 from .definition import PipelineDefinition, PromptStage
+from .evidence import (
+    build_run_evidence,
+    classify_failure,
+    rejected_candidate_path,
+    rejection_record,
+    render_run_markdown,
+)
 from .prompts import OutputSchemas, PromptContract, PromptError, load_prompt
 from .state import StateError, StateStore
 from .validators import ValidationEvidence, validate
@@ -43,6 +52,25 @@ def _atomic_write(path: Path, data: bytes) -> None:
             temporary.unlink()
 
 
+def _atomic_write_new(path: Path, data: bytes) -> None:
+    """Atomically create evidence without ever replacing an existing record."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            os.link(temporary, path)
+        except FileExistsError as exc:
+            raise StateError(f"refusing to overwrite rejected evidence: {path}") from exc
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
 class PipelineRunner:
     def __init__(self, definition: PipelineDefinition, client: InferenceClient | None = None) -> None:
         self.definition = definition
@@ -51,6 +79,7 @@ class PipelineRunner:
         self.schemas = OutputSchemas(definition.output_schema_path)
         self.prompts: dict[str, PromptContract] = {}
         self._stage_counts: dict[tuple[str, str, str], int] = {}
+        self._session_steps: dict[tuple[str, str, str], int] = {}
         for name, stage in {**definition.stages, **definition.analysis}.items():
             prompt = load_prompt(
                 stage.prompt_path,
@@ -71,7 +100,19 @@ class PipelineRunner:
 
     def discover(self) -> int:
         changed = 0
+        excluded_roots = tuple(
+            root.resolve()
+            for root in (
+                self.definition.artifact_root,
+                self.definition.thread_root,
+                self.definition.report_root,
+                self.definition.state_path.parent,
+            )
+        )
         for path in sorted(self.definition.source_root.glob(self.definition.source_glob)):
+            resolved = path.resolve()
+            if ".rejected." in path.name or any(resolved == root or root in resolved.parents for root in excluded_roots):
+                continue
             if path.is_file() and self.store.upsert_discovered(entity_id(path, self.definition.source_root), str(path), digest(path), self.contract_hash):
                 changed += 1
         return changed
@@ -80,6 +121,71 @@ class PipelineRunner:
         path = self.definition.artifact_root / kind / entity / name
         encoded = content.encode("utf-8") if isinstance(content, str) else content
         _atomic_write(path, encoded)
+        return path
+
+    def _write_rejected_candidate(
+        self,
+        content: str,
+        *,
+        run_id: str,
+        entity: str,
+        artifact: str,
+        stage: str,
+        attempt_id: str,
+        ordinal: int,
+        extension: str,
+        failure_class: str,
+        authority: str,
+        validator_or_reviewer: str,
+        rejection_code: str,
+        explanation: str,
+        retry_disposition: str,
+        thread: str,
+    ) -> Path:
+        encoded = content.encode("utf-8")
+        attempt_evidence = self.store.attempt_evidence(attempt_id)
+        attempt_row = attempt_evidence["attempt"]
+        path = rejected_candidate_path(
+            self.definition.artifact_root,
+            entity_id=entity,
+            artifact=artifact,
+            run_id=run_id,
+            ordinal=ordinal,
+            attempt_id=attempt_id,
+            extension=extension,
+        )
+        trailer = rejection_record(
+            run_id=run_id,
+            entity_id=entity,
+            artifact=artifact,
+            stage=stage,
+            attempt_id=attempt_id,
+            candidate_sha256=hashlib.sha256(encoded).hexdigest(),
+            failure_class=failure_class,
+            authority=authority,
+            validator_or_reviewer=validator_or_reviewer,
+            rejection_code=rejection_code,
+            actionable_explanation=explanation,
+            retry_disposition=retry_disposition,
+            run_report_path=self.definition.report_root / f"{run_id}.md",
+            thread_path=thread,
+            session_id=attempt_row.get("session_id"),
+            session_step=attempt_row.get("session_step"),
+            validation_evidence_path=attempt_evidence.get("validation_evidence_path"),
+        )
+        _atomic_write_new(path, encoded.rstrip() + trailer.encode("utf-8"))
+        self.store.finish_attempt(
+            attempt_id,
+            "rejected",
+            thread=thread or None,
+            artifact=str(path),
+            error=(rejection_code, explanation),
+            response_bytes=len(encoded),
+            failure_class=failure_class,
+            authority=authority,
+            validator_name=validator_or_reviewer,
+            retry_disposition=retry_disposition,
+        )
         return path
 
     def _invoke(
@@ -102,7 +208,31 @@ class PipelineRunner:
         inputs = {name: context[name] for name in prompt.inputs if name in context}
         rendered = prompt.render(inputs)
         attempt_id = f"a-{uuid.uuid4().hex[:16]}"
-        self.store.begin_attempt(attempt_id, run_id, entity, stage.name, prompt.prompt_id, prompt.version, prompt.content_hash)
+        lane = "independent-review" if stage.name in {"self_review", "reviewer", "adjudicator"} else "worker"
+        session_key = (run_id, entity, lane)
+        session_step = self._session_steps.get(session_key, 0) + 1
+        self._session_steps[session_key] = session_step
+        generation = dict(self.client.config.generation)
+        self.store.begin_attempt(
+            attempt_id,
+            run_id,
+            entity,
+            stage.name,
+            prompt.prompt_id,
+            prompt.version,
+            prompt.content_hash,
+            request_bytes=len(rendered.encode("utf-8")),
+            prompt_template_bytes=len(prompt.body.encode("utf-8")),
+            context_limit=generation.get("num_ctx") if isinstance(generation.get("num_ctx"), int) else None,
+            completion_limit=generation.get("num_predict") if isinstance(generation.get("num_predict"), int) else None,
+            reasoning_mode=str(generation.get("think", "unspecified")),
+            provider=self.client.config.provider,
+            model=self.client.config.model,
+            generation_config=generation,
+            session_id=f"{run_id}-{entity}-{lane}",
+            session_step=session_step,
+        )
+        response = None
         try:
             response = self.client.invoke(
                 InferenceRequest(
@@ -119,12 +249,59 @@ class PipelineRunner:
             )
             result = self.schemas.validate(prompt.output, response.content)
             thread = str(response.capture_path) if response.capture_path else ""
-            self.store.finish_attempt(attempt_id, "completed", thread=thread or None)
+            self.store.finish_attempt(
+                attempt_id,
+                "completed",
+                thread=thread or None,
+                response_bytes=len(response.content.encode("utf-8")),
+                failure_class="none",
+                authority="semantic_model",
+                validator_name=prompt.output,
+                retry_disposition="continue_stage",
+                transport_attempts=response.attempts,
+                transport_retry_events=[dict(item) for item in response.retry_events],
+                prompt_tokens=int(response.usage["prompt_eval_count"]) if isinstance(response.usage.get("prompt_eval_count"), int) else None,
+                completion_tokens=int(response.usage["eval_count"]) if isinstance(response.usage.get("eval_count"), int) else None,
+            )
             return result, attempt_id, thread
         except (InferenceError, PromptError) as exc:
             thread_path = getattr(exc, "capture_path", None)
             safe = self.client.redact(str(exc))
-            self.store.finish_attempt(attempt_id, "failed", thread=str(thread_path) if thread_path else None, error=("stage_error", safe))
+            thread = str(thread_path or (response.capture_path if response and response.capture_path else ""))
+            raw_failure = getattr(exc, "raw_content", None)
+            if response is not None or raw_failure is not None:
+                code = "schema_or_parse_rejection"
+                failure_class = "schema" if isinstance(exc, PromptError) else classify_failure(code)
+                self._write_rejected_candidate(
+                    self.client.redact(response.content if response is not None else str(raw_failure)),
+                    run_id=run_id,
+                    entity=entity,
+                    artifact=stage.name,
+                    stage=stage.name,
+                    attempt_id=attempt_id,
+                    ordinal=count,
+                    extension="txt",
+                    failure_class=failure_class,
+                    authority="deterministic",
+                    validator_or_reviewer=prompt.output,
+                    rejection_code=code,
+                    explanation=safe,
+                    retry_disposition="stage_retry_or_terminal",
+                    thread=thread,
+                )
+            else:
+                self.store.finish_attempt(
+                    attempt_id,
+                    "failed",
+                    thread=thread or None,
+                    error=("stage_error", safe),
+                    failure_class=classify_failure(str(exc)),
+                    authority="none",
+                    validator_name="inference_transport",
+                    retry_disposition="transport_policy_or_terminal",
+                    transport_attempts=getattr(exc, "attempts", None),
+                    transport_retry_events=list(getattr(exc, "retry_events", [])),
+                )
             raise
 
     def _context(self, source: str, candidate: str | None = None, evidence: Mapping[str, Any] | None = None, violations: list[Any] | None = None) -> dict[str, Any]:
@@ -251,18 +428,72 @@ class PipelineRunner:
         try:
             result, attempt, last_thread = self._invoke(worker, self._context(source), run_id=run_id, entity=entity, revision=revision)
             if result["status"] != "candidate" or not isinstance(result.get("candidate"), str):
-                self.store.set_outcome(entity, "quarantined", error=("worker_unable", str(result.get("reason") or "worker returned unable")), thread=last_thread, prompt_hash=self.contract_hash, evidence=str(snapshot))
+                explanation = str(result.get("reason") or "worker returned unable")
+                rejected = self._write_rejected_candidate(
+                    json.dumps(result, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+                    run_id=run_id,
+                    entity=entity,
+                    artifact=worker.name,
+                    stage=worker.name,
+                    attempt_id=attempt,
+                    ordinal=self._stage_counts.get((run_id, entity, worker.name), 1),
+                    extension="json",
+                    failure_class="semantic",
+                    authority="semantic_model",
+                    validator_or_reviewer="worker_result_contract",
+                    rejection_code="worker_unable",
+                    explanation=explanation,
+                    retry_disposition="quarantine",
+                    thread=last_thread,
+                )
+                self.store.set_outcome(entity, "quarantined", candidate=str(rejected), error=("worker_unable", explanation), thread=last_thread, prompt_hash=self.contract_hash, evidence=str(snapshot))
                 return
             candidate = str(result["candidate"])
             if len(candidate.encode("utf-8")) > self.definition.runtime.max_candidate_bytes:
-                self.store.set_outcome(entity, "quarantined", error=("candidate_too_large", f"candidate exceeds {self.definition.runtime.max_candidate_bytes} bytes"), thread=last_thread, prompt_hash=self.contract_hash)
+                explanation = f"candidate exceeds {self.definition.runtime.max_candidate_bytes} bytes"
+                rejected = self._write_rejected_candidate(
+                    candidate,
+                    run_id=run_id,
+                    entity=entity,
+                    artifact="worker",
+                    stage="candidate_size_validation",
+                    attempt_id=attempt,
+                    ordinal=self._stage_counts.get((run_id, entity, worker.name), 1),
+                    extension="md",
+                    failure_class="deterministic",
+                    authority="deterministic",
+                    validator_or_reviewer="max_candidate_bytes",
+                    rejection_code="candidate_too_large",
+                    explanation=explanation,
+                    retry_disposition="quarantine",
+                    thread=last_thread,
+                )
+                self.store.set_outcome(entity, "quarantined", candidate=str(rejected), error=("candidate_too_large", explanation), thread=last_thread, prompt_hash=self.contract_hash)
                 return
             staged = self._write_artifact("staged", entity, f"{attempt}.md", candidate)
             evidence, evidence_path = self._validate_candidate(run_id, entity, attempt, source, candidate)
             if not evidence.passed:
+                explanation = ", ".join(evidence.failure_codes)
+                rejected = self._write_rejected_candidate(
+                    candidate,
+                    run_id=run_id,
+                    entity=entity,
+                    artifact=worker.name,
+                    stage="deterministic_validation",
+                    attempt_id=attempt,
+                    ordinal=self._stage_counts.get((run_id, entity, worker.name), 1),
+                    extension="md",
+                    failure_class="deterministic",
+                    authority="deterministic",
+                    validator_or_reviewer="pipeline_validation",
+                    rejection_code=evidence.failure_codes[0],
+                    explanation=explanation,
+                    retry_disposition="semantic_repair" if self.definition.stages.get("repair") else "quarantine",
+                    thread=last_thread,
+                )
                 repaired, repair_attempt, repair_thread = self._repair(source, candidate, list(evidence.failure_codes), run_id=run_id, entity=entity, revision=revision)
                 if repaired is None:
-                    self.store.set_outcome(entity, "quarantined", candidate=str(staged), error=(evidence.failure_codes[0], ", ".join(evidence.failure_codes)), thread=repair_thread or last_thread, prompt_hash=self.contract_hash, evidence=str(evidence_path))
+                    self.store.set_outcome(entity, "quarantined", candidate=str(rejected), error=(evidence.failure_codes[0], explanation), thread=repair_thread or last_thread, prompt_hash=self.contract_hash, evidence=str(evidence_path))
                     return
                 candidate = repaired
                 attempt = repair_attempt
@@ -270,17 +501,53 @@ class PipelineRunner:
                 staged = self._write_artifact("staged", entity, f"{attempt}.md", candidate)
                 evidence, evidence_path = self._validate_candidate(run_id, entity, attempt, source, candidate)
                 if not evidence.passed:
-                    self.store.set_outcome(entity, "quarantined", candidate=str(staged), error=(evidence.failure_codes[0], ", ".join(evidence.failure_codes)), thread=last_thread, evidence=str(evidence_path))
+                    explanation = ", ".join(evidence.failure_codes)
+                    rejected = self._write_rejected_candidate(
+                        candidate,
+                        run_id=run_id,
+                        entity=entity,
+                        artifact="repair",
+                        stage="deterministic_validation",
+                        attempt_id=attempt,
+                        ordinal=self._stage_counts.get((run_id, entity, "repair"), 1),
+                        extension="md",
+                        failure_class="deterministic",
+                        authority="deterministic",
+                        validator_or_reviewer="pipeline_validation",
+                        rejection_code=evidence.failure_codes[0],
+                        explanation=explanation,
+                        retry_disposition="quarantine",
+                        thread=last_thread,
+                    )
+                    self.store.set_outcome(entity, "quarantined", candidate=str(rejected), error=(evidence.failure_codes[0], explanation), thread=last_thread, evidence=str(evidence_path))
                     return
             review_passed, violations, review_thread = self._semantic_review(source, candidate, evidence, run_id=run_id, entity=entity, revision=revision)
             if not review_passed:
+                explanation = json.dumps(violations, ensure_ascii=False)
+                rejected = self._write_rejected_candidate(
+                    candidate,
+                    run_id=run_id,
+                    entity=entity,
+                    artifact=f"{worker.name}-semantic-review" if attempt.startswith("a-") else "semantic-review",
+                    stage="semantic_review",
+                    attempt_id=attempt,
+                    ordinal=self._stage_counts.get((run_id, entity, worker.name), 1),
+                    extension="md",
+                    failure_class="semantic",
+                    authority="semantic_model",
+                    validator_or_reviewer="independent_semantic_review",
+                    rejection_code="semantic_review_failed",
+                    explanation=explanation,
+                    retry_disposition="adjudicate_then_repair_or_quarantine",
+                    thread=review_thread or last_thread,
+                )
                 action, adjudication_thread = self._adjudicate(source, candidate, evidence, violations, run_id=run_id, entity=entity, revision=revision)
                 if action != "repair":
-                    self.store.set_outcome(entity, "quarantined", candidate=str(staged), error=("semantic_review_failed", f"adjudication={action}; {json.dumps(violations, ensure_ascii=False)}"), thread=adjudication_thread or review_thread or last_thread, evidence=str(evidence_path))
+                    self.store.set_outcome(entity, "quarantined", candidate=str(rejected), error=("semantic_review_failed", f"adjudication={action}; {explanation}"), thread=adjudication_thread or review_thread or last_thread, evidence=str(evidence_path))
                     return
                 repaired, repair_attempt, repair_thread = self._repair(source, candidate, violations, run_id=run_id, entity=entity, revision=revision)
                 if repaired is None:
-                    self.store.set_outcome(entity, "quarantined", candidate=str(staged), error=("semantic_review_failed", json.dumps(violations, ensure_ascii=False)), thread=review_thread or last_thread, evidence=str(evidence_path))
+                    self.store.set_outcome(entity, "quarantined", candidate=str(rejected), error=("semantic_review_failed", explanation), thread=review_thread or last_thread, evidence=str(evidence_path))
                     return
                 candidate = repaired
                 attempt = repair_attempt
@@ -289,7 +556,27 @@ class PipelineRunner:
                 evidence, evidence_path = self._validate_candidate(run_id, entity, attempt, source, candidate)
                 review_passed, violations, review_thread = self._semantic_review(source, candidate, evidence, run_id=run_id, entity=entity, revision=revision) if evidence.passed else (False, list(evidence.failure_codes), "")
                 if not evidence.passed or not review_passed:
-                    self.store.set_outcome(entity, "quarantined", candidate=str(staged), error=("repair_not_accepted", json.dumps(violations, ensure_ascii=False)), thread=review_thread or last_thread, evidence=str(evidence_path))
+                    explanation = json.dumps(violations, ensure_ascii=False)
+                    failure_class = "deterministic" if not evidence.passed else "semantic"
+                    authority = "deterministic" if not evidence.passed else "semantic_model"
+                    rejected = self._write_rejected_candidate(
+                        candidate,
+                        run_id=run_id,
+                        entity=entity,
+                        artifact="repair",
+                        stage="repair_validation" if not evidence.passed else "semantic_review",
+                        attempt_id=attempt,
+                        ordinal=self._stage_counts.get((run_id, entity, "repair"), 1),
+                        extension="md",
+                        failure_class=failure_class,
+                        authority=authority,
+                        validator_or_reviewer="pipeline_validation" if not evidence.passed else "independent_semantic_review",
+                        rejection_code="repair_not_accepted",
+                        explanation=explanation,
+                        retry_disposition="quarantine",
+                        thread=review_thread or last_thread,
+                    )
+                    self.store.set_outcome(entity, "quarantined", candidate=str(rejected), error=("repair_not_accepted", explanation), thread=review_thread or last_thread, evidence=str(evidence_path))
                     return
             accepted = self._write_artifact("accepted", entity, f"{attempt}.md", candidate)
             state = "accepted"
@@ -307,7 +594,19 @@ class PipelineRunner:
             raise ValueError("run bounds must be positive")
         if dry_run:
             eligible = self.store.eligible(maximum)
-            return {"eligible": len(eligible), "entity_ids": [row["id"] for row in eligible], "state": self.store.summary()}
+            run_id = f"run-{uuid.uuid4().hex[:16]}"
+            self.store.start_run(run_id)
+            self.store.finish_run(run_id, "completed")
+            report = self.report(run_id)
+            return {
+                "run_id": run_id,
+                "status": "dry_run",
+                "eligible": len(eligible),
+                "entity_ids": [row["id"] for row in eligible],
+                "state": self.store.summary(),
+                "report": str(report),
+                "human_report": str(report.with_suffix(".md")),
+            }
         run_id = f"run-{uuid.uuid4().hex[:16]}"
         owner = f"{socket.gethostname()}-{os.getpid()}-{uuid.uuid4().hex[:8]}"
         lock_seconds = max(self.definition.runtime.lock_stale_seconds, int(runtime_minutes * 60) + 60)
@@ -317,7 +616,11 @@ class PipelineRunner:
         self.store.start_run(run_id)
         started = time.monotonic()
         status = "completed"
+        initial_report: Path | None = None
+        failure: Exception | None = None
         try:
+            # Evidence persistence is a precondition for material work.
+            initial_report = self.report(run_id)
             for row in eligible:
                 if time.monotonic() - started >= runtime_minutes * 60:
                     status = "bounded_stop"
@@ -325,20 +628,74 @@ class PipelineRunner:
                 self._process(row, run_id, owner)
         except KeyboardInterrupt:
             status = "interrupted"
+        except Exception as exc:
+            status = "failed"
+            failure = exc
         finally:
             self.store.finish_run(run_id, status)
             self.store.release_lock(owner, run_id)
         report = self.report(run_id)
-        return {"run_id": run_id, "status": status, "state": self.store.summary(), "report": str(report)}
+        if failure is not None:
+            raise failure
+        narrative = report.with_suffix(".md")
+        return {
+            "run_id": run_id,
+            "status": status,
+            "state": self.store.summary(),
+            "report": str(report),
+            "human_report": str(narrative),
+            "initial_report": str(initial_report) if initial_report else None,
+        }
 
     def inspect(self, entity: str) -> dict[str, Any] | None:
         return self.store.entity(entity)
 
-    def report(self, run_id: str | None = None) -> Path:
+    def report(self, run_id: str | None = None, *, learning_status: str | None = None) -> Path:
         self.definition.report_root.mkdir(parents=True, exist_ok=True)
-        data = {"schema_version": 1, "pipeline_id": self.definition.pipeline_id, "run_id": run_id, "state": self.store.summary(), "performance": self.store.run_metrics(run_id), "failure_cohorts": self.store.failure_cohorts()}
-        path = self.definition.report_root / (f"{run_id}.json" if run_id else "current-summary.json")
+        performance = self.store.run_metrics(run_id)
+        actual_run_id = performance.get("run_id")
+        if not actual_run_id:
+            data = {
+                "schema_version": 2,
+                "governance_version": "deterministic-semantic-human-v1",
+                "pipeline_id": self.definition.pipeline_id,
+                "run_id": run_id or "current-summary",
+                "execution_status": "no_op",
+                "learning_status": "not_required",
+                "started_at": None,
+                "finished_at": None,
+                "summary": {"state": self.store.summary(), "run": {}, "failure_cohorts": self.store.failure_cohorts()},
+                "state": self.store.summary(),
+                "performance": performance,
+                "failure_cohorts": self.store.failure_cohorts(),
+                "attempts": [],
+                "rejected_artifacts": [],
+                "observations": ["No recorded run exists; this is a deterministic current-state summary."],
+                "metrics": performance,
+                "hypotheses": [],
+                "recommendations": [],
+            }
+            path = self.definition.report_root / "current-summary.json"
+        else:
+            data = build_run_evidence(
+                pipeline_id=self.definition.pipeline_id,
+                run_evidence=self.store.run_evidence(str(actual_run_id)),
+                state_summary=self.store.summary(),
+                performance=performance,
+                failure_cohorts=self.store.failure_cohorts(),
+            )
+            if learning_status is not None:
+                data["learning_status"] = learning_status
+            path = self.definition.report_root / f"{actual_run_id}.json"
+        schema_path = Path(__file__).resolve().parents[1] / "schemas" / "run_evidence.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        errors = sorted(Draft202012Validator(schema).iter_errors(data), key=lambda error: list(error.path))
+        if errors:
+            location = ".".join(str(part) for part in errors[0].path) or "$"
+            raise StateError(f"run evidence failed at {location}: {errors[0].message}")
         _atomic_write(path, (json.dumps(data, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8"))
+        narrative = path.with_suffix(".md")
+        _atomic_write(narrative, render_run_markdown(data, path).encode("utf-8"))
         return path
 
     def analyze(self, run_id: str | None = None) -> Path:
@@ -383,13 +740,19 @@ class PipelineRunner:
         if performance_stage:
             analysis, thread = self._invoke_analysis(
                 performance_stage,
-                {"deterministic_run_metrics": deterministic["performance"], "evaluation_metrics": {"false_accept_rate": "unknown", "false_reject_rate": "unknown"}},
+                {
+                    "deterministic_run_metrics": deterministic["performance"],
+                    "execution_trajectory": deterministic.get("attempts", []),
+                    "evaluation_metrics": {"false_accept_rate": "unknown", "false_reject_rate": "unknown"},
+                },
                 str(actual_run_id),
                 "performance",
             )
             output["performance_analysis"] = {"analysis": analysis, "thread": thread}
         path = self.definition.report_root / f"{actual_run_id}.post-run.json"
         _atomic_write(path, (json.dumps(output, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8"))
+        if deterministic.get("run_id"):
+            self.report(str(deterministic["run_id"]), learning_status="completed")
         return path
 
     def retry_cohort(self, report_path: Path, cohort_id: str) -> int:

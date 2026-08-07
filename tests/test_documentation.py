@@ -3,6 +3,16 @@ import unittest
 
 
 class DocumentationTests(unittest.TestCase):
+    def test_authority_and_evidence_governance_is_routed(self) -> None:
+        agents = Path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("Deterministic methods may establish only properties exactly computable", agents)
+        self.assertIn("references/deterministic_and_semantic_authority.md", agents)
+        self.assertIn("references/run_evidence_and_continuous_improvement.md", agents)
+        self.assertIn("playbooks/how_to_audit_existing_pipeline_conformance.md", agents)
+        audit = Path("playbooks/how_to_audit_existing_pipeline_conformance.md").read_text(encoding="utf-8")
+        self.assertIn("Do not mutate host files", audit)
+        self.assertIn("rejected candidates", audit)
+
     def test_pipeline_progress_rule_requires_query_counts_and_eta(self) -> None:
         text = Path("AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("completed and remaining query counts", text)

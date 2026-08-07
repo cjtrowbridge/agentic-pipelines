@@ -1,0 +1,75 @@
+schema_version: 1
+governance_version: deterministic-semantic-human-v1
+cases:
+  - id: low-overlap-equivalence
+    domain: summarization
+    property: A paraphrase preserves the source meaning despite little lexical overlap.
+    property_class: semantic
+    mechanism: llm
+    authority: semantic_model
+    expected: allowed
+  - id: high-overlap-contradiction
+    domain: factual_transformation
+    property: A candidate does not reverse or contradict the source claim despite high lexical overlap.
+    property_class: semantic
+    mechanism: llm
+    authority: semantic_model
+    expected: allowed
+  - id: false-numeric-unit-match
+    domain: factual_transformation
+    property: A numeric value and its unit retain the same meaning after conversion.
+    property_class: semantic
+    mechanism: llm
+    authority: semantic_model
+    expected: allowed
+  - id: exact-typed-fact
+    domain: classification
+    property: A declared enum field contains an allowed value.
+    property_class: representational
+    mechanism: parser
+    authority: deterministic
+    expected: allowed
+  - id: balanced-markdown-fence
+    domain: document_repair
+    property: Markdown code fences are balanced.
+    property_class: representational
+    mechanism: parser
+    authority: deterministic
+    expected: allowed
+  - id: relevance-routing-only
+    domain: retrieval_ranking
+    property: Token overlap identifies candidates worth semantic review but cannot prove relevance.
+    property_class: semantic
+    mechanism: heuristic
+    authority: none
+    heuristic_role: candidate_generation
+    expected: allowed
+  - id: material-policy-exception
+    domain: classification
+    property: A risky exception is acceptable under organization policy.
+    property_class: human_policy
+    mechanism: human
+    authority: human
+    expected: allowed
+  - id: invalid-semantic-proxy-verdict
+    domain: retrieval_ranking
+    property: Character overlap proves two statements mean the same thing.
+    property_class: semantic
+    mechanism: heuristic
+    authority: deterministic
+    heuristic_role: none
+    expected: rejected
+  - id: invalid-exact-work-to-model
+    domain: document_repair
+    property: A required literal heading exists.
+    property_class: representational
+    mechanism: llm
+    authority: semantic_model
+    expected: rejected
+  - id: ambiguous-meaning-human-escalation
+    domain: summarization
+    property: Missing source context can be safely inferred.
+    property_class: human_policy
+    mechanism: human
+    authority: human
+    expected: allowed

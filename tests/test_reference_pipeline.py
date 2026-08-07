@@ -42,7 +42,15 @@ class ReferencePipelineTests(unittest.TestCase):
                 elif "reviewed_cohort_analysis" in inputs:
                     result = {"cohort_id": inputs["reviewed_cohort_analysis"]["cohort_id"], "observed_problem": "worker returned unable", "hypothesized_cause": "source lacks intended meaning", "proposed_change": "route this cohort to a human", "regression_fixture": "retain unrepairable.md", "sample_scope": "one entity", "retry_recommendation": "do not retry automatically", "authority": "advisory_only"}
                 else:
-                    result = {"observed_metrics": inputs["deterministic_run_metrics"], "calculated_metrics": {}, "hypotheses": [], "unknowns": ["false accept rate", "false reject rate"], "recommendations": ["measure the golden set"]}
+                    result = {
+                        "observed_metrics": inputs["deterministic_run_metrics"],
+                        "calculated_metrics": {},
+                        "observations": [],
+                        "hypotheses": [],
+                        "unknowns": ["false accept rate", "false reject rate"],
+                        "recommendations": [{"action": "measure the golden set", "authority": "advisory_only"}],
+                        "no_change_justified": False,
+                    }
                 return 200, json.dumps({"message": {"content": json.dumps(result)}}).encode("utf-8")
 
             config = ApiConfig(Path("api.yaml"), "ollama", "http://127.0.0.1:11434", "fake", None, request=RequestPolicy(max_attempts=1))
