@@ -2,6 +2,7 @@
 
 Format: `last_modified | path | title | summary`
 
+2026-08-07-12-09-54 | plans/past/2026-08-07-11-35-11_establish-authority-and-execution-evidence-governance.md | Establish Authority and Execution-Evidence Governance | Define and enforce deterministic, semantic, and human authority boundaries; require inspectable run and rejected-candidate evidence; and equip consuming hosts to audit and plan conformance migrations.
 2026-08-07-11-35-07 | plans/past/2026-08-04-19-00-27_host-owned-vscode-pipeline-entrypoints.md | Require Host-Owned VS Code Pipeline Entrypoints | Establish a concise framework policy and playbook requiring every host pipeline entrypoint to be a VS Code task and its main entrypoint to be a bootstrap-backed play action.
 2026-08-07-11-35-07 | plans/past/2026-07-14-13-12-31_reorient-pipelines-around-prompts-and-playbooks.md | Reorient Agentic Pipelines Around Prompts and Playbooks | Make concise prompts and task-specific playbooks the primary product while retaining the local runtime as shared supporting infrastructure.
 2026-07-14-18-01-45 | plans/past/2026-07-14-11-57-14_build-local-agentic-pipelines-framework.md | Build the local agentic pipelines framework | Convert this repository from agent-governance-first scaffolding into a submodule-ready framework for resumable local-inference pipelines with traceable review, recovery, and post-run analysis.

@@ -2,7 +2,7 @@
 plan_id: 2026-08-07-11-35-11_establish-authority-and-execution-evidence-governance
 title: Establish Authority and Execution-Evidence Governance
 summary: Define and enforce deterministic, semantic, and human authority boundaries; require inspectable run and rejected-candidate evidence; and equip consuming hosts to audit and plan conformance migrations.
-status: current
+status: past
 created_at: 2026-08-07-11-35-11
 ---
 
@@ -72,9 +72,16 @@ This is the canonical upstream execution plan derived from the approved host pro
   - [x] 6.7 Test redaction and cross-entity isolation and document compatibility/migration behavior for older hosts.
   - [x] 6.8 Run the complete upstream suite and record exact results.
 
-- [ ] 7. Document, publish, and hand off downstream adoption.
+- [x] 7. Document, publish, and hand off downstream adoption.
   - [x] 7.1 Update README/index documentation and release/migration guidance with the governance revision and repeatable update → synthesize → audit → plan → approve → remediate sequence.
   - [x] 7.2 Update this plan, regenerate plan indexes, and record the journal checkpoint with rationale and verification evidence.
   - [x] 7.3 Review the scoped upstream diff for internal consistency, ownership safety, generated evidence, and unrelated changes.
-  - [ ] 7.4 Commit the approved framework changes and push directly to `origin/main`.
-  - [ ] 7.5 Verify the remote revision and provide it to the host as the minimum conformance-governance revision.
+  - [x] 7.4 Commit the approved framework changes and push directly to `origin/main`.
+  - [x] 7.5 Verify the remote revision and provide it to the host as the minimum conformance-governance revision.
+
+## Completion Evidence
+
+- Framework implementation commit: `9397f4f5691a1fbbb94326e0ab3de2d9b138d6f4`.
+- `origin/main` was verified at the same revision after push.
+- Verification: 53 unit tests passed; 25 prompts linted; Python compiled; the reference package validated as schema 2 and governance conformant.
+- Downstream minimum governance revision: `9397f4f5691a1fbbb94326e0ab3de2d9b138d6f4`.
