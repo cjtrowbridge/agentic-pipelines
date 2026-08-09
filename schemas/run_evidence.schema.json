@@ -4,8 +4,8 @@
   "type": "object",
   "required": ["schema_version", "governance_version", "pipeline_id", "run_id", "execution_status", "learning_status", "started_at", "finished_at", "checkpointed_at", "reconciled", "summary", "attempts", "rejected_artifacts", "observations", "metrics", "hypotheses", "recommendations"],
   "properties": {
-    "schema_version": {"const": 5},
-    "governance_version": {"const": "deterministic-semantic-human-v2"},
+    "schema_version": {"enum": [4, 5]},
+    "governance_version": {"enum": ["deterministic-semantic-human-v1", "deterministic-semantic-human-v2"]},
     "pipeline_id": {"type": "string", "minLength": 1},
     "run_id": {"type": "string", "minLength": 1},
     "execution_status": {"enum": ["running", "succeeded", "partially_succeeded", "failed", "interrupted", "bounded_stop", "no_op"]},
