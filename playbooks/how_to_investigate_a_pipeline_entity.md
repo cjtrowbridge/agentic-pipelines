@@ -7,8 +7,8 @@ Explaining why one entity was accepted, rejected, retried, or quarantined.
 Only that entity’s source revision metadata, run narrative, transition history, attempts, rejected candidates and their integrity-bound explanation sidecars, validator/reviewer evidence, prompt identity, and thread captures. Verify each sidecar names the candidate and matching SHA-256. Load the authority and run-evidence references when classification is disputed.
 
 ## Procedure
-1. Verify entity/revision identity and source hash.
-2. Reconstruct transitions and attempts in order.
+1. Verify entity/revision identity and source hash. Inventory sequential rejection bundles, checking numeric order, truthful extensions, parent/precursor relationships, and every sidecar path/SHA-256.
+2. Reconstruct transitions and attempts in numeric bundle order; reconcile any evidence written after the last report checkpoint.
 3. Verify evidence hashes and prompt/model/config identity.
 4. Identify the first failing gate, property actually proved, verdict authority, repeated/changing feedback, and first preventable retry. Distinguish observation, metric, hypothesis, and recommendation.
 5. Identify the earliest responsible input, prompt, context, schema, normalizer, validator, reviewer, provider, or orchestration layer.

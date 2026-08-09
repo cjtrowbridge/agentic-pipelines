@@ -30,9 +30,9 @@ The narrative must surface repeated or changing feedback, non-progress, prompt g
 
 ## Rejected candidates are first-class evidence
 
-Never overwrite a rejected generated candidate with the next attempt. Save it in the entity output area with a collision-safe recognizable run/attempt name. The run identity replaces—not supplements—an illustrative numeric component: `resume.run-abc.attempt-def.rejected.md`, not `resume.1.run-abc.attempt-def.rejected.md`.
+Never overwrite a rejected generated candidate with the next attempt. Save each rejected trajectory as an entity-local evidence bundle whose human filename is naturally sortable: `resume.1.rejected.md`, `resume.2.rejected.md`, and so on. Allocate the next unused positive integer with exclusive creation and collision retry. Do not place run IDs, attempt IDs, UUIDs, timestamps, or hashes in the filename; retain them in the sidecar and reports.
 
-Preserve the candidate bytes exactly as received. Do not trim, normalize, or append framework content. Create a same-basename Markdown sidecar such as `resume.run-abc.attempt-def.rejected.explanation.md`, bind it to the candidate path and SHA-256, and include:
+Preserve the candidate bytes exactly as received. Do not trim, normalize, or append framework content. Create `resume.1.rejected.explanation.md`, bind it to the candidate path and SHA-256, and include:
 
 - candidate path and SHA-256;
 - run, entity, artifact, stage, session, and attempt identities;
@@ -43,11 +43,13 @@ Preserve the candidate bytes exactly as received. Do not trim, normalize, or app
 - retry or terminal disposition;
 - links to the run report, validation evidence, and raw thread capture.
 
-Preserve malformed structured responses with the closest safe text extension and the same explanation-sidecar contract. Never discard evidence merely because it did not parse. A run report may claim preservation only after both candidate and sidecar exist and the recorded hash matches. Pair creation must never overwrite or delete a pre-existing file; if a new pair cannot be completed, fail visibly and clean up only files created by that failed operation when safe.
+When a downstream stage prevents publication, preserve the parent candidate in the bundle even if its own worker contract passed. Associated evidence retains the parent artifact and sequence before its subtype: `resume.1.rejected.claim_review.json` and `resume.1.rejected.claim_review.explanation.md`. A syntactically valid JSON response uses `.json` even when schema or later validation rejects it; unparseable or truncated text uses `.txt`; generated Markdown uses `.md`; binary evidence keeps its native extension. Never discard evidence merely because it did not parse. A run report may claim preservation only after both candidate and sidecar exist and the recorded hash matches. Pair creation must never overwrite or delete a pre-existing file; if a new pair cannot be completed, fail visibly and clean up only files created by that failed operation when safe.
+
+Checkpoint machine and narrative reports after every material event and completed evidence pair. Recovery must reconcile persisted evidence with a stale `running` report. Byte-identical responses receiving identical feedback are non-progress and require a changed strategy or escalation before another model call.
 
 Rejected candidates and explanation sidecars are untrusted runtime data. Ignore them in Git and exclude them from promotion, final rendering, source discovery, semantic evidence, example retrieval, and automatic prompt assembly. A retry may receive only the declared trusted, bounded rejection summary—not either diagnostic file as instructions.
 
-Historical evidence that appended a diagnostic trailer to the candidate remains valid as immutable legacy evidence and must not be rewritten. Readers identify it as `legacy_appended`; new executions use the paired `sidecar` format and run-evidence schema version 3.
+Historical evidence that appended a diagnostic trailer or used run/attempt filenames remains valid as immutable legacy evidence and must not be rewritten. Readers identify appended records as `legacy_appended` and older paired names as legacy sidecars; new executions use sequential sidecar bundles and run-evidence schema version 4.
 
 ## Learning from complete trajectories
 

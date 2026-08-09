@@ -20,8 +20,8 @@ from .definition import PipelineDefinition, PromptStage
 from .evidence import (
     build_run_evidence,
     classify_failure,
-    persist_rejected_pair,
-    rejected_candidate_path,
+    persist_sequential_rejected_pair,
+    rejected_content_extension,
     rejection_explanation,
     render_run_markdown,
 )
@@ -126,44 +126,45 @@ class PipelineRunner:
         encoded = content.encode("utf-8")
         attempt_evidence = self.store.attempt_evidence(attempt_id)
         attempt_row = attempt_evidence["attempt"]
-        path = rejected_candidate_path(
-            self.definition.artifact_root,
-            entity_id=entity,
-            artifact=artifact,
-            run_id=run_id,
-            attempt_id=attempt_id,
-            extension=extension,
-        )
-        candidate_sha256 = hashlib.sha256(encoded).hexdigest()
-        explanation_markdown = rejection_explanation(
-            run_id=run_id,
-            entity_id=entity,
-            artifact=artifact,
-            stage=stage,
-            attempt_id=attempt_id,
-            candidate_path=path,
-            candidate_sha256=candidate_sha256,
-            failure_class=failure_class,
-            authority=authority,
-            validator_or_reviewer=validator_or_reviewer,
-            rejection_code=rejection_code,
-            actionable_explanation=explanation,
-            retry_disposition=retry_disposition,
-            run_report_path=self.definition.report_root / f"{run_id}.md",
-            thread_path=thread,
-            session_id=attempt_row.get("session_id"),
-            session_step=attempt_row.get("session_step"),
-            validation_evidence_path=attempt_evidence.get("validation_evidence_path"),
-        )
-        try:
-            persist_rejected_pair(
-                path,
-                encoded,
-                explanation_markdown,
+        requested = extension.removeprefix(".")
+        intended_format = "markdown" if requested in {"md", "markdown"} else "pdf" if requested == "pdf" else None
+        truthful_extension = rejected_content_extension(encoded, intended_format=intended_format)
+
+        def build_explanation(path: Path, sequence: int, candidate_sha256: str) -> str:
+            return rejection_explanation(
+                run_id=run_id,
+                entity_id=entity,
+                artifact=artifact,
+                stage=stage,
+                attempt_id=attempt_id,
+                candidate_path=path,
                 candidate_sha256=candidate_sha256,
+                failure_class=failure_class,
+                authority=authority,
+                validator_or_reviewer=validator_or_reviewer,
+                rejection_code=rejection_code,
+                actionable_explanation=explanation,
+                retry_disposition=retry_disposition,
+                run_report_path=self.definition.report_root / f"{run_id}.md",
+                thread_path=thread,
+                session_id=attempt_row.get("session_id"),
+                session_step=attempt_row.get("session_step"),
+                validation_evidence_path=attempt_evidence.get("validation_evidence_path"),
+                sequence=sequence,
+                artifact_role="candidate",
+                content_format=truthful_extension.removeprefix("."),
+            )
+        try:
+            path, _sidecar, _sequence = persist_sequential_rejected_pair(
+                self.definition.artifact_root,
+                entity_id=entity,
+                artifact=artifact,
+                candidate=encoded,
+                extension=truthful_extension,
+                explanation_builder=build_explanation,
             )
         except (FileExistsError, OSError, ValueError) as exc:
-            raise StateError(f"failed to preserve rejected evidence pair: {path}: {exc}") from exc
+            raise StateError(f"failed to preserve rejected evidence pair for {entity}/{artifact}: {exc}") from exc
         self.store.finish_attempt(
             attempt_id,
             "rejected",
@@ -176,6 +177,7 @@ class PipelineRunner:
             validator_name=validator_or_reviewer,
             retry_disposition=retry_disposition,
         )
+        self.report(run_id)
         return path
 
     def _invoke(
@@ -594,6 +596,8 @@ class PipelineRunner:
         owner = f"{socket.gethostname()}-{os.getpid()}-{uuid.uuid4().hex[:8]}"
         lock_seconds = max(self.definition.runtime.lock_stale_seconds, int(runtime_minutes * 60) + 60)
         self.store.acquire_lock(owner, run_id, lock_seconds)
+        for stale_run_id in self.store.reconcile_running_runs():
+            self.report(stale_run_id)
         self.store.recover_expired_leases()
         eligible = self.store.eligible(maximum)
         self.store.start_run(run_id)
@@ -609,6 +613,7 @@ class PipelineRunner:
                     status = "bounded_stop"
                     break
                 self._process(row, run_id, owner)
+                self.report(run_id)
         except KeyboardInterrupt:
             status = "interrupted"
         except Exception as exc:
@@ -639,7 +644,7 @@ class PipelineRunner:
         actual_run_id = performance.get("run_id")
         if not actual_run_id:
             data = {
-                "schema_version": 3,
+                "schema_version": 4,
                 "governance_version": "deterministic-semantic-human-v1",
                 "pipeline_id": self.definition.pipeline_id,
                 "run_id": run_id or "current-summary",
@@ -647,6 +652,8 @@ class PipelineRunner:
                 "learning_status": "not_required",
                 "started_at": None,
                 "finished_at": None,
+                "checkpointed_at": None,
+                "reconciled": False,
                 "summary": {"state": self.store.summary(), "run": {}, "failure_cohorts": self.store.failure_cohorts()},
                 "state": self.store.summary(),
                 "performance": performance,

@@ -1,4 +1,4 @@
-schema_version: 2
+schema_version: 3
 status: staged
 governance:
   framework_revision: deterministic-semantic-human-v1
@@ -47,8 +47,9 @@ scheduler_example: scheduler.example.txt
 evidence_policy:
   machine_report: reports/{run_id}.json
   human_report: reports/{run_id}.md
-  rejected_artifact_pattern: artifacts/rejected/{entity}/{stage}.{run_id}.{attempt}.rejected.{ext}
-  rejected_explanation_pattern: artifacts/rejected/{entity}/{stage}.{run_id}.{attempt}.rejected.explanation.md
+  rejected_artifact_pattern: artifacts/rejected/{entity}/{artifact}.{sequence}.rejected.{ext}
+  rejected_stage_pattern: artifacts/rejected/{entity}/{artifact}.{sequence}.rejected.{stage}.{ext}
+  rejected_explanation_pattern: artifacts/rejected/{entity}/{artifact}.{sequence}.rejected[.{stage}].explanation.md
   rejected_artifact_retention: retain until explicit governed cleanup
   excluded_from: [git, source_discovery, example_retrieval, prompt_assembly, rendering, promotion, semantic_evidence]
   failure_if_unwritable: true

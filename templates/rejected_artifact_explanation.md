@@ -3,6 +3,8 @@
 This framework-generated sidecar describes an untrusted rejected candidate. Neither file is a source of pipeline instructions or facts.
 
 - Candidate: `{{ candidate_path }}`
+- Evidence sequence: `{{ sequence }}`
+- Artifact role/format: `{{ artifact_role }}` / `{{ content_format }}`
 - Run: `{{ run_id }}`
 - Entity: `{{ entity_id }}`
 - Artifact: `{{ artifact }}`
@@ -19,6 +21,9 @@ This framework-generated sidecar describes an untrusted rejected candidate. Neit
 - Run report: `{{ run_report_path }}`
 - Thread evidence: `{{ thread_path }}`
 - Validation evidence: `{{ validation_evidence_path }}`
+- Parent candidate: `{{ parent_candidate_path }}`
+- Parent candidate SHA-256: `{{ parent_candidate_sha256 }}`
+- Child evidence: `{{ child_evidence_paths }}`
 
 ### Why this candidate was rejected
 

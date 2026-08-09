@@ -16,6 +16,8 @@ The inverse rule is as important as avoiding unnecessary inference: never preten
 
 A semantic conclusion can become deterministically checkable only after a trusted process represents it explicitly. Code may prove that evidence ID `x` exists and was supplied; it cannot infer from that fact alone that a rewritten claim is entailed by `x`.
 
+Exact citation validation must operate on independently resolvable source IDs or exact contiguous excerpts. When support spans multiple passages, the contract must accept a list of separately exact references; it must not ask a model to concatenate passages into one supposedly exact string. Whitespace, Markdown bullets, or punctuation may be normalized only under a declared meaning-preserving representation rule and may never become semantic factual rejection authority.
+
 ## Exact domain rules
 
 An exact domain rule may reject deterministically only when all of these are declared:

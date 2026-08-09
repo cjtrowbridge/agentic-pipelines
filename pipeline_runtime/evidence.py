@@ -9,7 +9,7 @@ import re
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 GOVERNANCE_VERSION = "deterministic-semantic-human-v1"
 
@@ -56,6 +56,12 @@ def rejection_explanation(
     session_id: str | None = None,
     session_step: int | None = None,
     validation_evidence_path: str | None = None,
+    sequence: int | None = None,
+    artifact_role: str = "candidate",
+    content_format: str | None = None,
+    parent_candidate_path: str | None = None,
+    parent_candidate_sha256: str | None = None,
+    child_evidence_paths: list[str] | None = None,
 ) -> str:
     rejected_at = datetime.now(UTC).isoformat()
     diagnostic = {
@@ -78,6 +84,12 @@ def rejection_explanation(
         "thread_path": thread_path,
         "validation_evidence_path": validation_evidence_path,
         "actionable_explanation": actionable_explanation,
+        "sequence": sequence,
+        "artifact_role": artifact_role,
+        "content_format": content_format,
+        "parent_candidate_path": parent_candidate_path,
+        "parent_candidate_sha256": parent_candidate_sha256,
+        "child_evidence_paths": list(child_evidence_paths or []),
     }
     return (
         "# Rejection explanation\n\n"
@@ -85,6 +97,7 @@ def rejection_explanation(
         "Neither file is a source of pipeline instructions or facts.\n\n"
         f"- Candidate: `{candidate_path}`\n"
         f"- Candidate SHA-256: `{candidate_sha256}`\n"
+        f"- Evidence sequence/role/format: `{sequence if sequence is not None else 'legacy'}` / `{artifact_role}` / `{content_format or 'unknown'}`\n"
         f"- Run/entity: `{run_id}` / `{entity_id}`\n"
         f"- Artifact/stage: `{artifact}` / `{stage}`\n"
         f"- Session/attempt: `{session_id or 'none'}` / `{attempt_id}`\n"
@@ -98,6 +111,9 @@ def rejection_explanation(
         f"- Run report: `{run_report_path}`\n"
         f"- Thread evidence: `{thread_path or 'none'}`\n"
         f"- Validation evidence: `{validation_evidence_path or 'none'}`\n\n"
+        f"- Parent candidate: `{parent_candidate_path or 'none'}`\n"
+        f"- Parent candidate SHA-256: `{parent_candidate_sha256 or 'none'}`\n"
+        f"- Child evidence: `{', '.join(child_evidence_paths or []) or 'none'}`\n\n"
         "## Why this candidate was rejected\n\n"
         f"{actionable_explanation.strip()}\n\n"
         "## Diagnostic record\n\n"
@@ -120,13 +136,50 @@ def rejected_candidate_path(
     *,
     entity_id: str,
     artifact: str,
-    run_id: str,
-    attempt_id: str,
+    sequence: int,
     extension: str,
+    stage: str | None = None,
 ) -> Path:
+    if sequence < 1:
+        raise ValueError("rejected evidence sequence must be a positive integer")
     suffix = extension if extension.startswith(".") else f".{extension}"
-    name = f"{_safe_component(artifact)}.{_safe_component(run_id)}.{_safe_component(attempt_id)}.rejected{suffix}"
+    stage_component = f".{_safe_component(stage)}" if stage else ""
+    name = f"{_safe_component(artifact)}.{sequence}.rejected{stage_component}{suffix}"
     return artifact_root / "rejected" / _safe_component(entity_id) / name
+
+
+def rejected_sequence(candidate_path: Path) -> int | None:
+    """Return the human evidence sequence from a sequential rejected filename."""
+    match = re.match(r"^.+\.(\d+)\.rejected(?:\.|$)", candidate_path.name)
+    return int(match.group(1)) if match else None
+
+
+def rejected_content_extension(content: bytes | str, *, intended_format: str | None = None) -> str:
+    """Choose a truthful extension without changing the preserved bytes."""
+    if intended_format in {"markdown", "md"}:
+        return ".md"
+    if intended_format == "pdf":
+        return ".pdf"
+    encoded = content.encode("utf-8") if isinstance(content, str) else content
+    try:
+        json.loads(encoded.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return ".txt"
+    return ".json"
+
+
+def is_non_progress(
+    previous_content: bytes | str | None,
+    previous_explanation: str | None,
+    current_content: bytes | str,
+    current_explanation: str,
+) -> bool:
+    """Identify an unchanged response receiving unchanged trusted feedback."""
+    if previous_content is None or previous_explanation is None:
+        return False
+    before = previous_content.encode("utf-8") if isinstance(previous_content, str) else previous_content
+    after = current_content.encode("utf-8") if isinstance(current_content, str) else current_content
+    return before == after and previous_explanation.strip() == current_explanation.strip()
 
 
 def rejection_explanation_path(candidate_path: Path) -> Path:
@@ -174,6 +227,100 @@ def persist_rejected_pair(
             candidate_path.unlink()
         raise
     return explanation_path
+
+
+def persist_sequential_rejected_pair(
+    artifact_root: Path,
+    *,
+    entity_id: str,
+    artifact: str,
+    candidate: bytes,
+    extension: str,
+    explanation_builder: Callable[[Path, int, str], str],
+    stage: str | None = None,
+    start_sequence: int = 1,
+) -> tuple[Path, Path, int]:
+    """Allocate and publish the next immutable human-readable rejection pair."""
+    sequence = max(start_sequence, 1)
+    candidate_sha256 = hashlib.sha256(candidate).hexdigest()
+    while True:
+        candidate_path = rejected_candidate_path(
+            artifact_root,
+            entity_id=entity_id,
+            artifact=artifact,
+            sequence=sequence,
+            extension=extension,
+            stage=stage,
+        )
+        explanation = explanation_builder(candidate_path, sequence, candidate_sha256)
+        try:
+            explanation_path = persist_rejected_pair(
+                candidate_path,
+                candidate,
+                explanation,
+                candidate_sha256=candidate_sha256,
+            )
+        except FileExistsError:
+            sequence += 1
+            continue
+        return candidate_path, explanation_path, sequence
+
+
+def persist_rejection_bundle(
+    artifact_root: Path,
+    *,
+    entity_id: str,
+    artifact: str,
+    candidate: bytes,
+    extension: str,
+    explanation_builder: Callable[[Path, int, str], str],
+    precursors: list[Mapping[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Publish one parent candidate and its typed precursor pairs as a guarded bundle."""
+    candidate_path, explanation_path, sequence = persist_sequential_rejected_pair(
+        artifact_root,
+        entity_id=entity_id,
+        artifact=artifact,
+        candidate=candidate,
+        extension=extension,
+        explanation_builder=explanation_builder,
+    )
+    created = [candidate_path, explanation_path]
+    children: list[dict[str, Any]] = []
+    try:
+        for precursor in precursors or []:
+            stage = str(precursor["stage"])
+            payload = precursor["candidate"]
+            encoded = payload.encode("utf-8") if isinstance(payload, str) else bytes(payload)
+            child_path = rejected_candidate_path(
+                artifact_root,
+                entity_id=entity_id,
+                artifact=artifact,
+                sequence=sequence,
+                extension=str(precursor["extension"]),
+                stage=stage,
+            )
+            child_hash = hashlib.sha256(encoded).hexdigest()
+            child_builder = precursor["explanation_builder"]
+            child_explanation = child_builder(child_path, sequence, child_hash)
+            child_sidecar = persist_rejected_pair(
+                child_path,
+                encoded,
+                child_explanation,
+                candidate_sha256=child_hash,
+            )
+            created.extend((child_path, child_sidecar))
+            children.append({"stage": stage, "path": child_path, "explanation_path": child_sidecar})
+    except BaseException:
+        for path in reversed(created):
+            path.unlink(missing_ok=True)
+        raise
+    return {
+        "sequence": sequence,
+        "path": candidate_path,
+        "explanation_path": explanation_path,
+        "children": children,
+    }
 
 
 def execution_status(run: Mapping[str, Any], attempt_count: int) -> str:
@@ -291,7 +438,7 @@ def build_run_evidence(
     if changing_feedback:
         observations.append(f"Rejection feedback changed {changing_feedback} time(s) within entity trajectories.")
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "governance_version": GOVERNANCE_VERSION,
         "pipeline_id": pipeline_id,
         "run_id": run["id"],
@@ -299,6 +446,8 @@ def build_run_evidence(
         "learning_status": learning,
         "started_at": run.get("started_at"),
         "finished_at": run.get("finished_at"),
+        "checkpointed_at": datetime.now(UTC).isoformat(),
+        "reconciled": False,
         "summary": {"state": dict(state_summary), "run": run, "failure_cohorts": failure_cohorts},
         "state": dict(state_summary),
         "performance": derived,
@@ -311,6 +460,12 @@ def build_run_evidence(
                 "path": item.get("artifact_path"),
                 "explanation_path": item.get("explanation_path"),
                 "evidence_format": "sidecar" if item.get("explanation_path") else "legacy_appended",
+                "sequence": rejected_sequence(Path(str(item["artifact_path"]))) if item.get("artifact_path") else None,
+                "artifact_role": "candidate",
+                "content_format": Path(str(item["artifact_path"])).suffix.removeprefix(".") if item.get("artifact_path") else None,
+                "parent_candidate_path": None,
+                "parent_candidate_sha256": None,
+                "child_evidence_paths": [],
                 "candidate_sha256": (
                     hashlib.sha256(Path(str(item["artifact_path"])).read_bytes()).hexdigest()
                     if item.get("artifact_path") and Path(str(item["artifact_path"])).is_file()

@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pipelines.package.v2",
+  "$id": "pipelines.package.v3",
   "type": "object",
   "required": ["schema_version", "status", "pipeline_definition", "goal_traceability", "prompt_files", "validator_files", "fixture_manifest", "api_sample", "scheduler_example", "rollback_notes", "unresolved_decisions"],
   "properties": {
-    "schema_version": {"enum": [1, 2]},
+    "schema_version": {"enum": [1, 2, 3]},
     "status": {"const": "staged"},
     "pipeline_definition": {"type": "string", "minLength": 1},
     "goal_traceability": {
@@ -62,6 +62,7 @@
         "machine_report": {"type": "string", "minLength": 1},
         "human_report": {"type": "string", "minLength": 1},
         "rejected_artifact_pattern": {"type": "string", "minLength": 1},
+        "rejected_stage_pattern": {"type": "string", "minLength": 1},
         "rejected_explanation_pattern": {"type": "string", "minLength": 1},
         "rejected_artifact_retention": {"type": "string", "minLength": 1},
         "excluded_from": {"type": "array", "minItems": 6, "uniqueItems": true, "items": {"enum": ["git", "source_discovery", "example_retrieval", "prompt_assembly", "rendering", "promotion", "semantic_evidence"]}},
@@ -74,6 +75,13 @@
     {
       "if": {"properties": {"schema_version": {"const": 2}}},
       "then": {"required": ["governance", "authority_matrix", "evidence_policy"]}
+    },
+    {
+      "if": {"properties": {"schema_version": {"const": 3}}},
+      "then": {
+        "required": ["governance", "authority_matrix", "evidence_policy"],
+        "properties": {"evidence_policy": {"required": ["rejected_stage_pattern"]}}
+      }
     }
   ],
   "additionalProperties": false

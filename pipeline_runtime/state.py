@@ -184,6 +184,23 @@ class StateStore:
         with self.connection:
             self.connection.execute("INSERT INTO runs(id,started_at,status) VALUES(?,?,'running')", (run_id, _stamp()))
 
+    def reconcile_running_runs(self) -> list[str]:
+        """Close runs left running after a process died once a new runner owns the lock."""
+        run_ids = [str(row["id"]) for row in self.connection.execute("SELECT id FROM runs WHERE status='running' ORDER BY started_at")]
+        if not run_ids:
+            return []
+        with self.connection:
+            for run_id in run_ids:
+                self.connection.execute(
+                    "UPDATE attempts SET status='interrupted',finished_at=COALESCE(finished_at,?),error_code=COALESCE(error_code,'process_interrupted'),error_detail=COALESCE(error_detail,'runner stopped before finalization') WHERE run_id=? AND status='started'",
+                    (_stamp(), run_id),
+                )
+                self.connection.execute(
+                    "UPDATE runs SET finished_at=?,status='interrupted' WHERE id=?",
+                    (_stamp(), run_id),
+                )
+        return run_ids
+
     def finish_run(self, run_id: str, status: str) -> None:
         summary = {row["state"]: row["count"] for row in self.connection.execute("SELECT state,COUNT(*) count FROM entities WHERE run_id=? GROUP BY state", (run_id,))}
         with self.connection:

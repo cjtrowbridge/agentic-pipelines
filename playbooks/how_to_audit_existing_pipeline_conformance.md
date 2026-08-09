@@ -10,7 +10,7 @@ The host pipeline definition and stage graph, customized prompts, validators, sc
 1. Record framework revision, host ownership, audit scope, and evidence gaps. Do not mutate host files.
 2. Inventory every transformation, gate, repair, and escalation. Classify it as exact deterministic validation, deterministic normalization, non-authoritative heuristic, bounded semantic judgment, explicit human decision, or misassigned/ambiguous authority.
 3. For each gate, state the property actually proved, claimed verdict, authority, proof basis, false-rejection/acceptance risk, and cited host evidence.
-4. Flag semantic proxies used as verdicts, exact defects sent to inference, unbounded reviewer authority, misleading messages, missing terminal reports, discarded/overwritten rejected candidates, and rejected evidence that can enter Git, discovery, retrieval, prompts, rendering, or promotion.
+4. Flag semantic proxies used as verdicts, concatenated-excerpt contracts, exact defects sent to inference, unbounded reviewer authority, misleading messages, stale or missing checkpoints, opaque evidence filenames, falsely typed extensions, stranded parent candidates, discarded/overwritten evidence, and rejected bundles that can enter Git, discovery, retrieval, prompts, rendering, or promotion.
 5. Reconstruct representative first-to-final trajectories. Identify repeated feedback, non-progress, prompt growth, unnecessary calls, and the earliest responsible layer.
 6. Produce a structured conformance report with conforming decisions, findings, accepted exceptions, unknowns, and no-change conclusions.
 7. Propose the smallest host remediation plan. Tie each change to evidence, expected benefit, regression risk, and a fixture. Do not implement it without separate approval.

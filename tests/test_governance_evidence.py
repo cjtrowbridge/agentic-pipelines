@@ -14,8 +14,13 @@ import yaml
 from pipeline_runtime import evidence as evidence_module
 from pipeline_runtime.evidence import (
     execution_status,
+    is_non_progress,
     persist_rejected_pair,
+    persist_rejection_bundle,
+    persist_sequential_rejected_pair,
     rejected_candidate_path,
+    rejected_content_extension,
+    rejected_sequence,
     rejection_explanation,
     rejection_explanation_path,
 )
@@ -75,11 +80,13 @@ class GovernanceEvidenceTests(unittest.TestCase):
 
     def test_rejected_candidate_paths_are_collision_safe_and_explanations_are_actionable(self) -> None:
         root = Path("artifacts")
-        first = rejected_candidate_path(root, entity_id="entity", artifact="resume", run_id="run-1", attempt_id="a-1", extension="md")
-        second = rejected_candidate_path(root, entity_id="entity", artifact="resume", run_id="run-1", attempt_id="a-2", extension="md")
+        first = rejected_candidate_path(root, entity_id="entity", artifact="resume", sequence=1, extension="md")
+        second = rejected_candidate_path(root, entity_id="entity", artifact="resume", sequence=2, extension="md")
         self.assertNotEqual(first, second)
-        self.assertIn("resume.run-1.a-1.rejected.md", first.as_posix())
-        self.assertNotIn("resume.2.", first.as_posix())
+        self.assertIn("resume.1.rejected.md", first.as_posix())
+        self.assertIn("resume.2.rejected.md", second.as_posix())
+        self.assertEqual(1, rejected_sequence(first))
+        self.assertNotIn("run-1", first.as_posix())
         explanation = rejection_explanation(
             run_id="run-1",
             entity_id="entity",
@@ -101,6 +108,71 @@ class GovernanceEvidenceTests(unittest.TestCase):
         self.assertIn(str(first), explanation)
         self.assertIn("one line over", explanation)
         self.assertIn('"authority": "deterministic"', explanation)
+
+    def test_sequential_pairs_are_atomic_naturally_ordered_and_truthfully_typed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+
+            def write(value: bytes) -> tuple[Path, int]:
+                candidate, _sidecar, sequence = persist_sequential_rejected_pair(
+                    root,
+                    entity_id="entity",
+                    artifact="resume",
+                    candidate=value,
+                    extension=".md",
+                    explanation_builder=lambda path, number, digest: f"{path}\n{number}\n{digest}\n",
+                )
+                return candidate, sequence
+
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                results = list(pool.map(write, (b"first", b"second")))
+            self.assertEqual([1, 2], sorted(sequence for _path, sequence in results))
+            self.assertEqual(
+                ["resume.1.rejected.md", "resume.2.rejected.md"],
+                sorted(path.name for path, _sequence in results),
+            )
+            self.assertTrue(all(rejection_explanation_path(path).is_file() for path, _sequence in results))
+            self.assertEqual(".json", rejected_content_extension(b'{"valid": true}'))
+            self.assertEqual(".txt", rejected_content_extension(b'{not json'))
+            self.assertEqual(".md", rejected_content_extension(b"# Resume", intended_format="markdown"))
+
+    def test_precursor_name_keeps_parent_sequence_before_stage(self) -> None:
+        path = rejected_candidate_path(
+            Path("artifacts"), entity_id="entity", artifact="resume", sequence=2,
+            stage="claim_review", extension="json",
+        )
+        self.assertEqual("resume.2.rejected.claim_review.json", path.name)
+        self.assertEqual("resume.2.rejected.claim_review.explanation.md", rejection_explanation_path(path).name)
+        self.assertNotIn("..", path.name)
+        self.assertTrue(is_non_progress(b"same", "same reason", b"same", "same reason"))
+        self.assertFalse(is_non_progress(b"before", "same reason", b"after", "same reason"))
+        paths = [
+            rejected_candidate_path(Path("artifacts"), entity_id="entity", artifact="resume", sequence=number, extension="md")
+            for number in range(12, 0, -1)
+        ]
+        self.assertEqual(list(range(1, 13)), [rejected_sequence(item) for item in sorted(paths, key=lambda item: rejected_sequence(item) or 0)])
+
+    def test_guarded_bundle_publishes_parent_and_typed_precursor_together(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            result = persist_rejection_bundle(
+                Path(temporary),
+                entity_id="entity",
+                artifact="resume",
+                candidate=b"# Resume\n",
+                extension=".md",
+                explanation_builder=lambda path, sequence, digest: f"parent {path} {sequence} {digest}",
+                precursors=[{
+                    "stage": "claim_review",
+                    "candidate": b'{"claims": []}',
+                    "extension": ".json",
+                    "explanation_builder": lambda path, sequence, digest: f"child {path} {sequence} {digest}",
+                }],
+            )
+            self.assertEqual(1, result["sequence"])
+            self.assertEqual("resume.1.rejected.md", result["path"].name)
+            self.assertEqual("resume.1.rejected.claim_review.json", result["children"][0]["path"].name)
+            self.assertTrue(result["explanation_path"].is_file())
+            self.assertTrue(result["children"][0]["explanation_path"].is_file())
 
     def test_rejected_pair_preserves_candidate_bytes_and_cannot_be_overwritten(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -187,7 +259,7 @@ class GovernanceEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(PackageError, "semantic_evidence"):
                 validate_package(target)
 
-    def test_schema_two_requires_rejected_explanation_sidecars(self) -> None:
+    def test_schema_three_requires_rejected_stage_and_explanation_patterns(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             target = Path(temporary) / "package"
             shutil.copytree(ROOT / "examples" / "markdown_repair", target)
@@ -196,6 +268,12 @@ class GovernanceEvidenceTests(unittest.TestCase):
             del manifest["evidence_policy"]["rejected_explanation_pattern"]
             manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
             with self.assertRaisesRegex(PackageError, "rejected_explanation_pattern"):
+                validate_package(target)
+
+            manifest = yaml.safe_load((ROOT / "examples" / "markdown_repair" / "package.yaml").read_text(encoding="utf-8"))
+            del manifest["evidence_policy"]["rejected_stage_pattern"]
+            manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+            with self.assertRaisesRegex(PackageError, "rejected_stage_pattern"):
                 validate_package(target)
 
     def test_rejected_artifacts_are_ignored_by_default(self) -> None:

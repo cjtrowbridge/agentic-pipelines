@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pipelines.run-evidence.v3",
+  "$id": "pipelines.run-evidence.v4",
   "type": "object",
-  "required": ["schema_version", "governance_version", "pipeline_id", "run_id", "execution_status", "learning_status", "started_at", "finished_at", "summary", "attempts", "rejected_artifacts", "observations", "metrics", "hypotheses", "recommendations"],
+  "required": ["schema_version", "governance_version", "pipeline_id", "run_id", "execution_status", "learning_status", "started_at", "finished_at", "checkpointed_at", "reconciled", "summary", "attempts", "rejected_artifacts", "observations", "metrics", "hypotheses", "recommendations"],
   "properties": {
-    "schema_version": {"const": 3},
+    "schema_version": {"const": 4},
     "governance_version": {"const": "deterministic-semantic-human-v1"},
     "pipeline_id": {"type": "string", "minLength": 1},
     "run_id": {"type": "string", "minLength": 1},
@@ -12,6 +12,8 @@
     "learning_status": {"enum": ["not_required", "pending", "completed", "skipped", "failed"]},
     "started_at": {"type": ["string", "null"]},
     "finished_at": {"type": ["string", "null"]},
+    "checkpointed_at": {"type": ["string", "null"]},
+    "reconciled": {"type": "boolean"},
     "summary": {"type": "object"},
     "attempts": {
       "type": "array",
@@ -40,13 +42,19 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["attempt_id", "entity_id", "path", "explanation_path", "evidence_format", "candidate_sha256", "explanation"],
+        "required": ["attempt_id", "entity_id", "path", "explanation_path", "evidence_format", "sequence", "artifact_role", "content_format", "parent_candidate_path", "parent_candidate_sha256", "child_evidence_paths", "candidate_sha256", "explanation"],
         "properties": {
           "attempt_id": {"type": ["string", "null"]},
           "entity_id": {"type": ["string", "null"]},
           "path": {"type": "string", "minLength": 1},
           "explanation_path": {"type": ["string", "null"]},
           "evidence_format": {"enum": ["sidecar", "legacy_appended"]},
+          "sequence": {"type": ["integer", "null"], "minimum": 1},
+          "artifact_role": {"enum": ["candidate", "precursor", "render", "legacy"]},
+          "content_format": {"type": ["string", "null"]},
+          "parent_candidate_path": {"type": ["string", "null"]},
+          "parent_candidate_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+          "child_evidence_paths": {"type": "array", "items": {"type": "string"}},
           "candidate_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
           "explanation": {"type": ["string", "null"]}
         },

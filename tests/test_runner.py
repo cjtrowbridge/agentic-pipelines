@@ -118,7 +118,7 @@ class RunnerTests(unittest.TestCase):
             result = runner.run(1, 1)
             report = json.loads(Path(result["report"]).read_text(encoding="utf-8"))
             self.assertEqual("failed", report["execution_status"])
-            self.assertEqual(3, report["schema_version"])
+            self.assertEqual(4, report["schema_version"])
             self.assertEqual(1, len(report["rejected_artifacts"]))
             rejected = Path(report["rejected_artifacts"][0]["path"])
             explanation = Path(report["rejected_artifacts"][0]["explanation_path"])
@@ -126,6 +126,8 @@ class RunnerTests(unittest.TestCase):
             self.assertIn("# Rejection explanation", explanation.read_text(encoding="utf-8"))
             self.assertIn(report["rejected_artifacts"][0]["candidate_sha256"], explanation.read_text(encoding="utf-8"))
             self.assertEqual("sidecar", report["rejected_artifacts"][0]["evidence_format"])
+            self.assertEqual(1, report["rejected_artifacts"][0]["sequence"])
+            self.assertEqual("worker.1.rejected.txt", rejected.name)
             runner.close()
 
     def test_failure_and_interruption_terminal_paths_finalize_reports(self) -> None:
@@ -160,6 +162,19 @@ class RunnerTests(unittest.TestCase):
             report = json.loads(Path(result["report"]).read_text(encoding="utf-8"))
             self.assertEqual("interrupted", report["execution_status"])
             interrupted.close()
+
+    def test_new_runner_reconciles_a_stale_running_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            runner = PipelineRunner(load_definition(host(root)))
+            runner.store.start_run("run-stale")
+            runner.report("run-stale")
+            result = runner.run(1, 0.01)
+            stale = json.loads((root / "reports" / "run-stale.json").read_text(encoding="utf-8"))
+            self.assertEqual("interrupted", stale["execution_status"])
+            self.assertIsNotNone(stale["finished_at"])
+            self.assertNotEqual("run-stale", result["run_id"])
+            runner.close()
 
     def test_promotion_refuses_a_changed_source(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
