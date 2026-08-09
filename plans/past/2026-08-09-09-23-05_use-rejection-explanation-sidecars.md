@@ -2,7 +2,7 @@
 plan_id: 2026-08-09-09-23-05_use-rejection-explanation-sidecars
 title: Preserve Rejected Candidates with Explanation Sidecars
 summary: Replace appended rejection diagnostics with integrity-bound Markdown explanation sidecars so rejected model output remains byte-for-byte reviewable while complete rejection evidence stays durable and machine-linked.
-status: current
+status: past
 created_at: 2026-08-09-09-23-05
 ---
 
@@ -44,9 +44,11 @@ This framework plan changes the universal rejected-candidate evidence contract, 
   - [x] 3.5 Prove both files remain excluded from Git, discovery, retrieval, prompt assembly, semantic evidence, rendering, and promotion.
   - [x] 3.6 Run the complete upstream suite, prompt lint, compilation, and schema-v2 reference-package validation.
 
-- [ ] 4. Publish and close the upstream change.
+- [x] 4. Publish and close the upstream change.
   - [x] 4.1 Update the plan and upstream journal with exact implementation and verification evidence and regenerate upstream plan indexes.
   - [x] 4.2 Review the submodule diff for framework scope, host safety, runtime evidence, credentials, and unrelated changes.
+  - [x] 4.3 Commit and push the reviewed framework change directly to upstream `main`, verify `origin/main`, and record the published revision for host adoption.
+  - [x] 4.4 Archive this completed plan, regenerate indexes, and publish the closure checkpoint.
 
 ## Implementation checkpoint — 2026-08-09
 
@@ -55,8 +57,7 @@ This framework plan changes the universal rejected-candidate evidence contract, 
 - Added guarded paired persistence, schema-v3 run evidence with explicit sidecar/legacy formats, package evidence declarations, human narrative links, migration guidance, and an actionable failure for legacy append-helper callers.
 - Preserved immutable historical appended evidence through the `legacy_appended` report format without rewriting it.
 - Verified 56 upstream tests, 25 prompt-lint checks, Python compilation, and the schema-v2 governance-conformant reference package with no warnings.
-  - [ ] 4.3 Commit and push the reviewed framework change directly to upstream `main`, verify `origin/main`, and record the published revision for host adoption.
-  - [ ] 4.4 Archive this completed plan, regenerate indexes, and publish the closure checkpoint.
+- Published the implementation as `7908c3eb74511758f376ae3c2e769afd02474698` and verified upstream `HEAD` and `origin/main` matched before this archive checkpoint.
 
 ## Success criteria
 
