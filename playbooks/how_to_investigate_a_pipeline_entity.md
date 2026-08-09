@@ -4,7 +4,7 @@
 Explaining why one entity was accepted, rejected, retried, or quarantined.
 
 ## Load
-Only that entity’s source revision metadata, run narrative, transition history, attempts, rejected candidates and appended reasons, validator/reviewer evidence, prompt identity, and thread captures. Load the authority and run-evidence references when classification is disputed.
+Only that entity’s source revision metadata, run narrative, transition history, attempts, rejected candidates and their integrity-bound explanation sidecars, validator/reviewer evidence, prompt identity, and thread captures. Verify each sidecar names the candidate and matching SHA-256. Load the authority and run-evidence references when classification is disputed.
 
 ## Procedure
 1. Verify entity/revision identity and source hash.

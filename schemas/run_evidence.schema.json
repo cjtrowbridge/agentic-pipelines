@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pipelines.run-evidence.v2",
+  "$id": "pipelines.run-evidence.v3",
   "type": "object",
   "required": ["schema_version", "governance_version", "pipeline_id", "run_id", "execution_status", "learning_status", "started_at", "finished_at", "summary", "attempts", "rejected_artifacts", "observations", "metrics", "hypotheses", "recommendations"],
   "properties": {
-    "schema_version": {"const": 2},
+    "schema_version": {"const": 3},
     "governance_version": {"const": "deterministic-semantic-human-v1"},
     "pipeline_id": {"type": "string", "minLength": 1},
     "run_id": {"type": "string", "minLength": 1},
@@ -29,13 +29,45 @@
           "explanation": {"type": ["string", "null"]},
           "thread_path": {"type": ["string", "null"]},
           "artifact_path": {"type": ["string", "null"]},
+          "explanation_path": {"type": ["string", "null"]},
           "started_at": {"type": ["string", "null"]},
           "finished_at": {"type": ["string", "null"]}
         },
         "additionalProperties": true
       }
     },
-    "rejected_artifacts": {"type": "array", "items": {"type": "object"}},
+    "rejected_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["attempt_id", "entity_id", "path", "explanation_path", "evidence_format", "candidate_sha256", "explanation"],
+        "properties": {
+          "attempt_id": {"type": ["string", "null"]},
+          "entity_id": {"type": ["string", "null"]},
+          "path": {"type": "string", "minLength": 1},
+          "explanation_path": {"type": ["string", "null"]},
+          "evidence_format": {"enum": ["sidecar", "legacy_appended"]},
+          "candidate_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+          "explanation": {"type": ["string", "null"]}
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"evidence_format": {"const": "sidecar"}}},
+            "then": {
+              "properties": {
+                "explanation_path": {"type": "string", "minLength": 1},
+                "candidate_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+              }
+            }
+          },
+          {
+            "if": {"properties": {"evidence_format": {"const": "legacy_appended"}}},
+            "then": {"properties": {"explanation_path": {"type": "null"}}}
+          }
+        ],
+        "additionalProperties": true
+      }
+    },
     "observations": {"type": "array", "items": {"type": "string"}},
     "metrics": {"type": "object"},
     "hypotheses": {"type": "array", "items": {"type": "object"}},

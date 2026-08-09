@@ -9,6 +9,7 @@ reports/
 *.rejected.md
 *.rejected.json
 *.rejected.txt
+*.rejected.*
 
 # Python tooling
 __pycache__/

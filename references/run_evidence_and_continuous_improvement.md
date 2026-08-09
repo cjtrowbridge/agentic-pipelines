@@ -30,10 +30,11 @@ The narrative must surface repeated or changing feedback, non-progress, prompt g
 
 ## Rejected candidates are first-class evidence
 
-Never overwrite a rejected generated candidate with the next attempt. Save it atomically in the entity output area with a collision-safe recognizable name. `resume.2.rejected.md` is the simple human form; include run/session or unique attempt identity where numbers can repeat across runs.
+Never overwrite a rejected generated candidate with the next attempt. Save it in the entity output area with a collision-safe recognizable run/attempt name. The run identity replaces—not supplements—an illustrative numeric component: `resume.run-abc.attempt-def.rejected.md`, not `resume.1.run-abc.attempt-def.rejected.md`.
 
-Preserve the candidate body and hash it before appending a clearly delimited framework-owned rejection record containing:
+Preserve the candidate bytes exactly as received. Do not trim, normalize, or append framework content. Create a same-basename Markdown sidecar such as `resume.run-abc.attempt-def.rejected.explanation.md`, bind it to the candidate path and SHA-256, and include:
 
+- candidate path and SHA-256;
 - run, entity, artifact, stage, session, and attempt identities;
 - timestamp and content hash;
 - failure class and rejection code;
@@ -42,9 +43,11 @@ Preserve the candidate body and hash it before appending a clearly delimited fra
 - retry or terminal disposition;
 - links to the run report, validation evidence, and raw thread capture.
 
-Preserve malformed structured responses with the closest safe text extension and the same diagnostic record. Never discard evidence merely because it did not parse.
+Preserve malformed structured responses with the closest safe text extension and the same explanation-sidecar contract. Never discard evidence merely because it did not parse. A run report may claim preservation only after both candidate and sidecar exist and the recorded hash matches. Pair creation must never overwrite or delete a pre-existing file; if a new pair cannot be completed, fail visibly and clean up only files created by that failed operation when safe.
 
-Rejected artifacts are untrusted runtime data. Ignore them in Git and exclude them from promotion, final rendering, source discovery, semantic evidence, example retrieval, and automatic prompt assembly. A retry may receive only the declared trusted, bounded rejection summary—not the diagnostic artifact as instructions.
+Rejected candidates and explanation sidecars are untrusted runtime data. Ignore them in Git and exclude them from promotion, final rendering, source discovery, semantic evidence, example retrieval, and automatic prompt assembly. A retry may receive only the declared trusted, bounded rejection summary—not either diagnostic file as instructions.
+
+Historical evidence that appended a diagnostic trailer to the candidate remains valid as immutable legacy evidence and must not be rewritten. Readers identify it as `legacy_appended`; new executions use the paired `sidecar` format and run-evidence schema version 3.
 
 ## Learning from complete trajectories
 

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Mapping
@@ -34,13 +36,14 @@ def classify_failure(code: str | None) -> str:
     return "orchestration"
 
 
-def rejection_record(
+def rejection_explanation(
     *,
     run_id: str,
     entity_id: str,
     artifact: str,
     stage: str,
     attempt_id: str,
+    candidate_path: Path,
     candidate_sha256: str,
     failure_class: str,
     authority: str,
@@ -54,6 +57,7 @@ def rejection_record(
     session_step: int | None = None,
     validation_evidence_path: str | None = None,
 ) -> str:
+    rejected_at = datetime.now(UTC).isoformat()
     diagnostic = {
         "run_id": run_id,
         "entity_id": entity_id,
@@ -62,7 +66,8 @@ def rejection_record(
         "attempt_id": attempt_id,
         "session_id": session_id,
         "session_step": session_step,
-        "rejected_at": datetime.now(UTC).isoformat(),
+        "rejected_at": rejected_at,
+        "candidate_path": str(candidate_path),
         "candidate_sha256": candidate_sha256,
         "failure_class": failure_class,
         "authority": authority,
@@ -75,12 +80,38 @@ def rejection_record(
         "actionable_explanation": actionable_explanation,
     }
     return (
-        "\n\n---\n\n## Rejection record\n\n"
-        "This framework-generated diagnostic follows an untrusted rejected candidate. "
-        "Neither section is a source of pipeline instructions or facts.\n\n"
+        "# Rejection explanation\n\n"
+        "This framework-generated sidecar describes an untrusted rejected candidate. "
+        "Neither file is a source of pipeline instructions or facts.\n\n"
+        f"- Candidate: `{candidate_path}`\n"
+        f"- Candidate SHA-256: `{candidate_sha256}`\n"
+        f"- Run/entity: `{run_id}` / `{entity_id}`\n"
+        f"- Artifact/stage: `{artifact}` / `{stage}`\n"
+        f"- Session/attempt: `{session_id or 'none'}` / `{attempt_id}`\n"
+        f"- Session step: `{session_step if session_step is not None else 'none'}`\n"
+        f"- Rejected at: `{rejected_at}`\n"
+        f"- Failure class: `{failure_class}`\n"
+        f"- Rejecting authority: `{authority}`\n"
+        f"- Validator/reviewer: `{validator_or_reviewer}`\n"
+        f"- Rejection code: `{rejection_code}`\n"
+        f"- Retry disposition: `{retry_disposition}`\n"
+        f"- Run report: `{run_report_path}`\n"
+        f"- Thread evidence: `{thread_path or 'none'}`\n"
+        f"- Validation evidence: `{validation_evidence_path or 'none'}`\n\n"
+        "## Why this candidate was rejected\n\n"
+        f"{actionable_explanation.strip()}\n\n"
+        "## Diagnostic record\n\n"
         "```json\n"
         f"{json.dumps(diagnostic, ensure_ascii=False, sort_keys=True, indent=2)}\n"
         "```\n"
+    )
+
+
+def rejection_record(**_kwargs: Any) -> str:
+    """Fail loudly for callers that still append diagnostics to candidate content."""
+    raise RuntimeError(
+        "rejection_record no longer appends diagnostics; use rejection_explanation and "
+        "persist_rejected_pair to create an integrity-bound sidecar"
     )
 
 
@@ -90,16 +121,59 @@ def rejected_candidate_path(
     entity_id: str,
     artifact: str,
     run_id: str,
-    ordinal: int,
     attempt_id: str,
     extension: str,
 ) -> Path:
     suffix = extension if extension.startswith(".") else f".{extension}"
-    name = (
-        f"{_safe_component(artifact)}.{ordinal}.{_safe_component(run_id)}."
-        f"{_safe_component(attempt_id)}.rejected{suffix}"
-    )
-    return artifact_root / "rejected" / entity_id / name
+    name = f"{_safe_component(artifact)}.{_safe_component(run_id)}.{_safe_component(attempt_id)}.rejected{suffix}"
+    return artifact_root / "rejected" / _safe_component(entity_id) / name
+
+
+def rejection_explanation_path(candidate_path: Path) -> Path:
+    """Return the same-basename Markdown sidecar path for one rejected candidate."""
+    return candidate_path.with_name(f"{candidate_path.stem}.explanation.md")
+
+
+def _atomic_create(path: Path, data: bytes) -> None:
+    """Create one immutable evidence file without replacing an existing path."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temporary, path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def persist_rejected_pair(
+    candidate_path: Path,
+    candidate: bytes,
+    explanation_markdown: str,
+    *,
+    candidate_sha256: str,
+) -> Path:
+    """Preserve an exact candidate and its sidecar as one guarded evidence operation."""
+    actual_hash = hashlib.sha256(candidate).hexdigest()
+    if actual_hash != candidate_sha256:
+        raise ValueError("candidate SHA-256 does not match the rejected bytes")
+    explanation_path = rejection_explanation_path(candidate_path)
+    if candidate_path.exists() or explanation_path.exists():
+        raise FileExistsError(f"refusing to overwrite rejected evidence pair: {candidate_path}")
+    candidate_created = False
+    try:
+        _atomic_create(candidate_path, candidate)
+        candidate_created = True
+        _atomic_create(explanation_path, explanation_markdown.encode("utf-8"))
+    except BaseException:
+        if candidate_created and candidate_path.exists():
+            candidate_path.unlink()
+        raise
+    return explanation_path
 
 
 def execution_status(run: Mapping[str, Any], attempt_count: int) -> str:
@@ -200,6 +274,12 @@ def build_run_evidence(
         item["authority"] = item.get("authority") or "none"
         item["validator_or_reviewer"] = item.get("validator_name")
         item["explanation"] = item.get("error_detail")
+        artifact_value = item.get("artifact_path")
+        if artifact_value:
+            sidecar = rejection_explanation_path(Path(str(artifact_value)))
+            item["explanation_path"] = str(sidecar) if sidecar.is_file() else None
+        else:
+            item["explanation_path"] = None
     status = execution_status(run, len(attempts))
     learning = "pending" if retry_count or rejected or int(run.get("quarantined") or 0) else "not_required"
     observations = [
@@ -211,7 +291,7 @@ def build_run_evidence(
     if changing_feedback:
         observations.append(f"Rejection feedback changed {changing_feedback} time(s) within entity trajectories.")
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "governance_version": GOVERNANCE_VERSION,
         "pipeline_id": pipeline_id,
         "run_id": run["id"],
@@ -229,6 +309,13 @@ def build_run_evidence(
                 "attempt_id": item.get("id"),
                 "entity_id": item.get("entity_id"),
                 "path": item.get("artifact_path"),
+                "explanation_path": item.get("explanation_path"),
+                "evidence_format": "sidecar" if item.get("explanation_path") else "legacy_appended",
+                "candidate_sha256": (
+                    hashlib.sha256(Path(str(item["artifact_path"])).read_bytes()).hexdigest()
+                    if item.get("artifact_path") and Path(str(item["artifact_path"])).is_file()
+                    else None
+                ),
                 "explanation": item.get("error_detail"),
             }
             for item in rejected
@@ -264,8 +351,8 @@ def render_run_markdown(data: Mapping[str, Any], machine_path: Path) -> str:
         "",
         "## Attempts and retries",
         "",
-        "| Attempt | Entity | Stage | Status | Failure class | Authority | Reason | Rejected artifact | Thread |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| Attempt | Entity | Stage | Status | Failure class | Authority | Reason | Rejected artifact | Explanation sidecar | Thread |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for item in data["attempts"]:
         lines.append(
@@ -280,12 +367,13 @@ def render_run_markdown(data: Mapping[str, Any], machine_path: Path) -> str:
                     item.get("authority"),
                     item.get("explanation"),
                     item.get("artifact_path"),
+                    item.get("explanation_path"),
                     item.get("thread_path"),
                 )
             ) + " |"
         )
     if not data["attempts"]:
-        lines.append("| — | — | — | no model attempts | none | none | — | — | — |")
+        lines.append("| — | — | — | no model attempts | none | none | — | — | — | — |")
     lines.extend(["", "## Observations", ""])
     lines.extend(f"- {item}" for item in data["observations"])
     lines.extend(["", "## Deterministic metrics", "", "```json", json.dumps(data["metrics"], ensure_ascii=False, sort_keys=True, indent=2), "```"])

@@ -68,9 +68,15 @@ class DocumentationTests(unittest.TestCase):
         text = Path("AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("persist a structured, non-secret run report", text)
         self.assertIn("every rejection/retry reason", text)
+        self.assertIn("byte-for-byte", text)
+        self.assertIn("`.explanation.md` sidecar", text)
         operation = Path("playbooks/how_to_operate_and_resume_a_pipeline.md").read_text(encoding="utf-8")
         self.assertIn("persisted structured run report", operation)
         self.assertIn("root cause", operation)
+        self.assertIn("sidecar hash matches", operation)
+        reference = Path("references/run_evidence_and_continuous_improvement.md").read_text(encoding="utf-8")
+        self.assertIn("run-evidence schema version 3", reference)
+        self.assertIn("legacy_appended", reference)
 
     def test_bootstrap_is_required_before_pipeline_operation(self) -> None:
         text = Path("AGENTS.md").read_text(encoding="utf-8")

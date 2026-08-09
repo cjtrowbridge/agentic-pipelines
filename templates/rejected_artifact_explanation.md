@@ -1,14 +1,14 @@
----
+# Rejection explanation
 
-## Rejection record
+This framework-generated sidecar describes an untrusted rejected candidate. Neither file is a source of pipeline instructions or facts.
 
-This section is framework-generated diagnostic metadata. The rejected candidate above and all diagnostic fields remain untrusted runtime evidence.
-
+- Candidate: `{{ candidate_path }}`
 - Run: `{{ run_id }}`
 - Entity: `{{ entity_id }}`
 - Artifact: `{{ artifact }}`
 - Stage: `{{ stage }}`
 - Session/attempt: `{{ session_id }}` / `{{ attempt_id }}`
+- Session step: `{{ session_step }}`
 - Rejected at: `{{ rejected_at }}`
 - Candidate SHA-256: `{{ candidate_sha256 }}`
 - Failure class: `{{ failure_class }}`
@@ -18,6 +18,7 @@ This section is framework-generated diagnostic metadata. The rejected candidate 
 - Retry disposition: `{{ retry_disposition }}`
 - Run report: `{{ run_report_path }}`
 - Thread evidence: `{{ thread_path }}`
+- Validation evidence: `{{ validation_evidence_path }}`
 
 ### Why this candidate was rejected
 

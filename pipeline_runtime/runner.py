@@ -20,8 +20,9 @@ from .definition import PipelineDefinition, PromptStage
 from .evidence import (
     build_run_evidence,
     classify_failure,
+    persist_rejected_pair,
     rejected_candidate_path,
-    rejection_record,
+    rejection_explanation,
     render_run_markdown,
 )
 from .prompts import OutputSchemas, PromptContract, PromptError, load_prompt
@@ -48,25 +49,6 @@ def _atomic_write(path: Path, data: bytes) -> None:
         Path(temporary_name).replace(path)
     finally:
         temporary = Path(temporary_name)
-        if temporary.exists():
-            temporary.unlink()
-
-
-def _atomic_write_new(path: Path, data: bytes) -> None:
-    """Atomically create evidence without ever replacing an existing record."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
-    temporary = Path(temporary_name)
-    try:
-        with os.fdopen(descriptor, "wb") as handle:
-            handle.write(data)
-            handle.flush()
-            os.fsync(handle.fileno())
-        try:
-            os.link(temporary, path)
-        except FileExistsError as exc:
-            raise StateError(f"refusing to overwrite rejected evidence: {path}") from exc
-    finally:
         if temporary.exists():
             temporary.unlink()
 
@@ -132,7 +114,6 @@ class PipelineRunner:
         artifact: str,
         stage: str,
         attempt_id: str,
-        ordinal: int,
         extension: str,
         failure_class: str,
         authority: str,
@@ -150,17 +131,18 @@ class PipelineRunner:
             entity_id=entity,
             artifact=artifact,
             run_id=run_id,
-            ordinal=ordinal,
             attempt_id=attempt_id,
             extension=extension,
         )
-        trailer = rejection_record(
+        candidate_sha256 = hashlib.sha256(encoded).hexdigest()
+        explanation_markdown = rejection_explanation(
             run_id=run_id,
             entity_id=entity,
             artifact=artifact,
             stage=stage,
             attempt_id=attempt_id,
-            candidate_sha256=hashlib.sha256(encoded).hexdigest(),
+            candidate_path=path,
+            candidate_sha256=candidate_sha256,
             failure_class=failure_class,
             authority=authority,
             validator_or_reviewer=validator_or_reviewer,
@@ -173,7 +155,15 @@ class PipelineRunner:
             session_step=attempt_row.get("session_step"),
             validation_evidence_path=attempt_evidence.get("validation_evidence_path"),
         )
-        _atomic_write_new(path, encoded.rstrip() + trailer.encode("utf-8"))
+        try:
+            persist_rejected_pair(
+                path,
+                encoded,
+                explanation_markdown,
+                candidate_sha256=candidate_sha256,
+            )
+        except (FileExistsError, OSError, ValueError) as exc:
+            raise StateError(f"failed to preserve rejected evidence pair: {path}: {exc}") from exc
         self.store.finish_attempt(
             attempt_id,
             "rejected",
@@ -279,7 +269,6 @@ class PipelineRunner:
                     artifact=stage.name,
                     stage=stage.name,
                     attempt_id=attempt_id,
-                    ordinal=count,
                     extension="txt",
                     failure_class=failure_class,
                     authority="deterministic",
@@ -436,7 +425,6 @@ class PipelineRunner:
                     artifact=worker.name,
                     stage=worker.name,
                     attempt_id=attempt,
-                    ordinal=self._stage_counts.get((run_id, entity, worker.name), 1),
                     extension="json",
                     failure_class="semantic",
                     authority="semantic_model",
@@ -458,7 +446,6 @@ class PipelineRunner:
                     artifact="worker",
                     stage="candidate_size_validation",
                     attempt_id=attempt,
-                    ordinal=self._stage_counts.get((run_id, entity, worker.name), 1),
                     extension="md",
                     failure_class="deterministic",
                     authority="deterministic",
@@ -481,7 +468,6 @@ class PipelineRunner:
                     artifact=worker.name,
                     stage="deterministic_validation",
                     attempt_id=attempt,
-                    ordinal=self._stage_counts.get((run_id, entity, worker.name), 1),
                     extension="md",
                     failure_class="deterministic",
                     authority="deterministic",
@@ -509,7 +495,6 @@ class PipelineRunner:
                         artifact="repair",
                         stage="deterministic_validation",
                         attempt_id=attempt,
-                        ordinal=self._stage_counts.get((run_id, entity, "repair"), 1),
                         extension="md",
                         failure_class="deterministic",
                         authority="deterministic",
@@ -531,7 +516,6 @@ class PipelineRunner:
                     artifact=f"{worker.name}-semantic-review" if attempt.startswith("a-") else "semantic-review",
                     stage="semantic_review",
                     attempt_id=attempt,
-                    ordinal=self._stage_counts.get((run_id, entity, worker.name), 1),
                     extension="md",
                     failure_class="semantic",
                     authority="semantic_model",
@@ -566,7 +550,6 @@ class PipelineRunner:
                         artifact="repair",
                         stage="repair_validation" if not evidence.passed else "semantic_review",
                         attempt_id=attempt,
-                        ordinal=self._stage_counts.get((run_id, entity, "repair"), 1),
                         extension="md",
                         failure_class=failure_class,
                         authority=authority,
@@ -656,7 +639,7 @@ class PipelineRunner:
         actual_run_id = performance.get("run_id")
         if not actual_run_id:
             data = {
-                "schema_version": 2,
+                "schema_version": 3,
                 "governance_version": "deterministic-semantic-human-v1",
                 "pipeline_id": self.definition.pipeline_id,
                 "run_id": run_id or "current-summary",

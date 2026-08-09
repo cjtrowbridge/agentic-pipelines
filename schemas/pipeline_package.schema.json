@@ -57,11 +57,12 @@
     },
     "evidence_policy": {
       "type": "object",
-      "required": ["machine_report", "human_report", "rejected_artifact_pattern", "rejected_artifact_retention", "excluded_from", "failure_if_unwritable"],
+      "required": ["machine_report", "human_report", "rejected_artifact_pattern", "rejected_explanation_pattern", "rejected_artifact_retention", "excluded_from", "failure_if_unwritable"],
       "properties": {
         "machine_report": {"type": "string", "minLength": 1},
         "human_report": {"type": "string", "minLength": 1},
         "rejected_artifact_pattern": {"type": "string", "minLength": 1},
+        "rejected_explanation_pattern": {"type": "string", "minLength": 1},
         "rejected_artifact_retention": {"type": "string", "minLength": 1},
         "excluded_from": {"type": "array", "minItems": 6, "uniqueItems": true, "items": {"enum": ["git", "source_discovery", "example_retrieval", "prompt_assembly", "rendering", "promotion", "semantic_evidence"]}},
         "failure_if_unwritable": {"const": true}

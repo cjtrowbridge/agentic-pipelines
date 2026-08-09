@@ -1,18 +1,25 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import tempfile
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from unittest.mock import patch
 
 import yaml
 
-from pipeline_runtime.evidence import execution_status, rejected_candidate_path, rejection_record
+from pipeline_runtime import evidence as evidence_module
+from pipeline_runtime.evidence import (
+    execution_status,
+    persist_rejected_pair,
+    rejected_candidate_path,
+    rejection_explanation,
+    rejection_explanation_path,
+)
 from pipeline_runtime.package import PackageError, _validate_authority_matrix, validate_package
-from pipeline_runtime.runner import _atomic_write_new
-from pipeline_runtime.state import StateError
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -66,18 +73,20 @@ class GovernanceEvidenceTests(unittest.TestCase):
             self.assertFalse(result["governance_conformant"])
             self.assertTrue(result["warnings"])
 
-    def test_rejected_candidate_paths_are_collision_safe_and_records_are_actionable(self) -> None:
+    def test_rejected_candidate_paths_are_collision_safe_and_explanations_are_actionable(self) -> None:
         root = Path("artifacts")
-        first = rejected_candidate_path(root, entity_id="entity", artifact="resume", run_id="run-1", ordinal=2, attempt_id="a-1", extension="md")
-        second = rejected_candidate_path(root, entity_id="entity", artifact="resume", run_id="run-1", ordinal=2, attempt_id="a-2", extension="md")
+        first = rejected_candidate_path(root, entity_id="entity", artifact="resume", run_id="run-1", attempt_id="a-1", extension="md")
+        second = rejected_candidate_path(root, entity_id="entity", artifact="resume", run_id="run-1", attempt_id="a-2", extension="md")
         self.assertNotEqual(first, second)
-        self.assertIn("resume.2.run-1.a-1.rejected.md", first.as_posix())
-        trailer = rejection_record(
+        self.assertIn("resume.run-1.a-1.rejected.md", first.as_posix())
+        self.assertNotIn("resume.2.", first.as_posix())
+        explanation = rejection_explanation(
             run_id="run-1",
             entity_id="entity",
             artifact="resume",
             stage="validation",
             attempt_id="a-1",
+            candidate_path=first,
             candidate_sha256="0" * 64,
             failure_class="deterministic",
             authority="deterministic",
@@ -88,33 +97,76 @@ class GovernanceEvidenceTests(unittest.TestCase):
             run_report_path=Path("reports/run-1.md"),
             thread_path="threads/run-1/a-1.json",
         )
-        self.assertIn("## Rejection record", trailer)
-        self.assertIn("one line over", trailer)
-        self.assertIn('"authority": "deterministic"', trailer)
+        self.assertIn("# Rejection explanation", explanation)
+        self.assertIn(str(first), explanation)
+        self.assertIn("one line over", explanation)
+        self.assertIn('"authority": "deterministic"', explanation)
 
-    def test_rejected_evidence_cannot_be_overwritten(self) -> None:
+    def test_rejected_pair_preserves_candidate_bytes_and_cannot_be_overwritten(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            path = Path(temporary) / "resume.2.rejected.md"
-            _atomic_write_new(path, b"first")
-            with self.assertRaises(StateError):
-                _atomic_write_new(path, b"second")
-            self.assertEqual(b"first", path.read_bytes())
+            path = Path(temporary) / "resume.run-1.a-1.rejected.md"
+            candidate = b"# Resume\n\nExact trailing spaces  \n\n---\nframework-looking text\n"
+            digest = hashlib.sha256(candidate).hexdigest()
+            explanation = f"Candidate SHA-256: `{digest}`\n"
+            sidecar = persist_rejected_pair(path, candidate, explanation, candidate_sha256=digest)
+            self.assertEqual(candidate, path.read_bytes())
+            self.assertEqual(rejection_explanation_path(path), sidecar)
+            self.assertEqual(explanation, sidecar.read_text(encoding="utf-8"))
+            with self.assertRaises(FileExistsError):
+                persist_rejected_pair(path, b"second", "other", candidate_sha256=hashlib.sha256(b"second").hexdigest())
+            self.assertEqual(candidate, path.read_bytes())
 
-    def test_concurrent_rejected_evidence_writers_cannot_overwrite(self) -> None:
+    def test_concurrent_rejected_pair_writers_cannot_overwrite(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            path = Path(temporary) / "resume.2.rejected.md"
+            path = Path(temporary) / "resume.run-1.a-1.rejected.md"
 
             def write(value: bytes) -> str:
                 try:
-                    _atomic_write_new(path, value)
+                    persist_rejected_pair(
+                        path, value, value.decode("utf-8"), candidate_sha256=hashlib.sha256(value).hexdigest(),
+                    )
                     return "created"
-                except StateError:
+                except FileExistsError:
                     return "rejected"
 
             with ThreadPoolExecutor(max_workers=2) as pool:
                 outcomes = sorted(pool.map(write, (b"first", b"second")))
             self.assertEqual(["created", "rejected"], outcomes)
             self.assertIn(path.read_bytes(), {b"first", b"second"})
+            self.assertTrue(rejection_explanation_path(path).is_file())
+
+    def test_partial_pair_failure_removes_only_the_new_candidate(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "resume.run-1.a-1.rejected.md"
+            original_create = evidence_module._atomic_create
+            calls = 0
+
+            def fail_second(target: Path, data: bytes) -> None:
+                nonlocal calls
+                calls += 1
+                if calls == 2:
+                    raise OSError("simulated sidecar failure")
+                original_create(target, data)
+
+            with patch.object(evidence_module, "_atomic_create", side_effect=fail_second):
+                with self.assertRaisesRegex(OSError, "simulated"):
+                    persist_rejected_pair(
+                        path, b"candidate", "explanation", candidate_sha256=hashlib.sha256(b"candidate").hexdigest(),
+                    )
+            self.assertFalse(path.exists())
+            self.assertFalse(rejection_explanation_path(path).exists())
+
+    def test_incomplete_pair_refuses_and_preserves_a_preexisting_sidecar(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "resume.run-1.a-1.rejected.md"
+            sidecar = rejection_explanation_path(path)
+            sidecar.write_text("user-owned evidence", encoding="utf-8")
+            with self.assertRaises(FileExistsError):
+                persist_rejected_pair(
+                    path, b"candidate", "new explanation", candidate_sha256=hashlib.sha256(b"candidate").hexdigest(),
+                )
+            self.assertFalse(path.exists())
+            self.assertEqual("user-owned evidence", sidecar.read_text(encoding="utf-8"))
 
     def test_execution_status_never_confuses_process_exit_with_artifact_success(self) -> None:
         self.assertEqual("failed", execution_status({"status": "failed", "processed": 0, "accepted": 0, "quarantined": 0}, 0))
@@ -135,9 +187,20 @@ class GovernanceEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(PackageError, "semantic_evidence"):
                 validate_package(target)
 
+    def test_schema_two_requires_rejected_explanation_sidecars(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary) / "package"
+            shutil.copytree(ROOT / "examples" / "markdown_repair", target)
+            manifest_path = target / "package.yaml"
+            manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+            del manifest["evidence_policy"]["rejected_explanation_pattern"]
+            manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+            with self.assertRaisesRegex(PackageError, "rejected_explanation_pattern"):
+                validate_package(target)
+
     def test_rejected_artifacts_are_ignored_by_default(self) -> None:
         ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
-        for pattern in ("*.rejected.md", "*.rejected.json", "*.rejected.txt"):
+        for pattern in ("*.rejected.md", "*.rejected.json", "*.rejected.txt", "*.rejected.*"):
             self.assertIn(pattern, ignore)
 
 
