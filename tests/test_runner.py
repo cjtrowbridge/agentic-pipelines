@@ -118,7 +118,7 @@ class RunnerTests(unittest.TestCase):
             result = runner.run(1, 1)
             report = json.loads(Path(result["report"]).read_text(encoding="utf-8"))
             self.assertEqual("failed", report["execution_status"])
-            self.assertEqual(4, report["schema_version"])
+            self.assertEqual(5, report["schema_version"])
             self.assertEqual(1, len(report["rejected_artifacts"]))
             rejected = Path(report["rejected_artifacts"][0]["path"])
             explanation = Path(report["rejected_artifacts"][0]["explanation_path"])

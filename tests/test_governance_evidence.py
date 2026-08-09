@@ -16,10 +16,12 @@ from pipeline_runtime.evidence import (
     execution_status,
     is_non_progress,
     persist_rejected_pair,
+    persist_diagnostic_render_pair,
     persist_rejection_bundle,
     persist_sequential_rejected_pair,
     rejected_candidate_path,
     rejected_content_extension,
+    diagnostic_render_path,
     rejected_sequence,
     rejection_explanation,
     rejection_explanation_path,
@@ -151,6 +153,28 @@ class GovernanceEvidenceTests(unittest.TestCase):
             for number in range(12, 0, -1)
         ]
         self.assertEqual(list(range(1, 13)), [rejected_sequence(item) for item in sorted(paths, key=lambda item: rejected_sequence(item) or 0)])
+
+    def test_diagnostic_render_is_a_hash_bound_typed_child(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            parent = Path(temporary) / "resume.1.rejected.md"
+            source = b"# Rejected resume\n"
+            digest = hashlib.sha256(source).hexdigest()
+            persist_rejected_pair(parent, source, "parent explanation", candidate_sha256=digest)
+            self.assertEqual("resume.1.rejected.render.pdf", diagnostic_render_path(parent).name)
+            render, sidecar, render_hash = persist_diagnostic_render_pair(
+                parent,
+                expected_candidate_sha256=digest,
+                rendered=b"%PDF-diagnostic",
+                explanation_markdown="diagnostic render explanation",
+            )
+            self.assertEqual("resume.1.rejected.render.pdf", render.name)
+            self.assertEqual("resume.1.rejected.render.explanation.md", sidecar.name)
+            self.assertEqual(hashlib.sha256(b"%PDF-diagnostic").hexdigest(), render_hash)
+            self.assertEqual(source, parent.read_bytes())
+            with self.assertRaises(FileExistsError):
+                persist_diagnostic_render_pair(parent, expected_candidate_sha256=digest, rendered=b"other", explanation_markdown="other")
+            with self.assertRaises(ValueError):
+                persist_diagnostic_render_pair(parent, expected_candidate_sha256="0" * 64, rendered=b"other", explanation_markdown="other", extension="txt")
 
     def test_guarded_bundle_publishes_parent_and_typed_precursor_together(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

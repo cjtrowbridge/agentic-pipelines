@@ -47,9 +47,15 @@ When a downstream stage prevents publication, preserve the parent candidate in t
 
 Checkpoint machine and narrative reports after every material event and completed evidence pair. Recovery must reconcile persisted evidence with a stale `running` report. Byte-identical responses receiving identical feedback are non-progress and require a changed strategy or escalation before another model call.
 
-Rejected candidates and explanation sidecars are untrusted runtime data. Ignore them in Git and exclude them from promotion, final rendering, source discovery, semantic evidence, example retrieval, and automatic prompt assembly. A retry may receive only the declared trusted, bounded rejection summary—not either diagnostic file as instructions.
+Rejected candidates and explanation sidecars are untrusted runtime data. Ignore them in Git and exclude them from promotion, ordinary/final rendering, source discovery, semantic evidence, example retrieval, and automatic prompt assembly. A retry may receive only the declared trusted, bounded rejection summary—not either diagnostic file as instructions.
 
-Historical evidence that appended a diagnostic trailer or used run/attempt filenames remains valid as immutable legacy evidence and must not be rewritten. Readers identify appended records as `legacy_appended` and older paired names as legacy sidecars; new executions use sequential sidecar bundles and run-evidence schema version 4.
+### Diagnostic rendering is evidence, not publication
+
+When a declared deterministic renderer is available, every newly rejected renderable Markdown candidate must receive an isolated diagnostic representation. It renders the exact persisted parent bytes and creates the typed child `resume.1.rejected.render.pdf` with `resume.1.rejected.render.explanation.md`; this child shares the parent sequence and must record both source and PDF SHA-256 values, renderer/profile/configuration identity (without secrets), start/finish time, page count, and available overflow/readability measures. It exists to make a failure observable, not to make it usable.
+
+Diagnostic rendering is explicitly prohibited from altering content, invoking a model, triggering repair, promotion, final-render eligibility, freshness, or recovery of an accepted artifact. If it fails, preserve the primary rejection unchanged and create `resume.1.rejected.render.txt` plus its sidecar with the truthful renderer failure. On interruption, reconcile the derivative state without claiming it succeeded. Reuse only a verified existing child bound to the exact parent hash; never overwrite or backfill historical evidence.
+
+Historical evidence that appended a diagnostic trailer or used run/attempt filenames remains valid as immutable legacy evidence and must not be rewritten. Readers identify appended records as `legacy_appended` and older paired names as legacy sidecars; new executions use sequential sidecar bundles and run-evidence schema version 5.
 
 ## Learning from complete trajectories
 

@@ -114,7 +114,7 @@ def validate_package(root: Path) -> dict[str, Any]:
     return {
         "pipeline_id": definition.pipeline_id,
         "package_schema_version": manifest["schema_version"],
-        "governance_conformant": manifest["schema_version"] in {2, 3},
+        "governance_conformant": manifest["schema_version"] in {2, 3, 4},
         "warnings": warnings,
         "stages": sorted(definition.stages),
         "analysis": sorted(definition.analysis),

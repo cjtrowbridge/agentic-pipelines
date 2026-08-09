@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pipelines.package.v3",
+  "$id": "pipelines.package.v4",
   "type": "object",
   "required": ["schema_version", "status", "pipeline_definition", "goal_traceability", "prompt_files", "validator_files", "fixture_manifest", "api_sample", "scheduler_example", "rollback_notes", "unresolved_decisions"],
   "properties": {
-    "schema_version": {"enum": [1, 2, 3]},
+    "schema_version": {"enum": [1, 2, 3, 4]},
     "status": {"const": "staged"},
     "pipeline_definition": {"type": "string", "minLength": 1},
     "goal_traceability": {
@@ -29,7 +29,7 @@
       "required": ["framework_revision", "authority_policy", "accepted_exceptions"],
       "properties": {
         "framework_revision": {"type": "string", "minLength": 1},
-        "authority_policy": {"const": "deterministic-semantic-human-v1"},
+        "authority_policy": {"enum": ["deterministic-semantic-human-v1", "deterministic-semantic-human-v2"]},
         "accepted_exceptions": {"type": "array", "items": {"type": "string"}}
       },
       "additionalProperties": false
@@ -66,7 +66,19 @@
         "rejected_explanation_pattern": {"type": "string", "minLength": 1},
         "rejected_artifact_retention": {"type": "string", "minLength": 1},
         "excluded_from": {"type": "array", "minItems": 6, "uniqueItems": true, "items": {"enum": ["git", "source_discovery", "example_retrieval", "prompt_assembly", "rendering", "promotion", "semantic_evidence"]}},
-        "failure_if_unwritable": {"const": true}
+        "failure_if_unwritable": {"const": true},
+        "diagnostic_render": {
+          "type": "object",
+          "required": ["available", "input_format", "output_format", "child_pattern", "failure_behavior"],
+          "properties": {
+            "available": {"type": "boolean"},
+            "input_format": {"const": "markdown"},
+            "output_format": {"const": "pdf"},
+            "child_pattern": {"const": "{artifact}.{sequence}.rejected.render.pdf"},
+            "failure_behavior": {"const": "preserve_parent_and_write_render_failure_child"}
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     }
@@ -81,6 +93,13 @@
       "then": {
         "required": ["governance", "authority_matrix", "evidence_policy"],
         "properties": {"evidence_policy": {"required": ["rejected_stage_pattern"]}}
+      }
+    },
+    {
+      "if": {"properties": {"schema_version": {"const": 4}}},
+      "then": {
+        "required": ["governance", "authority_matrix", "evidence_policy"],
+        "properties": {"evidence_policy": {"required": ["rejected_stage_pattern", "diagnostic_render"]}}
       }
     }
   ],

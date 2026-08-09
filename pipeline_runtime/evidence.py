@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-GOVERNANCE_VERSION = "deterministic-semantic-human-v1"
+GOVERNANCE_VERSION = "deterministic-semantic-human-v2"
 
 
 def _safe_component(value: str) -> str:
@@ -187,6 +187,24 @@ def rejection_explanation_path(candidate_path: Path) -> Path:
     return candidate_path.with_name(f"{candidate_path.stem}.explanation.md")
 
 
+def diagnostic_render_path(candidate_path: Path, *, extension: str = ".pdf") -> Path:
+    """Return the evidence-only render child for one rejected Markdown candidate.
+
+    This is deliberately a typed child rather than an ordinary render output: it
+    preserves the parent's human sequence and cannot collide with the parent's
+    own explanation sidecar.
+    """
+    if ".rejected." not in candidate_path.name or candidate_path.suffix.lower() not in {".md", ".markdown"}:
+        raise ValueError("diagnostic renders require a rejected Markdown candidate")
+    suffix = extension if extension.startswith(".") else f".{extension}"
+    return candidate_path.with_name(f"{candidate_path.stem}.render{suffix}")
+
+
+def diagnostic_render_explanation_path(render_path: Path) -> Path:
+    """Return the sidecar for a typed diagnostic render child."""
+    return rejection_explanation_path(render_path)
+
+
 def _atomic_create(path: Path, data: bytes) -> None:
     """Create one immutable evidence file without replacing an existing path."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -227,6 +245,42 @@ def persist_rejected_pair(
             candidate_path.unlink()
         raise
     return explanation_path
+
+
+def persist_diagnostic_render_pair(
+    candidate_path: Path,
+    *,
+    expected_candidate_sha256: str,
+    rendered: bytes,
+    explanation_markdown: str,
+    extension: str = ".pdf",
+) -> tuple[Path, Path, str]:
+    """Publish an immutable diagnostic derivative bound to exact parent bytes.
+
+    The parent must already be a persisted rejected Markdown candidate.  A
+    derivative failure never mutates or removes that primary evidence; callers
+    can record a truthful `.render.txt` child by passing that extension.
+    """
+    if not candidate_path.is_file():
+        raise FileNotFoundError(f"rejected candidate is unavailable: {candidate_path}")
+    actual_parent_hash = hashlib.sha256(candidate_path.read_bytes()).hexdigest()
+    if actual_parent_hash != expected_candidate_sha256:
+        raise ValueError("persisted rejected candidate SHA-256 does not match diagnostic render source")
+    render_path = diagnostic_render_path(candidate_path, extension=extension)
+    sidecar_path = diagnostic_render_explanation_path(render_path)
+    if render_path.exists() or sidecar_path.exists():
+        raise FileExistsError(f"refusing to overwrite diagnostic render evidence pair: {render_path}")
+    render_hash = hashlib.sha256(rendered).hexdigest()
+    created_render = False
+    try:
+        _atomic_create(render_path, rendered)
+        created_render = True
+        _atomic_create(sidecar_path, explanation_markdown.encode("utf-8"))
+    except BaseException:
+        if created_render and render_path.exists():
+            render_path.unlink()
+        raise
+    return render_path, sidecar_path, render_hash
 
 
 def persist_sequential_rejected_pair(
@@ -438,7 +492,7 @@ def build_run_evidence(
     if changing_feedback:
         observations.append(f"Rejection feedback changed {changing_feedback} time(s) within entity trajectories.")
     return {
-        "schema_version": 4,
+        "schema_version": 5,
         "governance_version": GOVERNANCE_VERSION,
         "pipeline_id": pipeline_id,
         "run_id": run["id"],

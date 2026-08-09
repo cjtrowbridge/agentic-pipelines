@@ -8,7 +8,7 @@ Entity/goal contract, protected invariants, `prompts/design/design_validation.md
 
 ## Procedure
 1. Classify each required property as representational, semantic, or explicit human/policy judgment.
-2. Build an authority matrix declaring mechanism, verdict authority, proof basis, heuristic role, evidence, materiality, repair owner, escalation, and stable code.
+2. Build an authority matrix declaring mechanism, verdict authority, proof basis, heuristic role, evidence, materiality, repair owner, escalation, and stable code. For factual review, declare the structural zones excluded from claim units and require `not_factual` for conventional/performative text. For coverage, require exact source IDs/excerpts before `repairable_missing` may trigger repair.
 3. Use deterministic validators only when failure follows exactly from declared representations or a traceable exact domain rule. Use safe deterministic normalization before model repair.
 4. Use bounded semantic review for meaning, entailment, equivalence, relevance, faithful restatement, and qualitative fitness. Treat generic similarity, overlap, embeddings, nonempty output, and model confidence as signals, never proof.
 5. Make uncertainty fail closed into semantic repair, quarantine, or human review; do not broaden thresholds merely to improve pass rate.

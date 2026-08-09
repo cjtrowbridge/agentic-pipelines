@@ -4,7 +4,9 @@
 Reviewing a host pipeline after a governance-changing framework update or when retry evidence suggests misassigned authority or missing execution evidence.
 
 ## Load
-The host pipeline definition and stage graph, customized prompts, validators, schemas, retry/repair/promotion rules, representative human and machine run reports, rejected candidates, thread references, relevant tests, and the two references on authority and run evidence. Do not load unrelated entity content.
+The host pipeline definition and stage graph, customized prompts, validators, schemas, retry/repair/promotion rules, representative human and machine run reports, rejected candidates and diagnostic render children, thread references, relevant tests, and the two references on authority and run evidence. Do not load unrelated entity content.
+
+Flag absent diagnostic render evidence for newly rejected renderable Markdown when a declared renderer is available; diagnostic PDFs entering any trusted/final path; salutation, closing, signature, objective, or polite text judged as unsupported factual claims; unsupported gaps labeled repairable; and decorative schema fields that can terminate an otherwise usable artifact.
 
 ## Procedure
 1. Record framework revision, host ownership, audit scope, and evidence gaps. Do not mutate host files.

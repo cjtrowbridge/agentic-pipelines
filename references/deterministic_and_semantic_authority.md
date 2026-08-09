@@ -66,3 +66,11 @@ Every gate must declare the property, property class, mechanism, verdict authori
 ## Semantic review is still untrusted
 
 A model reviewer is not a truth oracle. Give it narrow claims, cited evidence, a structured rubric, finite attempts, and classifications such as supported, partially supported, overstated, unsupported, ambiguous, or contradicted. Validate its schema and cited evidence deterministically. Use independent review for material decisions and escalate ambiguity or unacceptable risk to a human.
+
+## Scope the semantic unit before judging it
+
+Claim review applies to factual propositions, not every string in a document. A deterministic parser may identify structural zones such as a contact block, salutation, closing, signature, heading, or declared section without making a factual judgment. Conventional, performative, prospective, polite, or structural language (for example `Dear Hiring Manager`, `Thank you for your consideration`, an objective, an expression of interest, or `Sincerely`) must be classified `not_factual`, not `unsupported`. That result is non-blocking and non-repairing unless a separate exact structural rule rejects it.
+
+Coverage review likewise cannot manufacture qualifications. `repairable_missing` requires material trusted source evidence that is independently resolvable by an exact source ID or excerpt and can be added without invention. An unsupported qualification is `unsupported_gap`; a deliberate, source-backed selective omission is `optional_omitted`. Neither can trigger model repair. A cover letter normally selects the strongest material alignments rather than enumerating every posting phrase. Any disagreement between a structural validator and a semantic reviewer is an authority-boundary defect requiring correction or human review, never automatic deletion of required structure.
+
+Every model-output field needs a declared consumer and material consequence. Prompts, schema, examples, validators, and consumers must agree on its shape. Do not discard an otherwise usable candidate for decorative metadata, silently coerce invalid output, or repeat the same schema rejection after feedback. A finite retry policy must stop, change strategy, or escalate and report the rejection path, feedback delta, and response delta.

@@ -75,7 +75,7 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("root cause", operation)
         self.assertIn("sidecar hash matches", operation)
         reference = Path("references/run_evidence_and_continuous_improvement.md").read_text(encoding="utf-8")
-        self.assertIn("run-evidence schema version 4", reference)
+        self.assertIn("run-evidence schema version 5", reference)
         self.assertIn("legacy_appended", reference)
 
     def test_bootstrap_is_required_before_pipeline_operation(self) -> None:

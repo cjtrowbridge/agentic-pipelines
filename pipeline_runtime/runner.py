@@ -644,8 +644,8 @@ class PipelineRunner:
         actual_run_id = performance.get("run_id")
         if not actual_run_id:
             data = {
-                "schema_version": 4,
-                "governance_version": "deterministic-semantic-human-v1",
+                "schema_version": 5,
+                "governance_version": "deterministic-semantic-human-v2",
                 "pipeline_id": self.definition.pipeline_id,
                 "run_id": run_id or "current-summary",
                 "execution_status": "no_op",

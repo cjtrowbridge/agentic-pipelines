@@ -1,8 +1,8 @@
-schema_version: 3
+schema_version: 4
 status: staged
 governance:
   framework_revision: replace-with-pinned-agentic-pipelines-revision
-  authority_policy: deterministic-semantic-human-v1
+  authority_policy: deterministic-semantic-human-v2
   accepted_exceptions: []
 pipeline_definition: pipeline.yaml
 goal_traceability: []
@@ -18,6 +18,12 @@ evidence_policy:
   rejected_artifact_pattern: artifacts/rejected/{entity}/{artifact}.{sequence}.rejected.{ext}
   rejected_stage_pattern: artifacts/rejected/{entity}/{artifact}.{sequence}.rejected.{stage}.{ext}
   rejected_explanation_pattern: artifacts/rejected/{entity}/{artifact}.{sequence}.rejected[.{stage}].explanation.md
+  diagnostic_render:
+    available: false
+    input_format: markdown
+    output_format: pdf
+    child_pattern: '{artifact}.{sequence}.rejected.render.pdf'
+    failure_behavior: preserve_parent_and_write_render_failure_child
   rejected_artifact_retention: retain until explicit governed cleanup
   excluded_from: [git, source_discovery, example_retrieval, prompt_assembly, rendering, promotion, semantic_evidence]
   failure_if_unwritable: true

@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pipelines.run-evidence.v4",
+  "$id": "pipelines.run-evidence.v5",
   "type": "object",
   "required": ["schema_version", "governance_version", "pipeline_id", "run_id", "execution_status", "learning_status", "started_at", "finished_at", "checkpointed_at", "reconciled", "summary", "attempts", "rejected_artifacts", "observations", "metrics", "hypotheses", "recommendations"],
   "properties": {
-    "schema_version": {"const": 4},
-    "governance_version": {"const": "deterministic-semantic-human-v1"},
+    "schema_version": {"const": 5},
+    "governance_version": {"const": "deterministic-semantic-human-v2"},
     "pipeline_id": {"type": "string", "minLength": 1},
     "run_id": {"type": "string", "minLength": 1},
     "execution_status": {"enum": ["running", "succeeded", "partially_succeeded", "failed", "interrupted", "bounded_stop", "no_op"]},
@@ -50,7 +50,7 @@
           "explanation_path": {"type": ["string", "null"]},
           "evidence_format": {"enum": ["sidecar", "legacy_appended"]},
           "sequence": {"type": ["integer", "null"], "minimum": 1},
-          "artifact_role": {"enum": ["candidate", "precursor", "render", "legacy"]},
+          "artifact_role": {"enum": ["candidate", "precursor", "diagnostic_render", "diagnostic_render_failure", "legacy"]},
           "content_format": {"type": ["string", "null"]},
           "parent_candidate_path": {"type": ["string", "null"]},
           "parent_candidate_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},

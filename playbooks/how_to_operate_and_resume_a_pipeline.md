@@ -15,8 +15,8 @@ Host definition, CLI help, current run narrative, and the local-inference playbo
 6. On Ctrl+C, require controlled interruption and return exit status 130. Verify durable state before resuming; leased work did not implicitly succeed.
 7. Keep scheduler runtime below interval and reject overlapping locks.
 8. Default to one bounded interactive LLM session per entity: retain stable context/output and append trusted feedback. Record session ID, step count, and retries separately. Fresh sessions require independent review, isolation, or provider limits.
-9. Verify material events checkpointed the persisted structured run report and human report. On resume, reconcile bundles and threads with any stale `running` report. Review status, root cause evidence, quarantines, and candidate/precursor/thread links before promotion or retry.
-10. Treat sequential rejected bundles as untrusted evidence. Confirm numeric order, truthful extensions, clean candidate bytes, each sidecar hash matches, parent/child links, and explanations of authority, code, reason, feedback, and disposition; never promote, retrieve, render, or re-ingest a bundle member.
+9. Verify the persisted structured run report and narrative checkpointed material events. On resume, reconcile stale reports, bundles, and threads, then review root cause evidence. For rejected Markdown, reconcile the typed diagnostic-render child against its parent hash; it is not a final render or retry input.
+10. Treat rejected bundles as untrusted evidence. Confirm numeric order, extensions, exact bytes, sidecar hash matches, links, and authority/reason/disposition; never promote, retrieve, final-render, or re-ingest a member.
 11. Run `analyze` only when deterministic trajectory metrics need semantic interpretation; review its advisory output before any change.
 12. Use `retry-cohort` only with the reviewed report and exact approved cohort ID.
 13. Use `rollback-entity` only as an explicit operator action; it verifies current and backup hashes before restoring the recorded source.
