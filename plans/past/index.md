@@ -2,6 +2,7 @@
 
 Format: `last_modified | path | title | summary`
 
+2026-08-09-11-35-43 | plans/past/2026-08-09-11-17-48_standardize-sequential-rejection-evidence-bundles.md | Standardize Sequential Rejection Evidence Bundles | Replace opaque run-and-attempt filenames with sortable entity-local rejection bundles that preserve parent candidates, truthfully typed precursor evidence, explanation sidecars, and durably checkpointed traceability.
 2026-08-09-09-36-26 | plans/past/2026-08-09-09-23-05_use-rejection-explanation-sidecars.md | Preserve Rejected Candidates with Explanation Sidecars | Replace appended rejection diagnostics with integrity-bound Markdown explanation sidecars so rejected model output remains byte-for-byte reviewable while complete rejection evidence stays durable and machine-linked.
 2026-08-07-12-09-54 | plans/past/2026-08-07-11-35-11_establish-authority-and-execution-evidence-governance.md | Establish Authority and Execution-Evidence Governance | Define and enforce deterministic, semantic, and human authority boundaries; require inspectable run and rejected-candidate evidence; and equip consuming hosts to audit and plan conformance migrations.
 2026-08-07-11-35-07 | plans/past/2026-08-04-19-00-27_host-owned-vscode-pipeline-entrypoints.md | Require Host-Owned VS Code Pipeline Entrypoints | Establish a concise framework policy and playbook requiring every host pipeline entrypoint to be a VS Code task and its main entrypoint to be a bootstrap-backed play action.

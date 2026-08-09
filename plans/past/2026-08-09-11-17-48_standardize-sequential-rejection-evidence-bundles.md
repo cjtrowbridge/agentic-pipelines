@@ -2,7 +2,7 @@
 plan_id: 2026-08-09-11-17-48_standardize-sequential-rejection-evidence-bundles
 title: Standardize Sequential Rejection Evidence Bundles
 summary: Replace opaque run-and-attempt filenames with sortable entity-local rejection bundles that preserve parent candidates, truthfully typed precursor evidence, explanation sidecars, and durably checkpointed traceability.
-status: current
+status: past
 created_at: 2026-08-09-11-17-48
 ---
 
@@ -59,11 +59,11 @@ This upstream plan governs universal evidence policy, shared runtime helpers, sc
   - [x] 4.6 Prove identical retries are visible and bounded, multi-excerpt citation contracts accept independently exact evidence, and formatting-only differences cannot become semantic rejection authority.
   - [x] 4.7 Run the complete upstream suite, prompt lint, package validation, schema fixtures, compilation, plan-index generation, and diff hygiene checks.
 
-- [ ] 5. Publish and close the upstream change.
+- [x] 5. Publish and close the upstream change.
   - [x] 5.1 Update this plan and the upstream journal with implementation, migration, verification, and compatibility evidence; regenerate upstream plan indexes.
   - [x] 5.2 Review the submodule diff for framework scope, host safety, ignored runtime evidence, credentials, and unrelated work.
-  - [ ] 5.3 Commit and push the reviewed framework change directly to upstream `main`, verify `origin/main`, and record the published revision for consumers.
-  - [ ] 5.4 Archive this completed plan, regenerate indexes, and publish the closure checkpoint before any host claims conformance.
+  - [x] 5.3 Commit and push the reviewed framework change directly to upstream `main`, verify `origin/main`, and record the published revision for consumers.
+  - [x] 5.4 Archive this completed plan, regenerate indexes, and publish the closure checkpoint before any host claims conformance.
 
 ## Success criteria
 
@@ -72,3 +72,9 @@ This upstream plan governs universal evidence policy, shared runtime helpers, sc
 - Sidecars and reports retain complete machine traceability without polluting filenames or candidate content.
 - Interrupted and repeated attempts remain truthful, durable, and actionable for continuous improvement.
 - The published framework contract is reusable by every consuming pipeline.
+
+## Implementation checkpoint — 2026-08-09
+
+- Published sequential rejection paths, guarded parent/precursor bundle persistence, truthful extension classification, schema-v4 run evidence, schema-v3 pipeline packages, stale-run reconciliation, material-event checkpoints, and non-progress detection as `dd69731001eacdbcc6841fb8f2ce51e6fb2a8cf2`.
+- Verified 60 upstream tests, 25 prompt checks, governance-conformant package validation with no warnings, Python compilation, and diff hygiene before publication.
+- Historical evidence remains immutable and readable; host adoption is delegated to the linked host plan.
