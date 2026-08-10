@@ -60,9 +60,9 @@ declared source roles -> validated text derivatives -> allowed-role stage packet
   - [ ] 5.3 Update package/schema examples with non-secret configurable declarations for source roles, packet budgets, optional fallbacks, and provider health.
 
 - [ ] 6. Verify, publish, and close upstream.
-  - [ ] 6.1 Run unit tests, documentation/prompt checks, package/schema validation, Python compilation, plan-index generation, and diff hygiene.
+- [x] 6.1 Run unit tests, documentation/prompt checks, package/schema validation, Python compilation, plan-index generation, and diff hygiene. (65 framework tests pass.)
   - [ ] 6.2 Record the host failure rationale, compatibility boundaries, and verification evidence in the plan and journal.
-  - [ ] 6.3 Commit and push the reviewed framework-only change directly to upstream main, verify `origin/main`, and record the published revision for consumers.
+- [x] 6.3 Commit and push the reviewed framework-only change directly to upstream main, verify `origin/main`, and record the published revision for consumers. Published `ff1e922`.
   - [ ] 6.4 Archive this plan, regenerate indexes, and publish its closure checkpoint only after verification succeeds.
 
 ## Success criteria
