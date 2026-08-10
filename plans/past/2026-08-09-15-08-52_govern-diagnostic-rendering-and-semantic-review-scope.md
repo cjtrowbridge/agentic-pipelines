@@ -2,11 +2,13 @@
 plan_id: 2026-08-09-15-08-52_govern-diagnostic-rendering-and-semantic-review-scope
 title: Govern Diagnostic Rendering and Semantic Review Scope
 summary: Establish universal governance, schemas, evidence contracts, and conformance tests for diagnostic rendering of rejected candidates and correctly scoped semantic claim and coverage review.
-status: current
+status: past
 created_at: 2026-08-09-15-08-52
 ---
 
 # Govern Diagnostic Rendering and Semantic Review Scope
+
+Disposition: superseded as an execution plan by `2026-08-09-19-00-25_govern-source-packets-optional-stages-and-provider-health`. Its diagnostic-rendering and semantic-review governance was published in `cca64b5` and remains the baseline; its unchecked historical checklist is retained as an immutable planning record rather than a second active implementation authority.
 
 Key: `[ ]` pending task, `[x]` completed task, `[?]` needs validation, `[-]` closed task
 

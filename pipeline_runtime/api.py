@@ -22,10 +22,11 @@ LOGGER = logging.getLogger(__name__)
 class InferenceError(RuntimeError):
     """Normalized failure from the shared local inference boundary."""
 
-    def __init__(self, message: str, *, retryable: bool, status_code: int | None = None) -> None:
+    def __init__(self, message: str, *, retryable: bool, status_code: int | None = None, failure_code: str = "unknown") -> None:
         super().__init__(message)
         self.retryable = retryable
         self.status_code = status_code
+        self.failure_code = failure_code
         self.capture_path: Path | None = None
         self.raw_content: str | None = None
         self.attempts = 0
@@ -87,6 +88,43 @@ Transport = Callable[[str, bytes, Mapping[str, str], float, ssl.SSLContext | Non
 Sleeper = Callable[[float], None]
 
 
+def transport_failure_code(reason: object) -> str:
+    """Classify transport evidence without changing the configured endpoint."""
+    text = str(reason).casefold()
+    if "10013" in text or "permission" in text or "forbidden" in text:
+        return "socket_permission_denied"
+    if "name or service not known" in text or "getaddrinfo" in text or "nodename" in text:
+        return "dns_failure"
+    if "refused" in text:
+        return "connection_refused"
+    if "timed out" in text or "timeout" in text:
+        return "timeout"
+    if "ssl" in text or "tls" in text or "certificate" in text:
+        return "tls_failure"
+    return "transport_failure"
+
+
+@dataclass
+class ProviderCircuitBreaker:
+    """Run-local breaker that prevents equivalent doomed calls from multiplying."""
+
+    identity: str
+    open_code: str | None = None
+    suppressed_attempts: int = 0
+
+    def permit(self) -> None:
+        if self.open_code:
+            self.suppressed_attempts += 1
+            raise InferenceError(
+                f"provider circuit is open ({self.open_code})", retryable=False,
+                failure_code="provider_circuit_open",
+            )
+
+    def record_failure(self, failure: InferenceError) -> None:
+        if failure.failure_code in {"socket_permission_denied", "dns_failure", "connection_refused"}:
+            self.open_code = failure.failure_code
+
+
 def _default_transport(
     url: str, body: bytes, headers: Mapping[str, str], timeout: float, ssl_context: ssl.SSLContext | None
 ) -> tuple[int, bytes]:
@@ -97,9 +135,14 @@ def _default_transport(
     except error.HTTPError as exc:
         return exc.code, exc.read()
     except error.URLError as exc:
-        raise InferenceError(f"local inference connection failed: {exc.reason}", retryable=True) from exc
+        code = transport_failure_code(exc.reason)
+        raise InferenceError(
+            f"local inference connection failed: {exc.reason}",
+            retryable=code not in {"socket_permission_denied", "dns_failure", "connection_refused"},
+            failure_code=code,
+        ) from exc
     except TimeoutError as exc:
-        raise InferenceError("local inference request timed out", retryable=True) from exc
+        raise InferenceError("local inference request timed out", retryable=True, failure_code="timeout") from exc
 
 
 def _usage(raw: Mapping[str, Any]) -> dict[str, int | float]:
@@ -126,6 +169,7 @@ class InferenceClient:
         self._random = random_source
         self._thread_writer = thread_writer
         self._is_cancelled = is_cancelled or (lambda: False)
+        self._circuit = ProviderCircuitBreaker(f"{config.provider}|{config.endpoint}|{config.model}")
 
     @property
     def config(self) -> ApiConfig:
@@ -133,6 +177,7 @@ class InferenceClient:
         return self._config
 
     def invoke(self, inference_request: InferenceRequest) -> InferenceResponse:
+        self._circuit.permit()
         payload = inference_request.payload(self._config)
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         headers = {"Content-Type": "application/json", "Accept": "application/json", **self._config.headers}
@@ -182,12 +227,14 @@ class InferenceClient:
                     capture,
                 )
             except InferenceError as exc:
+                self._circuit.record_failure(exc)
                 last_error = exc
                 exc.attempts = attempt
                 event: dict[str, Any] = {
                     "attempt": attempt,
                     "failure": self._safe_message(exc),
-                    "status_code": exc.status_code,
+                "status_code": exc.status_code,
+                "failure_code": exc.failure_code,
                     "retryable": exc.retryable,
                 }
                 if not exc.retryable or attempt == self._config.request.max_attempts:
@@ -274,6 +321,7 @@ class InferenceClient:
                 "message": self._safe_message(error),
                 "retryable": error.retryable,
                 "status_code": error.status_code,
+                "failure_code": error.failure_code,
                 "attempts": error.attempts,
                 "raw_content": error.raw_content,
             } if error else None,

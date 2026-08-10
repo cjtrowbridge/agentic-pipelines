@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from pipeline_runtime.api import InferenceClient, InferenceRequest
+from pipeline_runtime.api import InferenceClient, InferenceError, InferenceRequest, ProviderCircuitBreaker, transport_failure_code
 from pipeline_runtime.config import ApiConfig, RequestPolicy
 from pipeline_runtime.thread_capture import ThreadCaptureWriter
 
@@ -81,6 +81,30 @@ class ApiPrimitiveTests(unittest.TestCase):
             stored = json.loads(response.capture_path.read_text(encoding="utf-8"))
             self.assertEqual(1, len(stored["retry_events"]))
             self.assertNotIn("source-secret", response.capture_path.read_text(encoding="utf-8"))
+
+    def test_permission_denied_opens_circuit_and_suppresses_equivalent_call(self) -> None:
+        calls = 0
+
+        def transport(_url: str, _body: bytes, _headers: object, _timeout: float, _context: object) -> tuple[int, bytes]:
+            nonlocal calls
+            calls += 1
+            raise InferenceError("socket denied", retryable=False, failure_code="socket_permission_denied")
+
+        client = InferenceClient(self.config(), transport=transport)
+        with self.assertRaisesRegex(InferenceError, "socket denied"):
+            client.invoke(InferenceRequest(messages=[{"role": "user", "content": "one"}]))
+        with self.assertRaisesRegex(InferenceError, "provider circuit is open"):
+            client.invoke(InferenceRequest(messages=[{"role": "user", "content": "two"}]))
+        self.assertEqual(1, calls)
+
+    def test_transport_failure_codes_are_stable(self) -> None:
+        self.assertEqual("socket_permission_denied", transport_failure_code("[WinError 10013] forbidden"))
+        self.assertEqual("connection_refused", transport_failure_code("Connection refused"))
+        self.assertEqual("timeout", transport_failure_code("operation timed out"))
+        breaker = ProviderCircuitBreaker("test")
+        breaker.record_failure(InferenceError("denied", retryable=False, failure_code="socket_permission_denied"))
+        with self.assertRaisesRegex(InferenceError, "circuit is open"):
+            breaker.permit()
 
 
 if __name__ == "__main__":
