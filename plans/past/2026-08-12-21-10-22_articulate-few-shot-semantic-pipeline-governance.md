@@ -2,7 +2,7 @@
 plan_id: 2026-08-12-21-10-22_articulate-few-shot-semantic-pipeline-governance
 title: Articulate Few-Shot Semantic Pipeline Governance
 summary: Make coherent few-shot semantic transformations the framework default while preventing semantic laundering, context fragmentation, and unbounded reviewer authority.
-status: current
+status: past
 created_at: 2026-08-12-21-10-22
 ---
 
@@ -138,8 +138,8 @@ The surrounding guidance must explain that this is the default design pattern wh
   - [x] 10.1 Run the complete relevant upstream unit tests, prompt/documentation checks, package/schema validation, Python compilation, plan-index verification, and diff hygiene review.
   - [x] 10.2 Record compatibility effects: existing consumers are not automatically rewritten or failed, but governance-changing adoption should offer a read-only conformance audit and a separate host remediation plan.
   - [x] 10.3 Record verification evidence and a framework journal checkpoint without copying private host content.
-  - [ ] 10.4 Review and commit the approved framework-only changes directly to upstream `main`, push without a pull request, verify `origin/main`, and record the published revision.
-  - [ ] 10.5 Archive the completed upstream plan and regenerate plan indexes after all planned work is complete or explicitly closed.
+  - [x] 10.4 Review and commit the approved framework-only changes directly to upstream `main`, push without a pull request, verify `origin/main`, and record the published revision.
+  - [x] 10.5 Archive the completed upstream plan and regenerate plan indexes after all planned work is complete or explicitly closed.
   - [x] 10.6 Document the consumer sequence: update submodule, synthesize without overwrite, audit the existing pipeline, inspect run evidence, create and approve a host remediation plan, implement, evaluate against representative fixtures, and publish host changes separately.
 
 ## Success criteria
@@ -181,3 +181,4 @@ The surrounding guidance must explain that this is the default design pattern wh
 - Added package schema 5 and `coherent-semantic-units-v3`; schemas 1–4 remain compatible legacy inputs but do not claim current governance conformance.
 - Added sanitized cross-domain fixtures for semantic laundering, context fragmentation, scope escape, coherent few-shot transformation, contaminated examples, lossy derivatives, code transformation, and justified high-assurance review.
 - Verification: 71 upstream unit tests pass; 25 prompts lint; the schema-5 Markdown reference package validates; changed Python compiles. No live model run was performed.
+- Published implementation revision: `ab3e1052720b73360998f2f89a39a7e7debee557`, verified on upstream `origin/main` before plan closure.
