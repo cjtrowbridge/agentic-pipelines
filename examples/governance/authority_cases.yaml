@@ -73,3 +73,17 @@ cases:
     mechanism: human
     authority: human
     expected: allowed
+  - id: code-migration-semantic-equivalence
+    domain: code_transformation
+    property: A migrated implementation preserves the source behavior while adopting the demonstrated target API pattern.
+    property_class: semantic
+    mechanism: llm
+    authority: semantic_model
+    expected: allowed
+  - id: semantic-laundering-typed-label
+    domain: extraction
+    property: A model-assigned evidence kind proves that the cited passage entails the generated claim.
+    property_class: semantic
+    mechanism: parser
+    authority: deterministic
+    expected: rejected

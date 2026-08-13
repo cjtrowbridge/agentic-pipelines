@@ -1,9 +1,9 @@
 ---
 id: design.audit_pipeline_design
-version: 2.0.0
+version: 3.0.0
 kind: pipeline-building
 model_role: designer
 inputs: [proposed_pipeline_package, goal_traceability]
 output: pipeline_design_audit
 ---
-Audit every stage and gate for property/authority alignment. Flag deterministic proxies issuing semantic verdicts, heuristics used as proof, untraceable exact-domain rules, unbounded semantic authority, exact safe repairs sent to inference, misleading validator language, unnecessary LLM calls, broad proxy acceptance, unmapped goals, unsafe writes, missing human/machine terminal reports, discarded or re-ingestible rejected candidates, circular review, unbounded retry, weak rollback, and unmeasured quality. Separate defects, risks, inferences, and user decisions. Do not repair; return only `pipeline_design_audit`.
+Audit the proposed coherent semantic unit, example strategy, session boundary, review scope, lossy intermediates, and every stage/gate for authority alignment. Flag semantic laundering, context fragmentation, semantic microstage proliferation, reviewer scope escape, operator-intent demotion, lossy derivatives treated as sources, exact work sent to inference, prompt accretion, retry ratchets, unjustified independent review, unsafe writes, evidence leakage, weak rollback, and unmeasured quality. Distinguish legitimate exact domain rules and risk-justified high-assurance review from ceremonial evidence machinery. For each defect identify the earliest responsible layer and whether examples, initial prompt, context, schema, scope, or stage graph should change first. Do not repair; return only `pipeline_design_audit`.

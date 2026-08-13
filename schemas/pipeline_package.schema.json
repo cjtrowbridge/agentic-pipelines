@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pipelines.package.v4",
+  "$id": "pipelines.package.v5",
   "type": "object",
   "required": ["schema_version", "status", "pipeline_definition", "goal_traceability", "prompt_files", "validator_files", "fixture_manifest", "api_sample", "scheduler_example", "rollback_notes", "unresolved_decisions"],
   "properties": {
-    "schema_version": {"enum": [1, 2, 3, 4]},
+    "schema_version": {"enum": [1, 2, 3, 4, 5]},
     "status": {"const": "staged"},
     "pipeline_definition": {"type": "string", "minLength": 1},
     "goal_traceability": {
@@ -29,8 +29,29 @@
       "required": ["framework_revision", "authority_policy", "accepted_exceptions"],
       "properties": {
         "framework_revision": {"type": "string", "minLength": 1},
-        "authority_policy": {"enum": ["deterministic-semantic-human-v1", "deterministic-semantic-human-v2"]},
+        "authority_policy": {"enum": ["deterministic-semantic-human-v1", "deterministic-semantic-human-v2", "coherent-semantic-units-v3"]},
         "accepted_exceptions": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "semantic_design": {
+      "type": "object",
+      "required": ["semantic_unit", "example_strategy", "example_roles", "example_selection", "session_boundary", "review_scope", "blocking_authority", "stage_split_justification", "lossy_intermediate_policy", "risk_tier"],
+      "properties": {
+        "semantic_unit": {"type": "string", "minLength": 1},
+        "example_strategy": {"enum": ["none", "representative_pairs", "boundary_examples", "mixed"]},
+        "example_roles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["facts", "behavior", "style_format", "ontology", "boundary_behavior", "negative_behavior"]}
+        },
+        "example_selection": {"type": "string", "minLength": 1},
+        "session_boundary": {"type": "string", "minLength": 1},
+        "review_scope": {"type": "string", "minLength": 1},
+        "blocking_authority": {"type": "string", "minLength": 1},
+        "stage_split_justification": {"type": "string", "minLength": 1},
+        "lossy_intermediate_policy": {"type": "string", "minLength": 1},
+        "risk_tier": {"enum": ["routine", "material", "high_assurance"]}
       },
       "additionalProperties": false
     },
@@ -100,6 +121,16 @@
       "then": {
         "required": ["governance", "authority_matrix", "evidence_policy"],
         "properties": {"evidence_policy": {"required": ["rejected_stage_pattern", "diagnostic_render"]}}
+      }
+    },
+    {
+      "if": {"properties": {"schema_version": {"const": 5}}},
+      "then": {
+        "required": ["governance", "semantic_design", "authority_matrix", "evidence_policy"],
+        "properties": {
+          "governance": {"properties": {"authority_policy": {"const": "coherent-semantic-units-v3"}}},
+          "evidence_policy": {"required": ["rejected_stage_pattern", "diagnostic_render"]}
+        }
       }
     }
   ],

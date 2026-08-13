@@ -1,0 +1,58 @@
+schema_version: 1
+governance_version: coherent-semantic-units-v3
+cases:
+  - id: semantic-laundering-free-text-kind
+    domain: document_generation
+    pattern: A model correctly judges a claim supported, but exact code rejects it because a regex classifies the rendered line into a different evidence kind.
+    expected_finding: semantic_laundering
+    expected_correction: Remove the proxy's semantic verdict authority; do not broaden the regex.
+  - id: context-fragmented-support
+    domain: summarization
+    pattern: A bounded evidence projection omits a supporting source unit and tells the reviewer the projection is complete.
+    expected_finding: context_fragmentation
+    expected_correction: Supply minimum sufficient source context or report incompleteness and route uncertainty.
+  - id: broad-revision-review
+    domain: document_repair
+    pattern: A reviewer reoptimizes unchanged accepted content, reverses a supported requested change, and changes feedback across repairs.
+    expected_finding: reviewer_scope_escape
+    expected_correction: Audit the requested delta and direct consequences; keep broader preference advisory.
+  - id: coherent-few-shot-transformation
+    domain: document_generation
+    pattern: Trusted past input and accepted-output pairs demonstrate selection, structure, tone, and paired-output relationships before the new input.
+    expected_finding: conforming
+    expected_correction: none
+  - id: semantic-category-boundaries
+    domain: classification
+    pattern: Representative labeled boundary examples define category meaning; code validates only the allowed output label.
+    expected_finding: conforming
+    expected_correction: none
+  - id: example-guided-extraction
+    domain: extraction
+    pattern: Trusted examples demonstrate how prose maps into the target ontology; code validates schema and source-ID resolution only.
+    expected_finding: conforming
+    expected_correction: none
+  - id: semantic-relevance-ranking
+    domain: retrieval_ranking
+    pattern: Exact eligibility filters produce candidates and a bounded semantic stage ranks relevance from representative choices.
+    expected_finding: conforming
+    expected_correction: none
+  - id: demonstrated-code-migration
+    domain: code_transformation
+    pattern: Trusted before-and-after examples demonstrate the migration while compilation and tests validate exact behavior contracts.
+    expected_finding: conforming
+    expected_correction: none
+  - id: contaminated-demonstration
+    domain: summarization
+    pattern: A rejected artifact is retrieved as a positive example for a later entity.
+    expected_finding: untrusted_example
+    expected_correction: Exclude rejected evidence from example retrieval and prompt assembly.
+  - id: lossy-summary-as-source
+    domain: factual_transformation
+    pattern: A simplified derivative silently replaces the complete authoritative source without omission policy or fallback.
+    expected_finding: lossy_source_substitution
+    expected_correction: Declare limited derivative authority and preservation, audit, fallback, or retained-source access.
+  - id: justified-independent-review
+    domain: high_assurance_publication
+    pattern: Consequence analysis identifies irreversible material harm and a fresh reviewer sees source, candidate, goal, and exact evidence.
+    expected_finding: conforming_high_assurance
+    expected_correction: none

@@ -91,6 +91,8 @@ discovered â†’ staged â†’ leased â†’ worker_completed â†’ de
 
 `accepted`, `promoted`, and `quarantined` are terminal for a specific entity revision. A new source snapshot or explicitly approved cohort retry creates a new processing revision; it does not erase prior evidence. Every transition is transactionally persisted with its reason and evidence links.
 
+`semantic_reviewed` is conditional, not universal. A pipeline may move from exact deterministic validation to acceptance when its declared risk policy does not require semantic review; routine semantic transformations normally use retained-session audit, while fresh-session independent review is reserved for justified high-assurance cases.
+
 ## State, artifacts, and promotion
 
 The initial state store is a local SQLite database. It records entities, source snapshots, attempts, leases, transitions, validator results, review results, run membership, and artifact/thread references. SQLite is the right initial boundary because the runner is single-host, needs transactions and queryability, and must not require a service.
@@ -124,12 +126,15 @@ Thread captures are stored beneath `threads/<run-id>/<entity-id>/<stage>/<attemp
 
 ## Validation and review model
 
-Validation has separate roles:
+Validation has risk-scaled roles:
 
-1. Deterministic validation is cheap and authoritative for structural and invariant checks: existence, parsing, front matter/schema preservation, protected sections, required fields, forbidden changes, and bounded diff/edit distance.
-2. Worker self-check is optional, low-cost, and explicitly non-independent.
-3. Independent semantic review uses a separate prompt contract and sees the source, candidate, goal state, and deterministic evidence—not hidden worker reasoning. It returns a schema-validated verdict, confidence, violations, and recommended action.
-4. Adjudication/repair selects accept, reject, focused repair, rerun, or quarantine based on declared policy.
+1. Deterministic validation is authoritative only for exact declared representations: existence, parsing, schema, protected literals, limits, rendering, state, and promotion conditions.
+2. Retained-session self-audit is the routine semantic-review default for reversible work. It treats prior output as an untrusted candidate and is limited to the coherent goal or requested delta.
+3. Fresh-session independent review and claim-level evidence are optional high-assurance roles justified by consequence or measured failure evidence.
+4. Human decision owns unresolved intent, material ambiguity, policy exceptions, and unacceptable risk.
+5. Adjudication/repair selects accept, reject, focused repair, rerun, or quarantine within finite progress-tested policy.
+
+Deterministic validation of a heuristic, free-text class, model label, typed evidence kind, similarity score, or lexical relation cannot stand in for a semantic verdict.
 
 Invalid model JSON or malformed reviewer output is a stage failure, not implicit approval. Retry budgets are finite; a terminal quarantine record includes reason, evidence, and next-action recommendation.
 

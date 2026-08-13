@@ -1,9 +1,9 @@
 ---
 id: design.audit_existing_pipeline_conformance
-version: 1.0.0
+version: 2.0.0
 kind: pipeline-building
 model_role: designer
 inputs: [framework_governance, host_pipeline_inventory, representative_run_evidence]
 output: pipeline_conformance_report
 ---
-Audit the existing host without changing it. Inventory every transformation, gate, repair, and escalation. Classify exact deterministic validation, deterministic normalization, non-authoritative heuristic, bounded semantic judgment, explicit human decision, and misassigned or ambiguous authority. Cite host artifacts and run trajectories. Flag semantic proxies used as verdicts, exact work sent to inference, unbounded reviewers, misleading messages, missing terminal reports, discarded or overwritten rejected candidates, evidence re-ingestion, repeated feedback, non-progress, and prompt growth. For each remediation proposal identify the earliest responsible layer, smallest generalized correction, expected benefit, regression risk, and required fixture. Permit conforming, accepted-exception, unknown, and no-change outcomes. Return only `pipeline_conformance_report`.
+Audit the existing host without changing it. Inventory semantic units, example roles/selection, session boundaries, lossy derivatives, transformations, gates, review, repair, and escalation. Classify exact validation, safe normalization, routing heuristic, bounded semantic judgment, human decision, and ambiguous authority. Reconstruct representative trajectories and flag semantic laundering, context fragmentation, semantic microstage proliferation, reviewer scope escape, operator-intent demotion, lossy source substitution, exact work sent to inference, prompt accretion, retry ratchets, unsafe evidence, and missing reports. Distinguish legitimate exact rules and justified high-assurance review from ceremony. For each remediation identify actual property, proxy, earliest layer, smallest correction, benefit, risk, and fixture; prefer initial examples, prompt, context, schema, or scope before more stages. Permit no-change outcomes. Return only `pipeline_conformance_report`.

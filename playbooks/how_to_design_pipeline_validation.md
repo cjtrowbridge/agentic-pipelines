@@ -1,20 +1,20 @@
 # Playbook: Design Pipeline Validation
 
 ## Use when
-Defining acceptance gates, evaluation fixtures, or reviewer/adjudicator contracts.
+Defining exact runtime gates, bounded semantic review, human decisions, evaluation fixtures, or reviewer contracts.
 
 ## Load
-Entity/goal contract, protected invariants, `prompts/design/design_validation.md`, validator evidence schema, `references/deterministic_and_semantic_authority.md`, and prompt-authoring reference when semantic review is required.
+Entity/goal contract, semantic-unit and example strategy, protected invariants, `prompts/design/design_validation.md`, validator evidence schema, `references/deterministic_and_semantic_authority.md`, and prompt-authoring guidance when inference is required.
 
 ## Procedure
-1. Classify each required property as representational, semantic, or explicit human/policy judgment.
-2. Build an authority matrix declaring mechanism, verdict authority, proof basis, heuristic role, evidence, materiality, repair owner, escalation, and stable code. For factual review, declare the structural zones excluded from claim units and require `not_factual` for conventional/performative text. For coverage, require exact source IDs/excerpts before `repairable_missing` may trigger repair.
-3. Use deterministic validators only when failure follows exactly from declared representations or a traceable exact domain rule. Use safe deterministic normalization before model repair.
-4. Use bounded semantic review for meaning, entailment, equivalence, relevance, faithful restatement, and qualitative fitness. Treat generic similarity, overlap, embeddings, nonempty output, and model confidence as signals, never proof.
-5. Make uncertainty fail closed into semantic repair, quarantine, or human review; do not broaden thresholds merely to improve pass rate.
-6. Define disagreement, malformed-review, rejected-candidate persistence, repair, retry, quarantine, and promotion behavior.
-7. Build a golden set covering valid, invalid, ambiguous, adversarial, unrepairable, low-overlap-equivalent, and high-overlap-contradictory cases.
-8. Measure false accepts and false rejects; label unmeasured quality unknown.
+1. Classify each property as representational, semantic, or human/policy. State what the mechanism actually proves.
+2. Use deterministic rejection only for exact declared representations or traceable exact domain rules. IDs, typed labels, free-text classes, similarity, overlap, embeddings, confidence, and handcrafted matching cannot prove meaning.
+3. Flag semantic laundering whenever exact control flow converts one of those proxies into a verdict over entailment, relevance, equivalence, materiality, or quality.
+4. Apply the cheapest authoritative exact gates before bounded semantic review. Safe representation repair belongs in code; meaning-changing repair belongs in the scoped semantic session.
+5. Choose retained self-audit for routine reversible work. Require a consequence or empirical justification for independent or claim-level high-assurance review.
+6. For revisions, review the requested delta and direct consequences. Unchanged accepted content is non-blocking unless the delta creates a contradiction or exact violation.
+7. Define malformed output, disagreement, finite progress-tested repair, quarantine, human escalation, promotion, and rejected-evidence behavior.
+8. Build versioned golden cases for examples, unsupported content, omission, low-overlap equivalence, high-overlap contradiction, scope escape, operator intent, context reduction, lossy intermediates, and high-assurance exceptions. Measure false accepts/rejects and retry cost.
 
 ## Output and verification
-A machine-checkable authority matrix mapping every invariant to exact code, bounded semantic review, or explicit human decision, with evidence, fixtures, acceptance thresholds, and rejected-artifact behavior.
+An authority matrix plus runtime and offline-evaluation plan. Every gate names property, authority, proof, materiality, evidence, repair owner, and escalation. Reject semantic proxies as verdicts, decorative blocking fields, unmeasured stage proliferation, or weakened criteria.

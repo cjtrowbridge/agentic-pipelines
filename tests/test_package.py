@@ -9,6 +9,8 @@ class PackageTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1] / "examples" / "markdown_repair"
         result = validate_package(root)
         self.assertEqual("markdown-reference", result["pipeline_id"])
+        self.assertEqual(5, result["package_schema_version"])
+        self.assertTrue(result["governance_conformant"])
         self.assertEqual(6, result["prompt_count"])
 
 

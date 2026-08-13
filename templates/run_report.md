@@ -16,6 +16,10 @@
 
 {{ attempt_table }}
 
+## Semantic design trajectory
+
+{{ semantic_unit_examples_sessions_derivatives_review_scope_and_operator_requests }}
+
 ## Rejected artifacts
 
 {{ rejected_artifact_links }}

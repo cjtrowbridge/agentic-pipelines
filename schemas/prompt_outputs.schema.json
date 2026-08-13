@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "pipelines.prompt-outputs.v1",
+  "$id": "pipelines.prompt-outputs.v2",
   "$defs": {
     "property_class": {"enum": ["representational", "semantic", "human_policy"]},
     "mechanism": {"enum": ["tool", "parser", "script", "query", "heuristic", "llm", "human"]},
@@ -74,8 +74,9 @@
     },
     "stage_design": {
       "type": "object",
-      "required": ["stages", "terminal_states"],
+      "required": ["semantic_design", "stages", "terminal_states"],
       "properties": {
+        "semantic_design": {"$ref": "#/$defs/semantic_design"},
         "stages": {
           "type": "array",
           "items": {
@@ -150,10 +151,11 @@
     },
     "pipeline_conformance_report": {
       "type": "object",
-      "required": ["framework_revision", "host_scope", "inventory", "findings", "conforming_decisions", "accepted_exceptions", "unknowns", "remediation_plan", "no_change_justified", "authority"],
+      "required": ["framework_revision", "host_scope", "semantic_design_inventory", "inventory", "findings", "conforming_decisions", "accepted_exceptions", "unknowns", "remediation_plan", "no_change_justified", "authority"],
       "properties": {
         "framework_revision": {"$ref": "#/$defs/nonempty_string"},
         "host_scope": {"$ref": "#/$defs/nonempty_string"},
+        "semantic_design_inventory": {"type": "object"},
         "inventory": {
           "type": "array",
           "items": {
@@ -183,7 +185,7 @@
             "required": ["finding_id", "earliest_responsible_layer", "proposed_change", "expected_benefit", "regression_risk", "required_fixture"],
             "properties": {
               "finding_id": {"$ref": "#/$defs/nonempty_string"},
-              "earliest_responsible_layer": {"enum": ["input", "prompt", "context", "schema", "normalizer", "validator_authority", "semantic_review", "provider", "orchestration", "goal"]},
+              "earliest_responsible_layer": {"enum": ["input", "examples", "prompt", "context", "semantic_unit", "lossy_intermediate", "schema", "normalizer", "validator_authority", "review_scope", "operator_authority", "semantic_review", "provider", "orchestration", "goal"]},
               "proposed_change": {"$ref": "#/$defs/nonempty_string"},
               "expected_benefit": {"$ref": "#/$defs/nonempty_string"},
               "regression_risk": {"$ref": "#/$defs/nonempty_string"},
@@ -197,10 +199,28 @@
       },
       "additionalProperties": false
     },
+    "semantic_design": {
+      "type": "object",
+      "required": ["semantic_unit", "minimum_sufficient_context", "example_roles", "example_selection", "session_boundary", "review_scope", "blocking_authority", "risk_tier", "stage_split_justification", "lossy_intermediate_policy"],
+      "properties": {
+        "semantic_unit": {"$ref": "#/$defs/nonempty_string"},
+        "minimum_sufficient_context": {"$ref": "#/$defs/string_list"},
+        "example_roles": {"$ref": "#/$defs/string_list"},
+        "example_selection": {"$ref": "#/$defs/nonempty_string"},
+        "session_boundary": {"$ref": "#/$defs/nonempty_string"},
+        "review_scope": {"$ref": "#/$defs/nonempty_string"},
+        "blocking_authority": {"$ref": "#/$defs/nonempty_string"},
+        "risk_tier": {"enum": ["routine", "material", "high_assurance"]},
+        "stage_split_justification": {"$ref": "#/$defs/nonempty_string"},
+        "lossy_intermediate_policy": {"$ref": "#/$defs/nonempty_string"}
+      },
+      "additionalProperties": false
+    },
     "staged_pipeline_package": {
       "type": "object",
-      "required": ["pipeline_definition", "prompt_files", "validators", "evaluation_fixtures", "scheduler_example", "evidence_policy", "rollback_notes", "goal_traceability", "missing_inputs"],
+      "required": ["semantic_design", "pipeline_definition", "prompt_files", "validators", "evaluation_fixtures", "scheduler_example", "evidence_policy", "rollback_notes", "goal_traceability", "missing_inputs"],
       "properties": {
+        "semantic_design": {"$ref": "#/$defs/semantic_design"},
         "pipeline_definition": {"type": "object"},
         "prompt_files": {"type": "array", "items": {"type": "object"}},
         "validators": {"type": "array", "items": {"type": "object"}},

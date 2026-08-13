@@ -54,6 +54,8 @@ Only the transaction that owns a valid lease may advance a non-terminal entity r
 | `accepted` | `promoted`, `quarantined` only if promotion safety fails before any source change |
 | `promoted`, `quarantined` | terminal |
 
+`semantic_reviewed` is optional according to the package's declared risk and review policy. Routine retained-session audit may be recorded as part of the semantic stage trajectory; fresh independent review is not required unless the package justifies it. Exact acceptance transitions never imply that deterministic code proved semantic correctness.
+
 A lease has a random owner token, a finite expiry, and an optional heartbeat. A new runner may reclaim it only after expiry and records a `lease_expired` transition. It never assumes an expired worker left no candidate artifact; it creates a new attempt and leaves prior evidence untouched.
 
 ## Artifact policy

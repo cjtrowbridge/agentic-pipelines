@@ -1,19 +1,19 @@
 # Playbook: Build Pipeline Prompts
 
 ## Use when
-Creating or revising worker, self-review, independent review, repair, adjudication, failure-analysis, or performance-analysis prompts.
+Creating or revising transformation, self-audit, request-aware review, independent high-assurance review, repair, adjudication, or analysis prompts.
 
 ## Load
-The relevant generator under `prompts/generate/`, `references/prompt_authoring.md`, `references/deterministic_and_semantic_authority.md`, the target output schema, entity/goal contracts, and no unrelated playbook.
+The relevant generator under `prompts/generate/`, `references/prompt_authoring.md`, `references/deterministic_and_semantic_authority.md`, target schemas, entity/goal contracts, example strategy, and review-risk decision.
 
 ## Procedure
-1. Reject the prompt request if an exact mechanism can establish the required property. Do not reject a genuinely semantic job merely because a lexical, similarity, embedding, or handcrafted proxy can approximate it.
-2. Give a necessary LLM call one semantic job, declared minimal inputs, allowed transformation, protected invariants, exact output schema, a completion-token limit (`num_predict`), a context-window limit (`num_ctx`), and stop conditions. Size `num_ctx` from a measured maximum assembled request plus the completion budget; never rely on a model's advertised maximum context, and never mistake `num_predict` for a context/KV-cache limit. Treat reasoning as opt-in: require a stage-specific justification, and disable it for clear, constrained transformations with representative examples.
-2.1 Treat one entity's pipeline instance as one interactive session by default: supply stable source context once, retain the prior model response, and append concise trusted validator/reviewer feedback for each bounded next step. Start fresh only for a declared reason—independent review, security/isolation, or provider limits. Declare a finite session-step budget and finite stage retry budget. A transport/API or parse/schema/validator retry is not a new session step; preserve the rejected output, log and link its reason, include that reason with the unchanged original inputs as a concise trusted summary, and never coerce or re-ingest a rejected artifact into acceptance.
-3. Keep governance and repeated project exposition out of runtime prompts.
-4. Keep reviewers independent from worker hidden reasoning.
-5. Version the prompt, validate metadata/schema references, and run compression/completeness review.
-6. Test normal, missing-input, adversarial-input, ambiguous, repeated-feedback, and first-attempt-regression cases before activation.
+1. Reject exact work. Do not reject genuine semantic work merely because a lexical, similarity, embedding, label, or handcrafted proxy approximates it.
+2. Give one prompt one coherent semantic decision with minimum sufficient sources, bounded trusted demonstrations, invariants, allowed transformation, exact output, scope, and inability behavior. Record example authority and omissions.
+3. Treat one entity decision as one retained session by default. Supply stable context once; retain candidate output; append concise trusted audit or exact-validator feedback. Split sessions only for declared risk, isolation, provider/context, reuse, or measured-quality reasons.
+4. Declare a completion-token limit (`num_predict`) and context-window limit (`num_ctx`). Size `num_ctx` from the measured complete session plus completion reserve; never mistake `num_predict` for a context/KV-cache limit. Reasoning is opt-in; disable it for clear, constrained transformations with representative examples.
+5. Scope routine self-audit to the declared goal. Scope revision review to the exact delta and direct consequences; supported operator intent is blocking within policy and broader preference is advice. Independent review requires a high-assurance justification.
+6. Declare a finite session-step budget and finite stage retry budget; count transport/schema retries separately. Preserve rejected output and evidence; include that reason with the unchanged original inputs as a concise trusted summary. Stop on repeated/changing feedback without progress.
+7. Keep governance exposition out of runtime prompts; version, lint, and test normal, ambiguous, adversarial, context-reduction, scope-escape, and first-attempt cases.
 
 ## Output and verification
-A lint-clean versioned prompt with fixtures and a recorded LLM justification. Reject deterministic jobs, undeclared inputs, prose-only machine outputs, authority to change pipeline policy, or removed critical constraints.
+A lint-clean versioned prompt with fixtures, measured limits, example/session/review declarations, and LLM justification. Reject semantic laundering, undeclared inputs, prose-only machine outputs, lossy source substitution, authority expansion, or removed critical constraints.

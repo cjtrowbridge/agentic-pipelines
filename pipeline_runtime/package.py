@@ -60,6 +60,16 @@ def _validate_authority_matrix(rows: list[dict[str, Any]]) -> None:
             raise PackageError(f"{location}: llm/human mechanisms cannot claim deterministic authority")
 
 
+def _validate_semantic_design(design: dict[str, Any]) -> None:
+    """Validate exact declaration consistency without judging semantic quality."""
+    strategy = design["example_strategy"]
+    roles = design["example_roles"]
+    if strategy == "none" and roles:
+        raise PackageError("semantic_design.example_roles must be empty when example_strategy is none")
+    if strategy != "none" and not roles:
+        raise PackageError("semantic_design.example_roles must declare at least one role when examples are used")
+
+
 def _inside(root: Path, value: str) -> Path:
     candidate = (root / value).resolve()
     if candidate != root and root not in candidate.parents:
@@ -91,14 +101,20 @@ def validate_package(root: Path) -> dict[str, Any]:
     warnings: list[str] = []
     if manifest["schema_version"] == 1:
         warnings.append(
-            "legacy package schema 1 has no enforceable authority/evidence declarations; migrate to schema 2 before claiming current governance conformance"
+            "legacy package schema 1 has no enforceable authority/evidence declarations; migrate to schema 5 before claiming current governance conformance"
         )
     else:
         _validate_authority_matrix(manifest["authority_matrix"])
+        if manifest["schema_version"] >= 5:
+            _validate_semantic_design(manifest["semantic_design"])
         exclusions = set(manifest["evidence_policy"]["excluded_from"])
         missing = sorted(REQUIRED_REJECTED_EXCLUSIONS - exclusions)
         if missing:
             raise PackageError(f"evidence_policy.excluded_from is missing required rejected-artifact boundaries: {missing}")
+        if manifest["schema_version"] < 5:
+            warnings.append(
+                "package schema is compatible legacy input but lacks the coherent semantic-unit, example, session, review-scope, and risk declarations required for current governance conformance"
+            )
     definition_path = _inside(package_root, manifest["pipeline_definition"])
     definition = load_definition(definition_path)
     declared_prompts = {_inside(package_root, value) for value in manifest["prompt_files"]}
@@ -114,7 +130,7 @@ def validate_package(root: Path) -> dict[str, Any]:
     return {
         "pipeline_id": definition.pipeline_id,
         "package_schema_version": manifest["schema_version"],
-        "governance_conformant": manifest["schema_version"] in {2, 3, 4},
+        "governance_conformant": manifest["schema_version"] == 5,
         "warnings": warnings,
         "stages": sorted(definition.stages),
         "analysis": sorted(definition.analysis),

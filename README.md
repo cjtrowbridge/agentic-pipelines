@@ -4,7 +4,7 @@ Agentic Pipelines is a prompt-first framework for using scarce cloud intelligenc
 
 Its primary reusable assets are concise prompts and task-specific playbooks. The Python runtime, Ollama-compatible API adapter, SQLite state, validators, thread capture, and reports are shared supporting infrastructure.
 
-Agentic Pipelines are mostly ordinary deterministic automation. Exact discovery, parsing, filtering, routing, validation, state transitions, and promotion use code or standard tools whenever they can establish the required property. Meaning, entailment, equivalence, relevance, and qualitative fitness use bounded semantic or human judgment; deterministic heuristics may route those questions but cannot issue semantic verdicts. Every model step receives minimum necessary context and is constrained by a precise output contract, exact gates, finite attempts, and captured evidence.
+Agentic Pipelines are mostly ordinary deterministic automation. Code governs exactness; models govern meaning; humans govern unresolved intent and risk; examples specify behavior. **LLMs are few-shot learners.** When trusted history exists, semantic stages should normally see bounded representative past inputs and accepted outputs followed by the new input, rather than an expanding handcrafted approximation of the demonstrated behavior. Every model step owns one coherent bounded decision with minimum sufficient context, precise output, scope-bound review, finite attempts, and captured evidence.
 
 ## Pipeline entry points
 
@@ -63,7 +63,7 @@ Before integration, validate a generated package without inference or source mut
 python pipelines/scripts/validate_pipeline_package.py path/to/staged-package
 ```
 
-The package must justify every LLM stage, map goals to specific verification, and contain no credentials. See `examples/markdown_repair/` for the fake-provider-tested vertical slice.
+The package must justify every LLM stage, map goals to specific verification, and contain no credentials. Package schemas 1–4 remain readable compatibility inputs; schema 5 is required to claim current coherent-semantic-unit governance because it declares example, session, review-scope, blocking-authority, lossy-intermediate, stage-split, and risk contracts. See `examples/markdown_repair/` for the fake-provider-tested vertical slice.
 
 ## Host layout
 

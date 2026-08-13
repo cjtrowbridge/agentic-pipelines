@@ -8,4 +8,19 @@ operating_constraints: []
 local_model_constraints: []
 acceptance_expectations: []
 human_escalation_boundary: []
+semantic_unit: ""
+minimum_sufficient_context: []
+example_strategy:
+  mode: none
+  roles: []
+  selection: ""
+  budget: ""
+  trust_boundary: ""
+  omission_evidence: ""
+session_boundary: ""
+review_scope: ""
+blocking_authority: ""
+risk_tier: routine
+stage_split_justification: ""
+lossy_intermediate_policy: ""
 unresolved_decisions: []

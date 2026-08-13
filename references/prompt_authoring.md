@@ -1,40 +1,35 @@
 # Prompt Authoring: Terse but Complete
 
-A prompt owns one model job. Include only: objective, declared inputs, protected invariants, permitted action, exact output contract, and stop/uncertainty behavior.
+A prompt owns one coherent semantic decision. Include only its objective, minimum sufficient inputs, trusted demonstrations, protected invariants, permitted action, exact output contract, review scope, and stop/uncertainty behavior.
 
-Before writing a prompt, prove that the job requires an LLM. Prefer a trusted tool, parser, query, shell command, or small program whenever it can establish the required property exactly. A model is appropriate only for a narrow semantic transformation or judgment whose ambiguity cannot be removed through an explicit representation. Do not use inference for exact file selection, exact routing, parsing, counting, state transitions, policy enforcement, promotion, or other mechanically decidable operations. Comparison, extraction, matching, ranking, and selection may still be semantic when correctness depends on meaning; do not replace them with deterministic proxies that merely look rigorous. Apply `deterministic_and_semantic_authority.md`.
+Before writing a prompt, prove that the job requires meaning. Use a trusted tool, parser, query, shell command, or small program for exact file selection, routing, parsing, counting, state transitions, policy enforcement, promotion, or other mechanically decidable work. Comparison, extraction, matching, ranking, selection, and transformation remain semantic when correctness depends on meaning; never replace them with deterministic proxies that merely look rigorous.
 
-Put procedures in playbooks, shared concepts in references, output shapes in schemas/templates, and deterministic rules in code/configuration. Link those artifacts; do not restate them.
+Use minimum sufficient context, not merely the fewest bytes. Include stable source context and bounded representative past input/accepted-output pairs when they materially demonstrate the desired ontology, selection, abstraction, output relationships, tone, or boundaries. Declare example authority and provenance. Exclude rejected or untrusted artifacts and record whole-example omission under the packet budget.
+
+Do not split one coherent decision into semantic microstages merely to make intermediate labels easier to validate. Split only for a declared risk, isolation, provider/context, reuse, or measured-quality reason. Treat lossy semantic intermediates as derivatives, never silent source replacements.
 
 Review every prompt for:
 
-- no undeclared inputs or unresolved placeholders;
-- no repeated project philosophy or repository governance;
-- no authority to change pipeline policy, credentials, tools, paths, source, or retry scope;
-- facts, hypotheses, confidence, and unknowns separated when analysis is involved;
-- machine-readable output validated before state changes;
-- critical constraints preserved after compression.
-- the job cannot be replaced by deterministic logic, and the prompt receives no context beyond that job.
-- retry feedback is a concise trusted summary linked to preserved evidence, not a rejected artifact re-ingested as instructions.
+- declared inputs and resolved placeholders;
+- one bounded coherent decision and no authority outside it;
+- exact output and inability contracts;
+- facts, hypotheses, confidence, and unknowns separated when needed;
+- representative examples plus concise invariants instead of exhaustive behavioral prose;
+- schema validation before state changes without semantic laundering;
+- reviewer scope limited to the current goal or requested delta;
+- retry feedback as a concise trusted summary, never rejected content re-ingested as instructions;
+- critical constraints retained after compression.
 
-Prefer a shorter prompt only when it remains behaviorally complete. Concision is the removal of irrelevant or duplicated context, not the removal of safeguards.
+Use a retained session for source, candidate, audit, and bounded repair by default. Fresh-session independent review requires a risk or empirical justification. A revision prompt receives the accepted baseline, exact request, and necessary factual authority; broader reviewer preference is advisory.
 
-## Placement decision
-
-| Content | Put it in |
+| Content | Canonical owner |
 | --- | --- |
-| One model invocation's objective and constraints | Prompt |
+| One invocation's objective, examples, constraints, and scope | Prompt |
 | Ordered human/agent workflow | Playbook |
-| Concept reused across workflows | Reference |
-| Exact response/document shape | Schema or template |
-| Fast objective acceptance rule | Deterministic validator |
-| Universal task routing or safety invariant | `AGENTS.md` |
+| Reusable concept | Reference |
+| Exact response shape | Schema/template |
+| Exact acceptance rule | Deterministic validator |
+| Cross-version semantic quality | Golden evaluation set |
+| Universal routing or safety invariant | `AGENTS.md` |
 
-## Compression example
-
-Verbose: “You are an expert editor working in our sophisticated pipeline system. It is very important to remember that our project values safety. Please carefully read the post below, take your time, and attempt to repair it. You should not change things unnecessarily.”
-
-Complete and terse: “Repair only the declared Markdown violations in `source_entity`. Preserve `protected_invariants`. Return `repair_result`; if safe repair is impossible, return `status: unable` with unresolved violation IDs.”
-
-The shorter form removes role theater and repeated philosophy while adding explicit inputs, scope, output, and stop behavior.
-
+Prefer shorter prompts only when behavior remains complete. Concision removes irrelevant or duplicated context; it does not remove evidence, demonstrations, safeguards, or semantic coherence.

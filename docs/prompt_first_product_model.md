@@ -21,6 +21,8 @@ An agent should load the universal router, identify its task, and then load only
 
 An agentic pipeline is not a chain of model calls. It is a deterministic program with occasional, tightly bounded inference stages.
 
+The positive design rule is: **Code governs exactness. Models govern meaning. Humans govern unresolved intent and risk. Examples specify behavior.** LLMs are few-shot learners, so a semantic transformation with trusted history should normally receive bounded representative past input/accepted-output pairs followed by the new input. This communicates demonstrated ontology, selection, abstraction, output relationships, tone, and boundaries more directly than an expanding rule system.
+
 For each proposed stage, choose the least powerful sufficient mechanism in this order:
 
 1. existing trusted tool or library;
@@ -31,7 +33,9 @@ For each proposed stage, choose the least powerful sufficient mechanism in this 
 
 “Sufficient” means able to establish the actual property from declared evidence. Deterministic preference does not authorize lexical, statistical, embedding, or handcrafted proxies to issue semantic verdicts. Exact computation has authority over declared representations; bounded semantic judgment has authority over meaning; explicit humans retain policy and material ambiguity. See `references/deterministic_and_semantic_authority.md`.
 
-An LLM stage must state why inference is necessary, the smallest entity/context it may see, its exact output schema, protected invariants, deterministic preconditions and postconditions, finite retry/repair behavior, and its quarantine or human-escalation path. Passing broad criteria such as nonempty output, general similarity, or model confidence is never enough to establish correctness. Acceptance must trace to the goal and protected invariants through specific validators or an explicitly acknowledged semantic/human decision.
+An LLM stage must state why inference is necessary, its smallest coherent semantic decision, minimum sufficient context, example authority and budget, exact output schema, protected invariants, review scope, deterministic preconditions and postconditions, finite progress-tested repair behavior, and its quarantine or human-escalation path. “Narrow” bounds authority and outcome; it does not fragment meaning into microstages. Passing broad criteria such as nonempty output, general similarity, or model confidence is never enough to establish correctness.
+
+Deterministic validation of a proxy does not validate the meaning that proxy approximates. A heuristic, free-text classification, model label, typed evidence kind, or lexical relation may route review but may not become an exact semantic verdict. Claim-level provenance and fresh-session independent review are optional high-assurance patterns selected through documented consequence analysis, not universal defaults.
 
 Design each entity path to pass specific evidence-backed gates or fail quickly. Reject missing inputs, unsafe paths, impossible invariants, oversized context, and malformed source before inference. After inference, parse the declared schema and run the cheapest authoritative validators first. A failure may route to one bounded repair, quarantine, or a human; it must not be converted into success by weakening acceptance criteria to raise throughput.
 
@@ -49,7 +53,7 @@ These are invoked repeatedly through the shared local API primitive. Their scope
 
 Pipeline-running prompts cannot change pipeline definitions, code, credentials, validation policy, retry cohorts, or source artifacts directly. The runtime applies only declared transitions and promotion rules after validation.
 
-Runtime prompts receive only the fields required for their one inference job. Deterministic stages do not load prompts at all.
+Runtime prompts receive the minimum sufficient fields and trusted demonstrations required for their one coherent inference decision. Deterministic stages do not load prompts at all. Revisions receive the accepted baseline, exact request, and necessary factual authority; their audit is limited to that delta and direct consequences.
 
 Every runtime preserves a structured report, a human-readable execution narrative, and separately inspectable rejected candidates. These artifacts expose the complete attempt trajectory so later agents can reduce avoidable loops at the earliest responsible layer. Rejected candidates remain ignored, untrusted evidence and cannot become source, examples, prompt instructions, rendered finals, or promotable output. See `references/run_evidence_and_continuous_improvement.md`.
 

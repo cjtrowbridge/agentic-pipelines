@@ -15,7 +15,8 @@ Old upstream revision, new upstream revision, host-owned/customized artifacts, m
 6. Preserve host `TODO.md`, journal/plans, customized prompts/validators, `.vscode/tasks.json`, `.vscode/launch.json`, native bootstrap scripts, `api.yaml`, state, artifacts, threads, failures, runs, and reports. Never install upstream VS Code examples over host files.
 7. Apply approved synthesis, migrations, and router updates.
 8. Validate prompt IDs/versions, pipeline compatibility, shims, API preflight, ignored paths, tests, and rollback viability.
-9. When the upstream revision changes authority or execution-evidence governance, offer `how_to_audit_existing_pipeline_conformance.md`. The audit proposes a host remediation plan; it does not mutate host-owned behavior during update synthesis.
+9. When upstream changes authority, coherent semantic-unit, few-shot example, review-scope, or execution-evidence governance, offer `how_to_audit_existing_pipeline_conformance.md`. Inventory the host's semantic units, examples, sessions, lossy intermediates, review authority, and representative trajectories. The audit proposes a separate host remediation plan; it never rewrites host behavior during update synthesis.
+10. Adopt deliberately: update submodule, synthesize without overwrite, audit, inspect run evidence, create and approve a host plan, implement, evaluate representative fixtures, and publish host changes separately.
 
 ## Outputs and stop conditions
 An approved synthesis report, verified host state, and rollback path. Stop on unresolved ownership, credential exposure, incompatible schema without migration, or unapproved host behavior change.

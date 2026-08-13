@@ -13,6 +13,28 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("Do not mutate host files", audit)
         self.assertIn("rejected candidates", audit)
 
+    def test_few_shot_semantic_design_is_canonical_governance(self) -> None:
+        agents = Path("AGENTS.md").read_text(encoding="utf-8")
+        authority = Path("references/deterministic_and_semantic_authority.md").read_text(encoding="utf-8")
+        prompts = Path("references/prompt_authoring.md").read_text(encoding="utf-8")
+        design = Path("playbooks/how_to_design_a_pipeline.md").read_text(encoding="utf-8")
+        self.assertIn("LLMs are few-shot learners.", agents)
+        self.assertIn("LLMs are few-shot learners.", authority)
+        self.assertIn("past inputs and their accepted outputs, followed by the new input", authority)
+        self.assertIn("smallest coherent semantic decision", authority)
+        self.assertIn("Semantic laundering", authority)
+        self.assertIn("minimum sufficient context", prompts)
+        self.assertIn("requested delta", prompts)
+        self.assertIn("trusted past input/accepted-output pairs", design)
+
+    def test_independent_review_is_risk_justified_not_universal(self) -> None:
+        authority = Path("references/deterministic_and_semantic_authority.md").read_text(encoding="utf-8")
+        architecture = Path("docs/pipelines_architecture.md").read_text(encoding="utf-8")
+        builder = Path("playbooks/how_to_build_pipeline_prompts.md").read_text(encoding="utf-8")
+        self.assertIn("optional high-assurance", authority)
+        self.assertIn("conditional, not universal", architecture)
+        self.assertIn("Independent review requires a high-assurance justification", builder)
+
     def test_pipeline_progress_rule_requires_query_counts_and_eta(self) -> None:
         text = Path("AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("completed and remaining query counts", text)

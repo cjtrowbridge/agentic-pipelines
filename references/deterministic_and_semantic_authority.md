@@ -1,76 +1,80 @@
 # Deterministic, Semantic, and Human Authority
 
-## Why this boundary exists
+## Core doctrine
 
-“Deterministic first” is a resource and reliability discipline, not permission to approximate meaning with ever more rules. A mechanism is sufficient only when it can establish the property actually being tested. Repeatability, conservatism, lexical overlap, embedding distance, confidence, or rule complexity does not turn a semantic proxy into proof.
+Code governs exactness. Models govern meaning. Humans govern unresolved intent and risk. Examples specify behavior.
 
-The inverse rule is as important as avoiding unnecessary inference: never pretend deterministic logic is sufficient when correctness depends on meaning. False certainty at this boundary creates brittle rejection loops, hides valid transformations, and prevents the semantic reviewer from exercising the authority it was designed to hold.
+“Deterministic first” is a resource and reliability discipline, not permission to approximate meaning with more rules. A mechanism is sufficient only when it can establish the property actually being tested. Repeatability, conservatism, lexical overlap, embeddings, confidence, typed labels, or rule complexity do not turn a semantic proxy into proof.
 
-## Property classes and authority
+**LLMs are few-shot learners.** For semantic transformations, the best outputs will come from giving the model representative examples of past inputs and their accepted outputs, followed by the new input, so the model can learn the demonstrated transformation rather than forcing agents to approximate that behavior with an expanding collection of handcrafted semantic rules.
 
-| Property class | Examples | Authoritative mechanism |
+This is the default when trusted representative examples exist. It is not permission to use inference for exact work, send unbounded examples, or let examples acquire undeclared factual authority. Demonstrations commonly specify ontology, selection behavior, abstraction level, relationships among outputs, tone, and boundary behavior; concise prose supplies invariants and exceptions.
+
+## Property and authority classes
+
+| Property | Examples | Authority |
 | --- | --- | --- |
-| Representational | Parse success, schema, paths, hashes, IDs, exact literals, declared limits, render/page count | Deterministic code |
-| Semantic | Entailment, equivalence, relevance, faithful paraphrase, overstatement, material omission, quality | Bounded model or human judgment |
-| Human/policy | Ambiguous material decisions, risk acceptance, policy exceptions, publication approval | Explicit human decision |
+| Representational | Parse success, schema, paths, hashes, stable IDs, exact literals, declared limits, render/page count | Deterministic code |
+| Semantic | Entailment, equivalence, relevance, faithful transformation, material omission, qualitative fitness | Bounded model or human judgment |
+| Human/policy | Unresolved intent, material ambiguity, risk acceptance, policy exception, publication approval | Explicit human decision |
 
-A semantic conclusion can become deterministically checkable only after a trusted process represents it explicitly. Code may prove that evidence ID `x` exists and was supplied; it cannot infer from that fact alone that a rewritten claim is entailed by `x`.
+A semantic conclusion can become exactly checkable only after a trusted decision represents it explicitly. Code may prove that evidence ID `x` exists and was supplied; it cannot infer that a claim is supported merely because `x` exists, has a particular typed kind, or shares words with the claim.
 
-Exact citation validation must operate on independently resolvable source IDs or exact contiguous excerpts. When support spans multiple passages, the contract must accept a list of separately exact references; it must not ask a model to concatenate passages into one supposedly exact string. Whitespace, Markdown bullets, or punctuation may be normalized only under a declared meaning-preserving representation rule and may never become semantic factual rejection authority.
+## Smallest coherent semantic unit
 
-## Exact domain rules
+Give one model stage the smallest coherent semantic decision whose parts must remain semantically coherent. “Narrow” means bounded goal, authority, context, output, and stop behavior—not atomizing meaning into independent microclaims.
 
-An exact domain rule may reject deterministically only when all of these are declared:
+Keep interdependent outputs together when selection, factual consistency, division of content, or operator intent crosses their boundary. Split a semantic stage only for a declared security/isolation boundary, provider or measured context limit, independently useful intermediate, material-risk review, or demonstrated quality failure. Every split states the observed failure, added context/schema/retry cost, lossy representation risk, and evaluation evidence. Making deterministic validation easier is not a sufficient reason.
 
-1. the canonical representation;
-2. the source contract that makes it authoritative;
-3. the exact property computed;
-4. normalization that cannot change meaning;
-5. counterexamples demonstrating the rule does not stand in for semantic judgment.
+Use minimum sufficient context. Stable sources, trusted demonstrations, the current candidate, and bounded feedback belong in one retained session when they are necessary for the coherent decision. Fewer bytes are not better when removing them destroys the evidence or examples needed to perform the task.
 
-“This date differs from the linked typed date field” may be exact. “This number is followed by a word not found beside it in the source” is only a lexical anomaly unless the domain contract defines that token pair as the canonical typed quantity.
+## Semantic laundering
 
-## Proper role of heuristics
+Semantic laundering occurs when a pipeline:
 
-Lexical matching, keywords, edit distance, embeddings, synonym lists, anomaly scores, and confidence may:
+1. converts meaning into a heuristic, inferred free-text class, model label, typed proxy, similarity score, or lexical relation;
+2. validates that proxy exactly; and
+3. lets the exact validator accept or reject the original semantic property.
 
-- shortlist candidates;
-- prioritize review;
-- route uncertain cases;
-- trigger semantic or human review;
-- surface anomalies for investigation.
+The validator may be deterministic about the proxy while still lacking authority over meaning. Adding more regexes, categories, or evidence kinds enlarges the proxy; it does not repair the authority boundary.
 
-They may not directly accept or reject semantic correctness. Name them `review trigger`, `routing heuristic`, `lexical anomaly`, or `candidate score`, not `semantic failure gate`.
+Heuristics may shortlist, prioritize, detect anomalies, route review, or escalate uncertainty. Name them accordingly. They may not issue semantic verdicts.
 
-## Mixed gates
+An exact domain rule may reject only when the canonical representation, authoritative source contract, computed property, meaning-preserving normalization, and counterexamples are declared. Exact citation validation may establish resolvable IDs, contiguous excerpts, hashes, or supplied-source availability. It does not establish entailment or relevance.
 
-A rigorous semantic transformation commonly uses this sequence:
+## Default semantic transformation
 
 ```text
-source passages receive stable IDs
-→ semantic selection or transformation cites those IDs
-→ deterministic code validates schema, ID resolution, source availability, and protected literals
-→ an independent semantic reviewer judges support and materiality
-→ ambiguity escalates to a human
-→ deterministic promotion verifies the accepted transaction
+trusted sources and bounded representative demonstrations
+-> deterministic provenance, preparation, bounds, and exact preconditions
+-> one coherent semantic transformation in a retained session
+-> scope-bound audit and bounded evidence-driven repair when justified
+-> deterministic schema, resource, render, state, and promotion gates
+-> human decision only for unresolved intent, material ambiguity, or risk
 ```
 
-Free-text fact extraction and relevance selection are not inherently deterministic. Code can segment text and assign IDs without claiming that a segment expresses a normalized fact.
+Each example declares whether it is authoritative for facts, behavior, style/format, ontology, boundary behavior, or negative behavior. Rejected, quarantined, diagnostic, unknown, or otherwise untrusted artifacts never become examples. Preserve whole examples; select within a measured complete-session budget and record omissions.
 
-## Repair ownership
+Examples can be inappropriate when they are contaminated, mutually inconsistent, privacy-restricted, policy-obsolete, adversarial, or likely to anchor an unacceptable error. Exact tasks remain deterministic.
 
-Perform safe, fact-preserving canonicalization in code: whitespace, stable headings, known serialization, ordering required by schema, or other exact representation. Send a candidate back to a model only when correction requires choosing, rewriting, compressing, interpreting, or preserving meaning.
+## Review and revision authority
 
-Every gate must declare the property, property class, mechanism, verdict authority, proof basis, evidence, materiality, repair owner, and escalation. An auditor must flag any mechanism whose error message or control flow claims more authority than its evidence establishes.
+A retained-session self-audit is the routine default for reversible semantic transformations: tell the model to treat its prior output as an untrusted candidate, give a constrained rubric, and permit only bounded repair. Shared authorship does not make the candidate correct, but a retained session avoids context loss and duplicated prompts.
 
-## Semantic review is still untrusted
+Fresh-session independent review and claim-level provenance are optional high-assurance patterns. Use them when a documented consequence analysis justifies the added assurance: safety-critical decisions, legal/medical/financial effects, adversarial inputs, irreversible publication, or demonstrated self-review blind spots. Independence is a tool, not a ritual.
 
-A model reviewer is not a truth oracle. Give it narrow claims, cited evidence, a structured rubric, finite attempts, and classifications such as supported, partially supported, overstated, unsupported, ambiguous, or contradicted. Validate its schema and cited evidence deterministically. Use independent review for material decisions and escalate ambiguity or unacceptable risk to a human.
+A reviewer may judge only the declared decision scope. For a revision, supply the accepted baseline, exact requested delta, and necessary factual authority. Audit whether the delta was applied, whether changed material is supported, whether it creates a direct contradiction, and whether it violates exact constraints. Previously accepted unchanged content remains outside blocking review. A supported operator-requested inclusion remains valid within policy even if a reviewer would prefer another optimization; that preference is non-blocking advice.
 
-## Scope the semantic unit before judging it
+Every audit/repair loop has finite attempts, specific repairable findings, a progress test, and a truthful unable or human branch. Changing or repeated feedback is evidence of a scope, prompt, context, or reviewer defect—not a reason to keep appending instructions.
 
-Claim review applies to factual propositions, not every string in a document. A deterministic parser may identify structural zones such as a contact block, salutation, closing, signature, heading, or declared section without making a factual judgment. Conventional, performative, prospective, polite, or structural language (for example `Dear Hiring Manager`, `Thank you for your consideration`, an objective, an expression of interest, or `Sincerely`) must be classified `not_factual`, not `unsupported`. That result is non-blocking and non-repairing unless a separate exact structural rule rejects it.
+## Lossy semantic intermediates
 
-Coverage review likewise cannot manufacture qualifications. `repairable_missing` requires material trusted source evidence that is independently resolvable by an exact source ID or excerpt and can be added without invention. An unsupported qualification is `unsupported_gap`; a deliberate, source-backed selective omission is `optional_omitted`. Neither can trigger model repair. A cover letter normally selects the strongest material alignments rather than enumerating every posting phrase. Any disagreement between a structural validator and a semantic reviewer is an authority-boundary defect requiring correction or human review, never automatic deletion of required structure.
+Summaries, simplified documents, extractions, classifications, and selected evidence packets are semantic derivatives. Declare whether each is lossy and what downstream authority it holds. A lossy derivative cannot silently become an exact substitute for its source. Define its preservation rubric, omission policy, fallback, audit path, or retained-source access in proportion to consequence. Cache it only under source, prompt, model/configuration, and output-contract identity.
 
-Every model-output field needs a declared consumer and material consequence. Prompts, schema, examples, validators, and consumers must agree on its shape. Do not discard an otherwise usable candidate for decorative metadata, silently coerce invalid output, or repeat the same schema rejection after feedback. A finite retry policy must stop, change strategy, or escalate and report the rejection path, feedback delta, and response delta.
+## Runtime gates and evaluation
+
+Runtime code applies the cheapest authoritative exact gates plus bounded semantic review appropriate to risk. Do not add live semantic microstages to compensate for a weak initial prompt or missing evaluation.
+
+Use versioned golden sets to measure first-pass acceptance, unsupported content, omission, low-overlap equivalence, high-overlap contradiction, reviewer scope, operator-intent preservation, context reduction, repair progress, and justified high-assurance review. Prefer improving the initial examples, prompt, context, schema, or scope before adding another stage. A justified no-change conclusion is valid.
+
+Every gate declares the property, property class, mechanism, verdict authority, proof basis, evidence, materiality, repair owner, and escalation. Auditors flag any control flow or message that claims more authority than its evidence establishes.

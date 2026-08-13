@@ -2,6 +2,7 @@
 
 Format: `last_modified | path | title | summary`
 
+2026-08-12-21-29-00 | plans/past/2026-08-09-19-00-25_govern-source-packets-optional-stages-and-provider-health.md | Govern Source Packets, Optional Stages, and Provider Health | Make typed source provenance, whole-packet budgets, optional-stage fallbacks, and provider circuit breaking universal and testable for every Agentic Pipelines consumer.
 2026-08-09-19-04-45 | plans/past/2026-08-09-15-08-52_govern-diagnostic-rendering-and-semantic-review-scope.md | Govern Diagnostic Rendering and Semantic Review Scope | Establish universal governance, schemas, evidence contracts, and conformance tests for diagnostic rendering of rejected candidates and correctly scoped semantic claim and coverage review.
 2026-08-09-11-35-43 | plans/past/2026-08-09-11-17-48_standardize-sequential-rejection-evidence-bundles.md | Standardize Sequential Rejection Evidence Bundles | Replace opaque run-and-attempt filenames with sortable entity-local rejection bundles that preserve parent candidates, truthfully typed precursor evidence, explanation sidecars, and durably checkpointed traceability.
 2026-08-09-09-36-26 | plans/past/2026-08-09-09-23-05_use-rejection-explanation-sidecars.md | Preserve Rejected Candidates with Explanation Sidecars | Replace appended rejection diagnostics with integrity-bound Markdown explanation sidecars so rejected model output remains byte-for-byte reviewable while complete rejection evidence stays durable and machine-linked.

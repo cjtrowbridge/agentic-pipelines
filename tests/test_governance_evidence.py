@@ -59,7 +59,7 @@ class GovernanceEvidenceTests(unittest.TestCase):
     def test_cross_domain_authority_fixtures_enforce_expected_decisions(self) -> None:
         fixture = yaml.safe_load((ROOT / "examples" / "governance" / "authority_cases.yaml").read_text(encoding="utf-8"))
         domains = {case["domain"] for case in fixture["cases"]}
-        self.assertTrue({"summarization", "classification", "factual_transformation", "retrieval_ranking", "document_repair"} <= domains)
+        self.assertTrue({"summarization", "classification", "factual_transformation", "retrieval_ranking", "document_repair", "code_transformation", "extraction"} <= domains)
         for case in fixture["cases"]:
             with self.subTest(case=case["id"]):
                 if case["expected"] == "allowed":
@@ -67,6 +67,17 @@ class GovernanceEvidenceTests(unittest.TestCase):
                 else:
                     with self.assertRaises(PackageError):
                         _validate_authority_matrix([matrix_row(case)])
+
+    def test_semantic_design_fixtures_cover_positive_and_adversarial_patterns(self) -> None:
+        fixture = yaml.safe_load((ROOT / "examples" / "governance" / "semantic_design_cases.yaml").read_text(encoding="utf-8"))
+        domains = {case["domain"] for case in fixture["cases"]}
+        findings = {case["expected_finding"] for case in fixture["cases"]}
+        self.assertTrue({"summarization", "classification", "extraction", "retrieval_ranking", "document_repair", "document_generation", "code_transformation"} <= domains)
+        self.assertTrue({"semantic_laundering", "context_fragmentation", "reviewer_scope_escape", "untrusted_example", "lossy_source_substitution", "conforming", "conforming_high_assurance"} <= findings)
+        laundering = next(case for case in fixture["cases"] if case["id"] == "semantic-laundering-free-text-kind")
+        self.assertIn("do not broaden the regex", laundering["expected_correction"].casefold())
+        broad_review = next(case for case in fixture["cases"] if case["id"] == "broad-revision-review")
+        self.assertIn("requested delta", broad_review["expected_correction"])
 
     def test_schema_one_package_is_compatible_but_not_governance_conformant(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -79,6 +90,45 @@ class GovernanceEvidenceTests(unittest.TestCase):
             result = validate_package(target)
             self.assertFalse(result["governance_conformant"])
             self.assertTrue(result["warnings"])
+
+    def test_schema_five_requires_coherent_semantic_design(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary) / "package"
+            shutil.copytree(ROOT / "examples" / "markdown_repair", target)
+            manifest_path = target / "package.yaml"
+            manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+            self.assertEqual(5, manifest["schema_version"])
+            result = validate_package(target)
+            self.assertTrue(result["governance_conformant"])
+            del manifest["semantic_design"]["review_scope"]
+            manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+            with self.assertRaisesRegex(PackageError, "review_scope"):
+                validate_package(target)
+
+    def test_schema_four_remains_compatible_but_requires_a_governed_migration(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary) / "package"
+            shutil.copytree(ROOT / "examples" / "markdown_repair", target)
+            manifest_path = target / "package.yaml"
+            manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+            manifest["schema_version"] = 4
+            manifest["governance"]["authority_policy"] = "deterministic-semantic-human-v2"
+            del manifest["semantic_design"]
+            manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+            result = validate_package(target)
+            self.assertFalse(result["governance_conformant"])
+            self.assertTrue(result["warnings"])
+
+    def test_schema_five_example_roles_match_declared_strategy(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary) / "package"
+            shutil.copytree(ROOT / "examples" / "markdown_repair", target)
+            manifest_path = target / "package.yaml"
+            manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+            manifest["semantic_design"]["example_roles"] = []
+            manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
+            with self.assertRaisesRegex(PackageError, "at least one role"):
+                validate_package(target)
 
     def test_rejected_candidate_paths_are_collision_safe_and_explanations_are_actionable(self) -> None:
         root = Path("artifacts")

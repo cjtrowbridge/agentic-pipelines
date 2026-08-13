@@ -8,7 +8,7 @@ Every source record therefore identifies a stable ID, canonical path, declared r
 
 ## Complete packet budgets
 
-Measure the complete assembled request before transport, not just the CV, posting, or examples independently. Record static prompt bytes, every component's bytes, selected and omitted IDs, request bytes, `num_ctx`, `num_predict`, batch identity, and reduction reason. Preserve whole source units and their identities; never hide a truncation inside a source record.
+Measure the complete assembled request before transport, not just one source or the examples independently. Record static prompt bytes, every component's bytes, example authority roles, selected and omitted IDs, request bytes, retained-session reserve, `num_ctx`, `num_predict`, batch identity, and reduction reason. Preserve whole source and demonstration units and their identities; never hide truncation inside a record.
 
 When a valid packet does not fit, use declared stable reduction or independent-unit batching. If neither can preserve the stage contract, emit `packet_budget_exhausted` with measurements. Scope that result to the affected stage or artifact. An advisory preflight may not block unrelated artifact generation.
 

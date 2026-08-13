@@ -4,18 +4,18 @@
 Turning a user goal into an entity-oriented pipeline proposal or package.
 
 ## Load
-`prompts/design/` in this order: understand goal, define entity contract, identify invariants, design stages/validation, audit design, assemble definition. Load the pipeline-design output template, `references/deterministic_and_semantic_authority.md`, `references/run_evidence_and_continuous_improvement.md`, and only repository evidence relevant to the target data.
+`prompts/design/` in its README order, the pipeline-design templates, `references/deterministic_and_semantic_authority.md`, `references/run_evidence_and_continuous_improvement.md`, and only relevant repository evidence and trusted representative examples.
 
 ## Procedure
-1. Separate stated requirements, discovered facts, inferences, and unresolved user decisions.
-2. Define entity identity, source snapshot, goal state, allowed changes, and protected invariants.
-3. For every transformation, decision, gate, and repair, declare the property, property class, mechanism, verdict authority, proof basis, heuristic role, evidence, repair owner, and escalation. A deterministic mechanism is sufficient only when it establishes the actual property exactly.
-4. Permit an LLM stage only for bounded semantic work that exact mechanisms cannot perform. Heuristics may route or escalate but may not accept or reject semantic correctness. Convert PDF sources to linked Markdown/text derivatives deterministically before the stage, and make the derived text—not the PDF—the declared prompt input.
-5. Put safe fact-preserving canonicalization before inference. Define exact gates around semantic stages, then finite semantic repair, quarantine, and human-decision paths. Never compensate for uncertain behavior with broad proxies or return exact formatting defects to a model unnecessarily.
-6. Order preconditions and validators so impossible or unsafe entities fail before consuming inference, while valid entities pass only with requirement-specific evidence.
-7. Define machine and human run reports, rejected-candidate naming/sidecars/exclusions/retention, evidence links, truthful execution and learning statuses, promotion, rollback, scheduling, and post-run analysis. For each renderable generated Markdown artifact, declare whether a deterministic diagnostic renderer is available and the required evidence-only `<artifact>.<sequence>.rejected.render.pdf` child; distinguish it from trusted final rendering.
-8. Produce a staged package and trace every goal/invariant to a stage and verification.
-9. Audit the design; request user decisions for material unresolved choices before integration.
+1. Separate user requirements, repository facts, inferences, and unresolved decisions. Define entity identity, source snapshot, goal, allowed changes, operator authority, and protected invariants.
+2. Classify every property as representational, semantic, or human/policy. Assign only an authority that can establish that property.
+3. For semantic work, define the smallest coherent decision before drawing stages. “Narrow” bounds goal and authority; it does not atomize meaning. Declare any split's observed failure, isolation/risk/context/reuse reason, cost, and evaluation evidence.
+4. Inventory trusted past input/accepted-output pairs. Declare example roles, provenance, selection, whole-session budget, omissions, and why examples are sufficient or inappropriate. Never use rejected or untrusted artifacts.
+5. Design one retained semantic session by default: stable context and demonstrations, candidate, scope-bound audit, and finite progress-tested repair. Fresh-session independent or claim-level review requires a consequence-based justification.
+6. For revisions, use accepted baseline plus exact request and necessary factual authority. Audit the delta and direct consequences; keep broader reviewer preference advisory.
+7. Declare every lossy semantic derivative, its limited authority, preservation/omission policy, cache identity, fallback, and downstream source access.
+8. Put exact preparation, schema/resource/render gates, state, evidence, promotion, and rollback in deterministic code. Never provide PDFs directly to a model; supply the linked validated derived text—not the PDF.
+9. Define golden fixtures and efficiency measures before adding semantic microstages. Audit the staged design and request material user decisions.
 
 ## Output and verification
-A reviewable pipeline package and design traceability report. Reject unnecessary model calls, deterministic semantic overreach, exact repairs sent to inference, unmapped goals, destructive unvalidated writes, missing terminal evidence, discardable rejected candidates, or undeclared authority.
+A reviewable package tracing every goal to an authoritative mechanism, coherent semantic unit, example strategy, review scope, exact gates, evidence, fixtures, and escalation. Reject semantic laundering, context fragmentation, unjustified stage splits, lossy source substitution, scope escape, retry ratchets, unsafe writes, or unbounded cycles.

@@ -24,9 +24,9 @@ Every execution—successful, failed, interrupted, partial, resumed, or no-op—
 
 Initialize reporting before material work. If the required evidence location cannot be written, fail visibly rather than continue unaudited. Use guarded finalization so exceptions and Ctrl+C cannot produce a false success status.
 
-The report must identify the pipeline and governance revision, configuration, selection, entities, stages, attempts, prompt/template/request sizes, declared context and completion limits, reasoning mode, timing, failure class, validator or reviewer, authority, explanation, evidence links, feedback, retry disposition, promotion/render outcome, recovery state, and truthful execution and learning statuses.
+The report must identify the pipeline and governance revision, semantic unit, example roles and selected/omitted IDs, semantic derivative reuse/regeneration, session and review scope, operator request IDs, risk tier, configuration, selection, entities, stages, attempts, prompt/template/request sizes, declared context and completion limits, reasoning mode, timing, failure class, validator or reviewer, authority, explanation, evidence links, feedback, retry disposition, promotion/render outcome, recovery state, and truthful execution and learning statuses.
 
-The narrative must surface repeated or changing feedback, non-progress, prompt growth, deterministic work sent to inference, suspected authority mismatches, malformed output, exhausted budgets, and the eventual outcome. Separate observed facts, deterministic metrics, root-cause hypotheses, and recommendations.
+The narrative must surface semantic laundering, context fragmentation, reviewer scope escape, operator-intent demotion, lossy source substitution, repeated or changing feedback, non-progress, prompt growth, deterministic work sent to inference, suspected authority mismatches, malformed output, exhausted budgets, and the eventual outcome. Separate observed facts, deterministic metrics, root-cause hypotheses, and recommendations.
 
 ## Rejected candidates are first-class evidence
 
@@ -61,20 +61,21 @@ Historical evidence that appended a diagnostic trailer or used run/attempt filen
 
 Compute factual metrics before optional inference: first-pass yield, repair-dependent acceptance, retry count, repeated feedback, changing feedback, non-progress, prompt/context growth, model calls, tokens, elapsed time, exact defects sent to inference, and suspected deterministic false rejection.
 
-Compare the initial request and first output with the accepted or terminal trajectory. Identify the earliest responsible layer:
+Compare the demonstrations, initial request and first output with the accepted or terminal trajectory. Identify the earliest responsible layer:
 
-- source/input preparation;
-- initial prompt or examples;
+- source/input preparation or lossy semantic derivative;
+- example authority, selection, omission, or contamination;
+- initial prompt and coherent semantic-unit boundary;
 - missing or excessive context;
 - output schema;
 - deterministic normalizer;
 - validator authority;
-- semantic-review rubric;
+- semantic-review rubric, scope, independence, or operator authority;
 - retry routing;
 - model/provider behavior;
 - orchestration;
 - infeasible or ambiguous goal.
 
-Recommendations are advisory. Each must cite observed evidence, expected benefit, regression risk, and a required fixture or measurement. Prevent prompt accretion: generalize and compress recurring lessons, test against successful cases, and explicitly recommend no change when the evidence does not justify one.
+Recommendations are advisory. Each must cite observed evidence, expected benefit, regression risk, and a required fixture or measurement. Prefer improving initial examples, prompt, context, schema, or scope before adding a stage or validator. Prevent prompt accretion and semantic microstage proliferation: generalize and compress recurring lessons, test against successful cases, and explicitly recommend no change when the evidence does not justify one.
 
 Execution completion and learning completion are separate. Retrospective failure must not invalidate accepted artifacts, but normal process exit must not be mislabeled execution success when required validation or promotion failed.

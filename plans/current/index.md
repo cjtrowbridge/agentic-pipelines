@@ -2,4 +2,4 @@
 
 Format: `last_modified | path | title | summary`
 
-2026-08-09-20-04-35 | plans/current/2026-08-09-19-00-25_govern-source-packets-optional-stages-and-provider-health.md | Govern Source Packets, Optional Stages, and Provider Health | Make typed source provenance, whole-packet budgets, optional-stage fallbacks, and provider circuit breaking universal and testable for every Agentic Pipelines consumer.
+2026-08-12-21-39-17 | plans/current/2026-08-12-21-10-22_articulate-few-shot-semantic-pipeline-governance.md | Articulate Few-Shot Semantic Pipeline Governance | Make coherent few-shot semantic transformations the framework default while preventing semantic laundering, context fragmentation, and unbounded reviewer authority.
