@@ -70,7 +70,7 @@ For changes to this repository, load `playbooks/how_to_change_the_pipelines_fram
 
 ## Host/submodule use
 
-When mounted at `./pipelines`, this file is canonical at `./pipelines/AGENTS.md`. Prefer host-owned/customized pipeline definitions, prompts, templates, playbooks, and references where designated active; use framework defaults only when the host artifact is absent. Never overwrite host-owned content or local runtime configuration during bootstrap or update synthesis.
+When mounted at `./agentic-pipelines`, this file is canonical at `./agentic-pipelines/AGENTS.md`. Prefer host-owned/customized pipeline definitions, prompts, templates, playbooks, and references where designated active; use framework defaults only when the host artifact is absent. Never overwrite host-owned content or local runtime configuration during bootstrap or update synthesis.
 
 ## Information ownership
 

@@ -19,8 +19,8 @@
 ## Three-Way Synthesis Inputs
 
 1. File: `[path]`
-   - Old upstream source (`./pipelines/...` @ old commit):
-   - New upstream source (`./pipelines/...` @ new commit):
+   - Old upstream source (`./agentic-pipelines/...` @ old commit):
+   - New upstream source (`./agentic-pipelines/...` @ new commit):
    - Current host-managed file (`./...`):
 
 ## Proposed Merge Decisions
@@ -41,7 +41,7 @@
 
 ## Verification Results
 
-- `python pipelines/scripts/regenerate_plan_indexes.py --check --repo-root .`:
+- `python agentic-pipelines/scripts/regenerate_plan_indexes.py --check --repo-root .`:
 - Path consistency grep checks:
 - Additional checks:
 

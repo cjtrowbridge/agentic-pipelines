@@ -82,8 +82,8 @@ Define a repeatable workflow for creating, selecting, executing, revising, and a
      * `future/current`: filesystem last-write time descending.
      * `past`: `created_at` descending.
    * Run `python scripts/regenerate_plan_indexes.py` after plan create/update/move/archive.
-   * If this framework is mounted as `./pipelines` in a host repo using host-owned `./plans/`, run:
-     * `python pipelines/scripts/regenerate_plan_indexes.py --repo-root .`
+   * If this framework is mounted as `./agentic-pipelines` in a host repo using host-owned `./plans/`, run:
+     * `python agentic-pipelines/scripts/regenerate_plan_indexes.py --repo-root .`
 
 9. **Checkpoint Summary Requirements**
    * Before commit/push flow, summarize:

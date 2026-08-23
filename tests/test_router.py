@@ -8,7 +8,7 @@ class RouterTests(unittest.TestCase):
         self.assertIn("Pipelines is a prompt-first framework", text)
         self.assertIn("## Task routing", text)
         self.assertIn("## Universal invariants", text)
-        self.assertIn("./pipelines/AGENTS.md", text)
+        self.assertIn("./agentic-pipelines/AGENTS.md", text)
         for name in ("RULES.md", "CODEX.md", "CLAUDE.md", "GEMINI.md", "OPENCODE.md"):
             self.assertFalse(Path(name).exists(), name)
 

@@ -31,7 +31,6 @@ stages:
     version: 1.0.0
     output: reviewer_verdict
     llm_justification: Meaning preservation cannot be completely established by structural validators.
-    max_attempts: 2
     max_attempts: 1
   repair:
     prompt: prompts/repair.md

@@ -3,7 +3,7 @@
 Use this only for an existing host that mounted the former framework.
 
 1. Record the current submodule revision, host status, customized files, and rollback command.
-2. Replace the old submodule path with `./pipelines`; point the host's concise `AGENTS.md` entrypoint to `./pipelines/AGENTS.md`.
+2. Replace the old submodule path with `./agentic-pipelines`; point the host's concise `AGENTS.md` entrypoint to `./agentic-pipelines/AGENTS.md`.
 3. Preserve the host's journal and plans. Replace legacy boards with one host-owned root `TODO.md`; do not copy machine events into it.
 4. Stage, compare, and explicitly approve generated `pipeline.yaml`, prompts, validators, fixtures, or schemas. Never overwrite customized host artifacts.
 5. Remove old downtime tasks. Runtime failures now produce deterministic cohorts, performance reports, and advisory remediation proposals.

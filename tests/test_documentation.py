@@ -151,7 +151,7 @@ class DocumentationTests(unittest.TestCase):
 
     def test_migration_guide_names_required_boundaries(self) -> None:
         text = Path("docs/migrating_from_agents.md").read_text(encoding="utf-8")
-        for term in ("./pipelines", "AGENTS.md", "TODO.md", "journal", "api.yaml", "schema version 2", "rollback", "LLM stage"):
+        for term in ("./agentic-pipelines", "AGENTS.md", "TODO.md", "journal", "api.yaml", "schema version 2", "rollback", "LLM stage"):
             self.assertIn(term, text)
 
     def test_active_product_files_do_not_reference_removed_systems(self) -> None:

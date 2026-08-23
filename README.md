@@ -8,22 +8,22 @@ Agentic Pipelines are mostly ordinary deterministic automation. Code governs exa
 
 ## Pipeline entry points
 
-All commands run from the host repository root, where the framework is normally mounted at `./pipelines`. Start with the command matching the smallest action you need:
+All commands run from the host repository root, where the framework is normally mounted at `./agentic-pipelines`. Start with the command matching the smallest action you need:
 
-- `python pipelines/scripts/validate_pipeline_package.py path/to/staged-package`: validate a proposed pipeline package without inference or source mutation.
-- `python pipelines/scripts/pipeline.py preflight --api-config api.yaml`: validate the local, ignored API configuration before a model-backed operation.
-- `python pipelines/scripts/pipeline.py discover ...`: register source or contract changes using deterministic discovery only.
-- `python pipelines/scripts/pipeline.py run ...`: perform a bounded, resumable pipeline run; it invokes local inference only for declared LLM stages.
-- `python pipelines/scripts/pipeline.py inspect-entity ...`: inspect state, evidence, and disposition for one entity without operating on unrelated entities.
-- `python pipelines/scripts/pipeline.py report ...` and `analyze ...`: produce deterministic run reporting or bounded advisory analysis; `analyze` requires local API configuration when it invokes its declared analysis prompt.
-- `python pipelines/scripts/pipeline.py retry-cohort ...` and `rollback-entity ...`: perform the explicit recovery actions described in the operation/retry playbooks.
+- `python agentic-pipelines/scripts/validate_pipeline_package.py path/to/staged-package`: validate a proposed pipeline package without inference or source mutation.
+- `python agentic-pipelines/scripts/pipeline.py preflight --api-config api.yaml`: validate the local, ignored API configuration before a model-backed operation.
+- `python agentic-pipelines/scripts/pipeline.py discover ...`: register source or contract changes using deterministic discovery only.
+- `python agentic-pipelines/scripts/pipeline.py run ...`: perform a bounded, resumable pipeline run; it invokes local inference only for declared LLM stages.
+- `python agentic-pipelines/scripts/pipeline.py inspect-entity ...`: inspect state, evidence, and disposition for one entity without operating on unrelated entities.
+- `python agentic-pipelines/scripts/pipeline.py report ...` and `analyze ...`: produce deterministic run reporting or bounded advisory analysis; `analyze` requires local API configuration when it invokes its declared analysis prompt.
+- `python agentic-pipelines/scripts/pipeline.py retry-cohort ...` and `rollback-entity ...`: perform the explicit recovery actions described in the operation/retry playbooks.
 
 These commands describe the framework reference runtime; an importing project may expose different interactive operations. Every host-declared operator entrypoint must have a host-owned VS Code task, and exactly one ordinary main entrypoint must be the primary Run/Debug play action. Both invoke the host's appropriate platform-native prerequisite/bootstrap script before its actual pipeline command. See `playbooks/how_to_set_up_pipeline_entrypoints_in_vscode.md`; the files under `templates/vscode/` are adaptable examples, not installable defaults. Direct commands remain available for CI, schedulers, and other automation.
 
 Every host pipeline must bootstrap before its own imports or source work: ensure the pinned framework is available, install only its declared requirements and declared local runtime dependencies into ignored host-local directories, then run preflight. The reusable helper supports that contract without modifying system Python:
 
 ```powershell
-python pipelines/scripts/bootstrap_pipeline_environment.py --host-root . --requirements requirements-pipeline.txt --requirements pipelines/requirements.txt --check-module yaml --playwright-browser chromium
+python agentic-pipelines/scripts/bootstrap_pipeline_environment.py --host-root . --requirements requirements-pipeline.txt --requirements agentic-pipelines/requirements.txt --check-module yaml --playwright-browser chromium
 ```
 
 ## How agents use the framework
@@ -60,19 +60,19 @@ After a governance-changing framework update, use `playbooks/how_to_audit_existi
 Before integration, validate a generated package without inference or source mutation:
 
 ```powershell
-python pipelines/scripts/validate_pipeline_package.py path/to/staged-package
+python agentic-pipelines/scripts/validate_pipeline_package.py path/to/staged-package
 ```
 
 The package must justify every LLM stage, map goals to specific verification, and contain no credentials. Package schemas 1–4 remain readable compatibility inputs; schema 5 is required to claim current coherent-semantic-unit governance because it declares example, session, review-scope, blocking-authority, lossy-intermediate, stage-split, and risk contracts. See `examples/markdown_repair/` for the fake-provider-tested vertical slice.
 
 ## Host layout
 
-The framework is normally mounted at `./pipelines`:
+The framework is normally mounted at `./agentic-pipelines`:
 
 ```text
 host/
-â”œâ”€â”€ pipelines/          # submodule
-â”œâ”€â”€ AGENTS.md           # routes to ./pipelines/AGENTS.md
+â”œâ”€â”€ agentic-pipelines/  # submodule
+â”œâ”€â”€ AGENTS.md           # routes to ./agentic-pipelines/AGENTS.md
 â”œâ”€â”€ TODO.md             # sole host-owned human checklist
 â”œâ”€â”€ pipeline.yaml       # host pipeline definition
 â”œâ”€â”€ api.sample.yaml     # tracked host configuration template
@@ -93,7 +93,7 @@ The framework never overwrites host-owned prompts, `TODO.md`, plans, journal, cr
 During framework bootstrap, copy the framework `api.sample.yaml` to a tracked `api.sample.yaml` in the host root. The operator then copies that host sample to ignored `api.yaml`, supplies the local Ollama-compatible endpoint/model and any local gateway credential, and runs:
 
 ```powershell
-python pipelines/scripts/pipeline.py preflight --api-config api.yaml
+python agentic-pipelines/scripts/pipeline.py preflight --api-config api.yaml
 ```
 
 The runtime has no silent cloud fallback. Never commit `api.yaml` or runtime evidence.

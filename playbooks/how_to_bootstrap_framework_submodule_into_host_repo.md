@@ -8,10 +8,10 @@ Adding this framework to a host for the first time.
 
 ## Procedure
 1. Inspect the host and obtain approval for the submodule, target path, and planned host files.
-2. Add/initialize the framework at `./pipelines`.
+2. Add/initialize the framework at `./agentic-pipelines`.
 3. Create only missing non-secret host scaffolding: root shim, `TODO.md`, pipeline definition, prompts, plans/journal, ignored runtime directories, and a tracked root `api.sample.yaml` copied from the framework sample. Do not create `api.yaml` or infer its values.
 4. If a target exists, produce synthesis decisions; never overwrite host-owned content.
-5. Point host shims to `./pipelines/AGENTS.md` while retaining host-specific routing context.
+5. Point host shims to `./agentic-pipelines/AGENTS.md` while retaining host-specific routing context.
 6. Ensure `.gitignore` excludes `.agentic-pipelines/`, `api.yaml`, state, artifacts, threads, failures, runs, generated reports, and rejected candidates such as `*.rejected.md`, `*.rejected.json`, and `*.rejected.txt`.
 7. Ask the operator to copy the host-root `api.sample.yaml` to ignored `api.yaml` and configure local values through the local-inference playbook; do not create or infer them.
 8. Through `how_to_set_up_pipeline_entrypoints_in_vscode.md`, inventory the host's actual interactive entrypoints, create only missing host-owned VS Code/native-script files from reviewed host inputs, and preserve existing configuration through an explicit merge proposal.

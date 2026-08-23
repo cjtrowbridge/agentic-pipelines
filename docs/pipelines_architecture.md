@@ -20,12 +20,12 @@ No prompt, worker output, reviewer output, or failure-analysis output may modify
 
 ## Framework and host ownership
 
-The framework is installed as `./pipelines` in a host repository. The framework owns reusable runtime code, schemas, templates, documentation, and playbooks. The host owns its pipeline definition, source data, prompts selected or customized for that project, local configuration, runtime state, artifacts, reports, and operational checklist.
+The framework is installed as `./agentic-pipelines` in a host repository. The framework owns reusable runtime code, schemas, templates, documentation, and playbooks. The host owns its pipeline definition, source data, prompts selected or customized for that project, local configuration, runtime state, artifacts, reports, and operational checklist.
 
 ```text
 host/
-â”œâ”€â”€ pipelines/                     # framework submodule
-â”œâ”€â”€ AGENTS.md                      # points to ./pipelines/AGENTS.md
+â”œâ”€â”€ agentic-pipelines/             # framework submodule
+â”œâ”€â”€ AGENTS.md                      # points to ./agentic-pipelines/AGENTS.md
 â”œâ”€â”€ TODO.md                        # host-owned human work checklist
 â”œâ”€â”€ pipeline.yaml                  # host-owned pipeline definition
 â”œâ”€â”€ api.yaml                       # local-only credentials/endpoint configuration
@@ -72,7 +72,7 @@ The runtime refuses unknown schema versions, missing required gates, unsafe path
 
 ## Initial packaging and command surface
 
-The initial runtime targets Python 3.11 or newer and uses the standard library where practical (`sqlite3`, `json`, `argparse`, `logging`, `pathlib`, `urllib`) plus a pinned YAML parser. The framework code lives in a `pipeline_runtime` Python package in this repository, with thin scripts that may be invoked directly from a host as `python pipelines/scripts/pipeline.py <command>`. A host does not copy runtime source in order to run a pipeline.
+The initial runtime targets Python 3.11 or newer and uses the standard library where practical (`sqlite3`, `json`, `argparse`, `logging`, `pathlib`, `urllib`) plus a pinned YAML parser. The framework code lives in a `pipeline_runtime` Python package in this repository, with thin scripts that may be invoked directly from a host as `python agentic-pipelines/scripts/pipeline.py <command>`. A host does not copy runtime source in order to run a pipeline.
 
 The command surface is deliberately small: `preflight`, `discover`, `run`, `inspect-entity`, `report`, `analyze`, `retry-cohort`, and `rollback-entity`. Deterministic inspection/reporting commands do not require API configuration. Mutating run, retry, and rollback commands are explicit and bounded.
 
