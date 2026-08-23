@@ -2,6 +2,7 @@
 
 Format: `last_modified | path | title | summary`
 
+2026-08-23-11-34-42 | plans/past/2026-08-23-11-28-57_support-agentic-pipelines-host-path.md | Support the Agentic Pipelines Host Path | Remove the legacy requirement that hosts mount the framework at ./pipelines and make ./agentic-pipelines the documented and tested canonical path.
 2026-08-23-11-28-48 | plans/past/2026-08-12-21-10-22_articulate-few-shot-semantic-pipeline-governance.md | Articulate Few-Shot Semantic Pipeline Governance | Make coherent few-shot semantic transformations the framework default while preventing semantic laundering, context fragmentation, and unbounded reviewer authority.
 2026-08-23-11-28-48 | plans/past/2026-08-09-19-00-25_govern-source-packets-optional-stages-and-provider-health.md | Govern Source Packets, Optional Stages, and Provider Health | Make typed source provenance, whole-packet budgets, optional-stage fallbacks, and provider circuit breaking universal and testable for every Agentic Pipelines consumer.
 2026-08-23-11-28-48 | plans/past/2026-08-09-15-08-52_govern-diagnostic-rendering-and-semantic-review-scope.md | Govern Diagnostic Rendering and Semantic Review Scope | Establish universal governance, schemas, evidence contracts, and conformance tests for diagnostic rendering of rejected candidates and correctly scoped semantic claim and coverage review.
