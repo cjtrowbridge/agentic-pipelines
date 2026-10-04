@@ -11,6 +11,7 @@ Agentic Pipelines are mostly ordinary deterministic automation. Code governs exa
 All commands run from the host repository root, where the framework is normally mounted at `./agentic-pipelines`. Start with the command matching the smallest action you need:
 
 - `python agentic-pipelines/scripts/validate_pipeline_package.py path/to/staged-package`: validate a proposed pipeline package without inference or source mutation.
+- `python agentic-pipelines/scripts/render_markdown_pdf.py path/to/document.md`: bootstrap the portable Unicode/emoji renderer and atomically regenerate the sibling PDF; see `playbooks/how_to_render_markdown_to_pdf.md` for its document profile.
 - `python agentic-pipelines/scripts/pipeline.py preflight --api-config api.yaml`: validate the local, ignored API configuration before a model-backed operation.
 - `python agentic-pipelines/scripts/pipeline.py discover ...`: register source or contract changes using deterministic discovery only.
 - `python agentic-pipelines/scripts/pipeline.py run ...`: perform a bounded, resumable pipeline run; it invokes local inference only for declared LLM stages.

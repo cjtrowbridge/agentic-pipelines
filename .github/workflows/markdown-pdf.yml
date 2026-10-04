@@ -1,0 +1,35 @@
+name: Portable Markdown PDF
+on:
+  push:
+    paths:
+      - 'scripts/render_markdown_pdf.py'
+      - 'requirements-markdown-pdf.txt'
+      - 'assets/pdf-fonts/**'
+      - 'tests/test_render_markdown_pdf.py'
+      - '.github/workflows/markdown-pdf.yml'
+  pull_request:
+    paths:
+      - 'scripts/render_markdown_pdf.py'
+      - 'requirements-markdown-pdf.txt'
+      - 'assets/pdf-fonts/**'
+      - 'tests/test_render_markdown_pdf.py'
+      - '.github/workflows/markdown-pdf.yml'
+  workflow_dispatch:
+jobs:
+  render:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.12']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -r requirements-markdown-pdf.txt
+      - run: python -m unittest discover -s tests -p test_render_markdown_pdf.py -v
+      - name: Exercise clean bootstrap and repeat render
+        run: |
+          python scripts/render_markdown_pdf.py assets/pdf-fonts/README.md
+          python scripts/render_markdown_pdf.py --no-bootstrap assets/pdf-fonts/README.md

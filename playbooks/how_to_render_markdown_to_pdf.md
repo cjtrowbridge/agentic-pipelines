@@ -2,69 +2,36 @@
 
 ## Use when
 
-You need a repeatable, local PDF derivative of a trusted Markdown document on Windows or Linux. This is a deterministic rendering operation; it is not a model stage and does not authorize a PDF as model input. If a pipeline needs a PDF source, first extract and validate a linked Markdown/text derivative, then provide only that derivative to prompts.
+Regenerate a trusted Markdown document's local PDF derivative. Regenerate after every source edit. This deterministic operation does not authorize PDF input to models; extract and validate text first.
 
 ## Load
 
 - `AGENTS.md`
 - `scripts/render_markdown_pdf.py`
 - `requirements-markdown-pdf.txt`
-- The source Markdown document and the active plan item that authorizes its rendering
+- `assets/pdf-fonts/README.md`
+- Source Markdown and authorizing plan item
 
-## Renderer contract
+## Contract
 
-Use `scripts/render_markdown_pdf.py`. On its first run it creates an ignored local virtual environment at `agentic-pipelines/.markdown-pdf-renderer/`, installs only the packages in `requirements-markdown-pdf.txt`, and restarts itself in that environment. It requires no browser, Pandoc, TeX distribution, or OS package manager.
-
-The renderer reads UTF-8 or UTF-8-with-BOM Markdown and writes `<source-stem>.pdf` in the same directory. It atomically replaces the destination only after `xhtml2pdf` reports no errors and the temporary file begins with a PDF header. It emits visible bootstrap, rendering, completion, and failure messages; Ctrl+C returns status 130.
-
-The dependency path is Python-package based and portable across supported CPython releases on Windows and Linux. Its packages may use platform wheels; “portable” means it has no separate browser, TeX, Pandoc, or OS-level renderer prerequisite. It is not a promise of pixel-identical output across all platforms: PDF library versions and available fonts can affect typography. Keep the dependency ranges declared and test the target platform for release-critical documents.
-
-## Supported document profile
-
-Use ordinary Markdown: headings, paragraphs, emphasis, links, lists, fenced code blocks, tables, and local images. The renderer uses a deliberately small embedded stylesheet and the `extra`, `sane_lists`, and `toc` Markdown extensions.
-
-Avoid browser-dependent JavaScript, remote assets, arbitrary CSS, SVGs that need browser layout, advanced page floats, and Unicode glyphs not covered by the available PDF fonts. For multilingual or brand-critical output, supply and test a licensed Unicode font as an explicit renderer enhancement; do not silently substitute or claim fidelity without visual review.
-
-## Procedure
-
-1. Confirm an approved plan item authorizes the derivative and that the Markdown input is trusted. Do not render rejected evidence as an ordinary/final artifact; use the isolated diagnostic-rendering contract instead.
-2. Run the renderer from the host root or any directory:
-
-   ```powershell
-   python agentic-pipelines/scripts/render_markdown_pdf.py path/to/document.md
-   ```
-
-   ```bash
-   python3 agentic-pipelines/scripts/render_markdown_pdf.py path/to/document.md
-   ```
-
-3. On the first invocation, allow the visible local bootstrap to complete. It downloads packages through the configured Python package index. For an offline/reproducible environment, pre-populate the local environment using an approved package mirror; do not add an undeclared system renderer as a fallback.
-4. Confirm that `path/to/document.pdf` exists, is nonempty, and begins with `%PDF-`. Open it for a human visual check whenever layout, tables, images, or non-ASCII text are material.
-5. Treat a rendering failure as a failed derivative. Preserve the Markdown source and report the command/error; do not mislabel a partial PDF as success.
-
-## Options and examples
-
-Use `--no-bootstrap` in a controlled environment to fail if the renderer environment is not already ready:
+Run:
 
 ```powershell
-python agentic-pipelines/scripts/render_markdown_pdf.py --no-bootstrap docs/report.md
+python agentic-pipelines/scripts/render_markdown_pdf.py path/to/document.md
 ```
 
-Place the local environment elsewhere only when the default ignored directory is unsuitable:
+On Linux use `python3` if needed. Requires CPython 3.11/3.12 with venv/pip. Bootstrap installs declared versions into ignored `.markdown-pdf-renderer/`; system Python remains untouched. First installation requires package-index access or a preconfigured offline wheelhouse. No browser, Pandoc, TeX, OS package manager, or installed fonts are required. Python dependencies include platform wheels.
 
-```bash
-python3 agentic-pipelines/scripts/render_markdown_pdf.py --bootstrap-dir /tmp/markdown-pdf-env docs/report.md
-```
+Uses Markdown, fpdf2, HarfBuzz and checksum-verified bundled Noto text/code/color-emoji fonts. UTF-8/BOM `.md` or `.markdown` becomes sibling `<stem>.pdf`. Promotion is atomic after PDF/page validation. Failure/interruption preserves the prior PDF; Ctrl+C exits 130. Progress is visible.
 
-## Verification
+## Document profile
 
-- Confirm the source path ends in `.md` or `.markdown` and the sibling output is `<stem>.pdf`.
-- Confirm a zero exit code, a nonempty PDF, and a `%PDF-` header.
-- Visually inspect representative tables, lists, code blocks, images, page breaks, and required characters for a release-critical document.
-- Record the source/output paths, renderer dependency versions, platform, and any visual-review result in the applicable run evidence or checkpoint.
+Supports headings, paragraphs, emphasis, links, lists, code, tables and local images. Unicode coverage follows bundled fonts; additional scripts require explicit fonts and shaping validation. Color emoji and compound sequences use a fixed font release. Missing characters fail visibly.
 
-## Failure handling
+Layout: Letter, 0.6-inch margins, 9-point body, repeating table headers. Three-column tables use 26/28/46 percent widths; others are equal-width. Cells are left/top aligned. Table-cell inline code preserves text using the table font. Embedded CSS is replaced with this profile, visibly reported; `report-page-break` is supported. Arbitrary CSS/JavaScript, remote images and rows taller than a page are unsupported.
 
-- A missing Python `venv`/`pip`, package-install failure, unreadable source, or renderer error is a visible failure. Correct the environment or input and rerun; do not replace this renderer with an unreviewed platform-specific tool.
-- If the PDF is invalid, the temporary file is removed and the prior sibling PDF remains untouched.
-- If a local image cannot resolve, simplify or correct the Markdown path and verify the output visually. Remote images are intentionally not a reliable publication dependency.
+## Verification and failure handling
+
+Check zero exit, nonempty sibling PDF and readable pages. Visually review tables, images, emoji and page breaks; test extraction separately. Record versions/platform and validation gaps. Correct input/environment and rerun; never report stale output as newly rendered.
+
+`--no-bootstrap` rejects missing/outdated environments. `--bootstrap-dir PATH` selects another environment. Run `tests/test_render_markdown_pdf.py` using renderer dependencies; CI covers Windows/Linux. Byte-identical output and universal Unicode coverage are not promised.
