@@ -173,7 +173,19 @@ def prepare_html(body: str, source_dir: Path) -> str:
     return str(soup)
 
 
-def create_pdf(html: str):
+def document_title(html: str, markdown_path: Path) -> str:
+    """Derive the PDF metadata title from the rendered document, never a generic label."""
+    from bs4 import BeautifulSoup
+
+    heading = BeautifulSoup(html, "html.parser").find("h1")
+    if heading:
+        title = " ".join(heading.get_text(" ", strip=True).split())
+        if title:
+            return title
+    return markdown_path.stem.replace("_", " ").replace("-", " ")
+
+
+def create_pdf(html: str, title: str = "Markdown document"):
     from bs4 import BeautifulSoup
     from fpdf import FPDF
     from fpdf.html import HTML2FPDF
@@ -235,7 +247,7 @@ def create_pdf(html: str):
     pdf.HTML2FPDF_CLASS = PortableHTML
     pdf.set_margins(43.2, 43.2, 43.2)
     pdf.set_auto_page_break(True, 43.2)
-    pdf.set_title("Markdown document")
+    pdf.set_title(title)
     pdf.set_creator("Agentic Pipelines portable Markdown renderer")
     emoji = TTFont(FONT_ROOT / "Noto-COLRv1.ttf")
     emoji_points = {cp for cp in emoji.getBestCmap() if cp >= 0x2000}
@@ -288,6 +300,7 @@ def render(markdown_path: Path) -> Path:
 
     output = markdown_path.with_suffix(".pdf")
     html = prepare_html(document_html(markdown_path.read_text(encoding="utf-8-sig")), markdown_path.parent)
+    title = document_title(html, markdown_path)
 
     print(f"render: {markdown_path.name} -> {output.name}", flush=True)
     with tempfile.NamedTemporaryFile(
@@ -299,7 +312,7 @@ def render(markdown_path: Path) -> Path:
     logger.addHandler(warnings)
     pdf = None
     try:
-        pdf = create_pdf(html)
+        pdf = create_pdf(html, title)
         pdf.output(temp_path)
         if warnings.messages:
             raise RuntimeError("PDF rendering warnings: " + "; ".join(dict.fromkeys(warnings.messages)))

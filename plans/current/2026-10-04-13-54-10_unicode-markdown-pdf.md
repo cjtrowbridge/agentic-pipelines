@@ -22,6 +22,7 @@ Authority: user approved implementation and host report rendering on 2026-10-04;
   - [x] 2.2 Render the host Week 6–7 deliverables report and inspect representative pages.
   - [?] 2.3 Check syntax and relevant framework tests; record platform coverage honestly.
   - [x] 2.4 Update indexes and journal; leave changes uncommitted pending user review.
+  - [x] 2.5 Replace the generic PDF metadata title with the source document's H1 (or readable filename fallback), and cover both paths with renderer tests.
 
 No framework ROADMAP.md exists; this scoped continuation of the archived renderer plan changes no host delivery commitments.
 Windows validation occurs on CJ-Desktop. Linux execution must be recorded separately if available; otherwise it remains an explicit validation gap.

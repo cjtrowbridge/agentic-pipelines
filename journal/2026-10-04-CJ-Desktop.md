@@ -25,6 +25,8 @@
 
 - [2026-10-04 local, CJ-Desktop] Implemented user-approved Unicode PDF replacement under `plans/current/2026-10-04-13-54-10_unicode-markdown-pdf.md` atoms 1.1–1.4 and 2.1–2.4. Replaced xhtml2pdf with fpdf2 2.8.9 and HarfBuzz, bundled checksum-verified OFL Noto fonts, pinned dependencies, added regression tests and Windows/Linux CI, and synchronized the playbook/entrypoint. Eleven renderer tests and eighteen focused framework tests passed on Windows Python 3.12; clean bootstrap and repeat rendering succeeded. Inspected status glyphs, compound emoji, keycaps and report pages 1–3; keycap fallback needed a focused shaping-run adapter. Regenerated the host `2026/Phase 2/Deliverables/week-6/development-week-6-7-report.pdf` as seven readable pages without editing its Markdown source. Linux/Python 3.11 execution remains pending CI after publication approval (atom 2.3 needs validation). Changes remain uncommitted for user PDF review and explicit commit/push approval.
 
+- [2026-10-04 local, CJ-Desktop] Corrected the unacceptable generic PDF metadata title `Markdown document`: the renderer now derives the title from the first H1, with a readable source-filename fallback. Regenerated the Week 6-7 report PDF (seven readable pages) and confirmed its metadata title is `Development Weeks 6-7 Deliverables Report`; all 12 renderer tests passed. This remains part of the uncommitted renderer review checkpoint.
+
 ## Notes / Reflections
 
 -

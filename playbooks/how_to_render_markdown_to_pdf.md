@@ -22,7 +22,7 @@ python agentic-pipelines/scripts/render_markdown_pdf.py path/to/document.md
 
 On Linux use `python3` if needed. Requires CPython 3.11/3.12 with venv/pip. Bootstrap installs declared versions into ignored `.markdown-pdf-renderer/`; system Python remains untouched. First installation requires package-index access or a preconfigured offline wheelhouse. No browser, Pandoc, TeX, OS package manager, or installed fonts are required. Python dependencies include platform wheels.
 
-Uses Markdown, fpdf2, HarfBuzz and checksum-verified bundled Noto text/code/color-emoji fonts. UTF-8/BOM `.md` or `.markdown` becomes sibling `<stem>.pdf`. Promotion is atomic after PDF/page validation. Failure/interruption preserves the prior PDF; Ctrl+C exits 130. Progress is visible.
+Uses Markdown, fpdf2, HarfBuzz and checksum-verified bundled Noto text/code/color-emoji fonts. UTF-8/BOM `.md` or `.markdown` becomes sibling `<stem>.pdf`. The PDF metadata title is the first H1 (or a readable source-filename fallback), never a generic renderer label. Promotion is atomic after PDF/page validation. Failure/interruption preserves the prior PDF; Ctrl+C exits 130. Progress is visible.
 
 ## Document profile
 

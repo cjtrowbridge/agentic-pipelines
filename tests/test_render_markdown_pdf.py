@@ -45,6 +45,22 @@ class RendererTests(unittest.TestCase):
             self.assertIn("/Font", resources)
             self.assertTrue(any(font.get_object().get("/Subtype") == "/Type3" for font in resources["/Font"].values()))
 
+    def test_pdf_metadata_uses_h1_or_readable_filename(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            headed = root / "ignored-name.md"
+            headed.write_text("# A deliberate report title\n", encoding="utf-8")
+            self.assertEqual(
+                PdfReader(renderer.render(headed)).metadata.title,
+                "A deliberate report title",
+            )
+            unheaded = root / "week_7-status-report.md"
+            unheaded.write_text("No heading here.\n", encoding="utf-8")
+            self.assertEqual(
+                PdfReader(renderer.render(unheaded)).metadata.title,
+                "week 7 status report",
+            )
+
     def test_long_table_repeats_headings_without_losing_rows(self):
         with tempfile.TemporaryDirectory() as directory:
             source = Path(directory) / "table.md"
