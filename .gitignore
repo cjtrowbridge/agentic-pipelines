@@ -17,4 +17,5 @@ __pycache__/
 .pytest_cache/
 .venv/
 .agentic-pipelines/
+.markdown-pdf-renderer/
 
