@@ -6,4 +6,6 @@ Only routed playbooks are active product instructions. Unrouted procedures shoul
 
 `how_to_set_up_pipeline_entrypoints_in_vscode.md` owns creation and review of host-owned VS Code tasks, the selected main play action, and their platform-native prerequisite/bootstrap boundary.
 
+`how_to_create_and_maintain_host_bootstrap.md` owns the host's stable/versioned bootstrap design, idempotent setup, read-only check mode, service probes, and repair integration.
+
 `how_to_audit_existing_pipeline_conformance.md` owns preservation-safe review of an existing consumer after governance changes and produces findings plus a proposed host remediation plan without automatic mutation.

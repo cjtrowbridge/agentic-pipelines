@@ -44,11 +44,14 @@ class VSCodeEntrypointExampleTests(unittest.TestCase):
         self.assertIn("replace_", combined)
         self.assertIn("not installable framework defaults", combined)
 
-    def test_native_examples_check_then_delegate(self) -> None:
+    def test_native_examples_bootstrap_then_delegate(self) -> None:
         powershell = (ROOT / "bootstrap.example.ps1").read_text(encoding="utf-8")
         bash = (ROOT / "bootstrap.example.sh").read_text(encoding="utf-8")
-        self.assertLess(powershell.index("Get-Command REPLACE_PREREQUISITE_COMMAND"), powershell.index("& REPLACE_PIPELINE_COMMAND"))
-        self.assertLess(bash.index("command -v REPLACE_PREREQUISITE_COMMAND"), bash.index("exec REPLACE_PIPELINE_COMMAND"))
+        self.assertLess(powershell.index("Get-Command REPLACE_PYTHON_COMMAND"), powershell.index("scripts/bootstrap.py"))
+        self.assertLess(powershell.index("scripts/bootstrap.py"), powershell.index("& REPLACE_PIPELINE_COMMAND"))
+        self.assertLess(bash.index("command -v REPLACE_PYTHON_COMMAND"), bash.index("scripts/bootstrap.py"))
+        self.assertLess(bash.index("scripts/bootstrap.py"), bash.index("exec REPLACE_PIPELINE_COMMAND"))
+        self.assertIn("if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }", powershell)
         self.assertIn("exit 130", powershell)
         self.assertIn("exit 130", bash)
 

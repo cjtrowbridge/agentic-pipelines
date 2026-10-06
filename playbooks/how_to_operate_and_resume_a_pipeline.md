@@ -7,8 +7,8 @@ Discovering, dry-running, processing, stopping, resuming, or scheduling entities
 Host definition, CLI help, current run narrative, and the local-inference playbook only when preflight fails. Do not load design prompts during operation.
 
 ## Procedure
-1. For interactive work, select the applicable host-owned VS Code task or primary play action; it enters native bootstrap. Automation may call the equivalent direct interface.
-2. Run bootstrap first: verify framework and ignored local dependencies, then definition/API/storage/prompt/schema preflight. Do not process source or invoke a model after failure.
+1. For interactive work, select the applicable host-owned VS Code task or primary play action. Automation runs `scripts/bootstrap.py` before direct commands.
+2. Run bootstrap first: verify framework, local dependencies, services, and preflight. `python scripts/bootstrap.py --check` inspects without changes. Do not process source or invoke a model after failure.
 3. Discover entities and inspect counts without source mutation.
 4. Confirm visible stage reporting: query counts, prompt sizes, elapsed/ETA, discovery, skips, validation, promotion, rendering, failures, and outcomes without protected inputs.
 5. Dry-run eligible selection, then invoke a bounded entity/time-limited run.

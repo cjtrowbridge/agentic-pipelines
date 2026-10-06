@@ -21,11 +21,15 @@ All commands run from the host repository root, where the framework is normally 
 
 These commands describe the framework reference runtime; an importing project may expose different interactive operations. Every host-declared operator entrypoint must have a host-owned VS Code task, and exactly one ordinary main entrypoint must be the primary Run/Debug play action. Both invoke the host's appropriate platform-native prerequisite/bootstrap script before its actual pipeline command. See `playbooks/how_to_set_up_pipeline_entrypoints_in_vscode.md`; the files under `templates/vscode/` are adaptable examples, not installable defaults. Direct commands remain available for CI, schedulers, and other automation.
 
-Every host pipeline must bootstrap before its own imports or source work: ensure the pinned framework is available, install only its declared requirements and declared local runtime dependencies into ignored host-local directories, then run preflight. The reusable helper supports that contract without modifying system Python:
+Every importing project owns `scripts/bootstrap.py` as its stable setup and health-check command. It delegates to a host-selected versioned implementation such as `scripts/bootstrap-v1.py`. Run `python scripts/bootstrap.py --check` for read-only per-requirement results and final pass/fail totals. Run it without `--check` to inspect and repair declared requirements idempotently before pipeline work. See `playbooks/how_to_create_and_maintain_host_bootstrap.md`; `templates/bootstrap/` provides non-installable examples.
+
+Every host pipeline must bootstrap before its own imports or source work: ensure the pinned framework is available, install only its declared requirements and declared local runtime dependencies into ignored host-local directories, then run preflight. The host's selected versioned bootstrap may invoke the reusable `bootstrap_pipeline_environment.py` helper without modifying system Python. For example, that implementation can call:
 
 ```powershell
 python agentic-pipelines/scripts/bootstrap_pipeline_environment.py --host-root . --requirements requirements-pipeline.txt --requirements agentic-pipelines/requirements.txt --check-module yaml --playwright-browser chromium
 ```
+
+The host's `scripts/bootstrap.py` remains the operator entrypoint for applying setup changes.
 
 ## How agents use the framework
 
@@ -98,6 +102,10 @@ python agentic-pipelines/scripts/pipeline.py preflight --api-config api.yaml
 ```
 
 The runtime has no silent cloud fallback. Never commit `api.yaml` or runtime evidence.
+
+Hosts using Ollama directly can create named context variants for their measured stage budgets. See `playbooks/how_to_create_ollama_context_aliases.md` for 1k, 4k, 64k, 96k, and verified upper-context examples. Keep each stage's request-level `num_ctx` aligned with its selected alias; this runtime sends that option on every model request.
+
+For a local Docker Ollama container, `scripts/ensure_ollama_context_aliases.py` provides the host bootstrap with a read-only `--check` and an idempotent creation command. Alias names follow `[hostname]-[context]-[model name]`, such as `cj-desktop-96k-qwen3.8:27b`. The host selects the model and contexts with repeatable `--context` arguments; see the playbook for the complete command and bootstrap wiring.
 
 Deterministic commands such as `discover`, `inspect-entity`, and `report` do not require API configuration. `run` and `analyze` require the ignored local config because they may invoke declared LLM stages.
 

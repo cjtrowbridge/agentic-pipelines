@@ -4,6 +4,8 @@
 
 `vscode/` contains non-installable, placeholder-marked examples for host-owned VS Code tasks, one primary play action, and platform-native prerequisite/bootstrap scripts. Use the owning VS Code entrypoint playbook before adapting them.
 
+`bootstrap/` contains a non-installable Python example of a stable host entrypoint and a versioned, idempotent implementation. Use the host-bootstrap playbook before adapting it.
+
 - `pipeline_design_intake.yaml`: unresolved goal-to-pipeline intake.
 - `pipeline_package.yaml`: staged package manifest.
 - `task_execution_plan.md`: framework or host change plan.
