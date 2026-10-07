@@ -25,6 +25,7 @@ For combined tasks, follow dependency order: design before building prompts; con
 | Create or revise worker/reviewer/repair prompts | `playbooks/how_to_build_pipeline_prompts.md` |
 | Design deterministic and semantic validation | `playbooks/how_to_design_pipeline_validation.md` |
 | Configure or test local inference | `playbooks/how_to_configure_local_inference.md` |
+| Optimize VS Code Chat with Ollama | `playbooks/how_to_optimize_vscode_and_ollama.md` |
 | Create named Ollama model context presets | `playbooks/how_to_create_ollama_context_aliases.md` |
 | Render a trusted Markdown document to PDF | `playbooks/how_to_render_markdown_to_pdf.md` |
 | Discover, run, stop, or resume entities | `playbooks/how_to_operate_and_resume_a_pipeline.md` |

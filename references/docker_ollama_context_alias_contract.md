@@ -2,6 +2,8 @@
 
 Naming, sizing, and provisioning details for `playbooks/how_to_create_ollama_context_aliases.md`. The host owns the selected model, contexts, container, and measured stage budgets. For another Ollama-compatible provider, use its supported configuration mechanism instead. Ollama documents its [model API](https://docs.ollama.com/api/create), [model details](https://docs.ollama.com/api-reference/show-model-details), and [context length](https://docs.ollama.com/context-length).
 
+Context aliases must preserve the complete selected model definition. For MTP models such as Qwen3.8, inspect every model/draft component exposed by the installed backend; do not require exactly one FROM entry or validate only the first weight source. Some versions expose multiple FROM entries, while others expose FROM plus DRAFT. Create the alias from the existing named model so its complete definition is inherited, override only the intended context parameter, and verify all source components and the existing MTP parameters remain intact. Do not reconstruct it from one blob or disable MTP to make verification pass.
+
 ## Procedure
 
 1. Identify the exact base model tag and local Docker Ollama container. Check the model's current published context limit. Record the model tag or digest used, the limit's source, available memory, and the host's chosen largest operating context. If the base is missing, add its authorized acquisition to the host bootstrap; the alias script does not pull models. A model's published limit, Ollama's hardware-dependent default allocation, and a host's chosen cap are different values.

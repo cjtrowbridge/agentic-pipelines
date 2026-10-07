@@ -9,3 +9,5 @@ Only routed playbooks are active product instructions. Unrouted procedures shoul
 `how_to_create_and_maintain_host_bootstrap.md` owns the host's stable/versioned bootstrap design, idempotent setup, read-only check mode, service probes, and repair integration.
 
 `how_to_audit_existing_pipeline_conformance.md` owns preservation-safe review of an existing consumer after governance changes and produces findings plus a proposed host remediation plan without automatic mutation.
+
+`how_to_optimize_vscode_and_ollama.md` mandates q8_0 KV cache and 45-minute inference timeouts for VS Code/Ollama, with warm-prefix reuse verification.

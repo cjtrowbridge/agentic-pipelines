@@ -24,7 +24,7 @@ NAMESPACE_RE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_-]*\Z")
 CONTAINER_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*\Z")
 CONTEXT_RE = re.compile(r"([1-9][0-9]*)([kK]?)\Z")
 NUM_CTX_RE = re.compile(r"\s*num_ctx\s+([0-9]+)\s*", re.IGNORECASE)
-FROM_RE = re.compile(r"\s*FROM\s+(\S+)\s*", re.IGNORECASE)
+SOURCE_RE = re.compile(r"\s*(FROM|DRAFT)\s+(\S+)\s*", re.IGNORECASE)
 LOCAL_OPENER = request.build_opener(request.ProxyHandler({}))
 
 
@@ -146,17 +146,24 @@ def model_limit(show: dict[str, Any]) -> int:
     return limit
 
 
-def from_source(show: dict[str, Any]) -> str:
+def from_source(show: dict[str, Any]) -> tuple[tuple[str, str], ...]:
+    """Retain every model/draft source instead of assuming a single weight model.
+
+    MTP definitions may expose multiple FROM entries or a separate DRAFT entry.
+    Compare their complete ordered identity so a dropped/changed draft fails.
+    """
     modelfile = show.get("modelfile")
     if not isinstance(modelfile, str):
         raise AliasError("model source cannot be verified: Ollama show omitted modelfile")
-    sources = [match.group(1) for line in modelfile.splitlines() if (match := FROM_RE.fullmatch(line))]
-    if len(sources) != 1:
-        raise AliasError("model source cannot be verified: expected one FROM line")
-    return sources[0]
+    sources = tuple((match.group(1).upper(), match.group(2))
+                    for line in modelfile.splitlines()
+                    if (match := SOURCE_RE.fullmatch(line)))
+    if not any(kind == "FROM" for kind, _ in sources):
+        raise AliasError("model source cannot be verified: missing FROM source")
+    return sources
 
 
-def verify_alias(show: dict[str, Any], *, base_source: str, context: int) -> None:
+def verify_alias(show: dict[str, Any], *, base_source: tuple[tuple[str, str], ...], context: int) -> None:
     parameters = show.get("parameters")
     if not isinstance(parameters, str):
         raise AliasError("alias has no inspectable parameters")

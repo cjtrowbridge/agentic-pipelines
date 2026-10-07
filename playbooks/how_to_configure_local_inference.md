@@ -5,6 +5,8 @@ Connecting a host pipeline to its local Ollama-compatible endpoint.
 
 For a host using Ollama directly, first create and verify the needed named context presets with `playbooks/how_to_create_ollama_context_aliases.md`. The configured model name and request-level `num_ctx` must agree for each stage.
 
+For VS Code Chat using Ollama, also follow `playbooks/how_to_optimize_vscode_and_ollama.md`: q8_0 KV cache and 45-minute inference timeouts are mandatory.
+
 ## Load
 `api.sample.yaml`, the host pipeline definition, and `scripts/pipeline.py` preflight help. Do not load or display existing credentials unnecessarily.
 

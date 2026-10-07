@@ -36,7 +36,7 @@ class FakeOllama:
             assert payload is not None
             self.creates.append(payload)
             self.models[payload["model"]] = {
-                "modelfile": f"FROM {BASE_SOURCE}\nPARAMETER num_ctx {payload['parameters']['num_ctx']}\n",
+                "modelfile": self.models[payload["from"]]["modelfile"] + f"PARAMETER num_ctx {payload['parameters']['num_ctx']}\n",
                 "parameters": f"num_ctx {payload['parameters']['num_ctx']}",
             }
             return {"status": "success"}
@@ -103,6 +103,23 @@ class OllamaContextAliasTests(unittest.TestCase):
             self.assertEqual(status, 0)
             self.assertEqual(len(fake.creates), 2)
             self.assertIn("TOTAL pass=2 fail=0 created=0", output.getvalue())
+
+    def test_mtp_multiple_sources_create_and_repeat_without_replacement(self) -> None:
+        fake = FakeOllama()
+        fake.models["qwen3.8:27b"]["modelfile"] = f"FROM {BASE_SOURCE}\nFROM /draft/blob\n"
+        with patch.object(aliases, "docker_endpoint", return_value="http://127.0.0.1:11434"), patch.object(aliases, "api_json", side_effect=fake.api), redirect_stdout(StringIO()):
+            for check_only in (False, False, True):
+                self.assertEqual(aliases.ensure_aliases("ollama", "qwen3.8:27b", ["96k"], check_only=check_only, timeout=15, hostname="CJ-Desktop"), 0)
+        self.assertEqual(len(fake.creates), 1)
+        self.assertEqual(fake.creates[0]["from"], "qwen3.8:27b")
+
+    def test_mtp_missing_or_changed_secondary_source_is_rejected(self) -> None:
+        for draft_kind in ("FROM", "DRAFT"):
+            base = aliases.from_source({"modelfile": f"FROM {BASE_SOURCE}\n{draft_kind} /draft/blob\n"})
+            aliases.verify_alias({"modelfile": f"FROM {BASE_SOURCE}\n{draft_kind} /draft/blob\n", "parameters": "num_ctx 98304"}, base_source=base, context=98304)
+            for tail in ("", f"{draft_kind} /different/draft\n"):
+                with self.assertRaisesRegex(aliases.AliasError, "source does not match"):
+                    aliases.verify_alias({"modelfile": f"FROM {BASE_SOURCE}\n" + tail, "parameters": "num_ctx 98304"}, base_source=base, context=98304)
 
     def test_conflicting_existing_alias_is_not_replaced(self) -> None:
         fake = FakeOllama()
