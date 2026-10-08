@@ -10,15 +10,22 @@ Host bootstrap, Ollama deployment configuration, installed VS Code provider/vers
 
 ## Required settings
 
-Ollama must explicitly use Q8 KV cache with Flash Attention:
+Ollama must explicitly use Q8 KV cache:
 
 ```yaml
 environment:
   OLLAMA_KV_CACHE_TYPE: q8_0
+```
+
+Pin Flash Attention only where appropriate — the backend must actually support and be able to compile the FA kernel (CUDA with FA-capable tensor cores, or a prebuilt build known to ship it). Add it to the same environment block on such platforms:
+
+```yaml
   OLLAMA_FLASH_ATTENTION: "1"
 ```
 
-Persist both in the host-owned server/container bootstrap configuration. Verify the running process environment and runner logs show `q8_0` for both K and V caches. A model's weight quantization or an alias name does not establish its KV cache type. A restart alone does not update an existing Docker container's environment; recreate it through the approved host bootstrap. Do not silently accept an f16 fallback. [Ollama KV cache documentation](https://docs.ollama.com/faq#how-can-i-set-the-quantization-type-for-the-kv-cache)
+Do not pin it on platforms where the backend cannot run FA (older Jetson SoCs, CPU-only hosts, or slim builds lacking the JIT path): there the runner may fail to start or fall back silently, and `auto` already resolves FA on its own where supported. On FA-capable hosts, verify the runner log shows Flash Attention enabled (e.g. `resolve_fused_ops: Flash Attention enabled` with `flash_attn = auto`); the env pin then only makes intent explicit, and log evidence wins over the env var.
+
+Persist the applied settings in the host-owned server/container bootstrap configuration. Verify the running process environment and runner logs show `q8_0` for both K and V caches. A model's weight quantization or an alias name does not establish its KV cache type. A restart alone does not update an existing Docker container's environment; recreate it through the approved host bootstrap. Do not silently accept an f16 fallback. [Ollama KV cache documentation](https://docs.ollama.com/faq#how-can-i-set-the-quantization-type-for-the-kv-cache)
 
 VS Code's Ollama inference timeout must be **45 minutes**, equivalent to **2700 seconds / 2700000 milliseconds**. For the official Ollama extension, merge this entry into the appropriate host-owned VS Code settings scope:
 
