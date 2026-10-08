@@ -10,7 +10,7 @@ Host bootstrap, Ollama deployment configuration, installed VS Code provider/vers
 
 ## Required settings
 
-Ollama must explicitly use Q8 KV cache:
+Ollama must explicitly use Q8 KV cache for both the target model and every active MTP/draft context. The target setting alone does not configure the separate draft cache. For backends exposing the following verified draft controls:
 
 ```yaml
 environment:
@@ -21,11 +21,11 @@ Pin Flash Attention only where appropriate — the backend must actually support
 
 ```yaml
   OLLAMA_FLASH_ATTENTION: "1"
+  LLAMA_ARG_SPEC_DRAFT_CACHE_TYPE_K: q8_0
+  LLAMA_ARG_SPEC_DRAFT_CACHE_TYPE_V: q8_0
 ```
 
-Do not pin it on platforms where the backend cannot run FA (older Jetson SoCs, CPU-only hosts, or slim builds lacking the JIT path): there the runner may fail to start or fall back silently, and `auto` already resolves FA on its own where supported. On FA-capable hosts, verify the runner log shows Flash Attention enabled (e.g. `resolve_fused_ops: Flash Attention enabled` with `flash_attn = auto`); the env pin then only makes intent explicit, and log evidence wins over the env var.
-
-Persist the applied settings in the host-owned server/container bootstrap configuration. Verify the running process environment and runner logs show `q8_0` for both K and V caches. A model's weight quantization or an alias name does not establish its KV cache type. A restart alone does not update an existing Docker container's environment; recreate it through the approved host bootstrap. Do not silently accept an f16 fallback. [Ollama KV cache documentation](https://docs.ollama.com/faq#how-can-i-set-the-quantization-type-for-the-kv-cache)
+Persist these settings in the host-owned server/container bootstrap configuration. Inspect the installed backend's help for supported draft controls; other versions may require different controls. Verify the running worker environment and the separate target and MTP/draft allocation logs each show `q8_0` for both K and V caches. Do not infer draft quantization from target flags or environment alone, and preserve MTP — test successful inference, draft acceptance and generation latency rather than disabling MTP or a draft cache to pass. A model's weight quantization or an alias name does not establish its KV cache type. A restart alone does not update an existing Docker container's environment; recreate it through the approved host bootstrap. Do not silently accept an f16 target or draft fallback. [Ollama KV cache documentation](https://docs.ollama.com/faq#how-can-i-set-the-quantization-type-for-the-kv-cache)
 
 VS Code's Ollama inference timeout must be **45 minutes**, equivalent to **2700 seconds / 2700000 milliseconds**. For the official Ollama extension, merge this entry into the appropriate host-owned VS Code settings scope:
 
@@ -51,6 +51,6 @@ Context aliases must preserve the complete selected model definition. For MTP mo
 
 ## Output and stop conditions
 
-Record Q8 K/V runner evidence, effective 45-minute provider/transport settings, model/context/residency configuration and cold-versus-warm timings. Configuration-only verification is not a live performance result.
+Record separate target and MTP/draft Q8 K/V runner evidence, effective 45-minute provider/transport settings, model/context/residency configuration, draft acceptance and cold-versus-warm timings. Configuration-only verification is not a live performance result.
 
 Stop and report unsupported Q8/Flash Attention, an unconfigurable shorter inference timeout, insufficient context/memory, or a residency change outside host authority. Do not silently downgrade either mandated setting.

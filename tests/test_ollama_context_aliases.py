@@ -37,13 +37,23 @@ class FakeOllama:
             self.creates.append(payload)
             self.models[payload["model"]] = {
                 "modelfile": self.models[payload["from"]]["modelfile"] + f"PARAMETER num_ctx {payload['parameters']['num_ctx']}\n",
-                "parameters": f"num_ctx {payload['parameters']['num_ctx']}",
+                "parameters": self.models[payload["from"]]["parameters"] + f"\nnum_ctx {payload['parameters']['num_ctx']}",
             }
             return {"status": "success"}
         raise AssertionError(path)
 
 
 class OllamaContextAliasTests(unittest.TestCase):
+    def test_inherited_mtp_parameters_are_required(self):
+        show = {"modelfile": f"FROM {BASE_SOURCE}\n", "parameters": "num_ctx 65536\ndraft_num_predict 4"}
+        source = aliases.from_source(show)
+        params = aliases.inherited_parameters(show)
+        aliases.verify_alias(show, base_source=source, context=65536, base_parameters=params)
+        for parameters in ("num_ctx 65536", "num_ctx 65536\ndraft_num_predict 0"):
+            with self.assertRaisesRegex(aliases.AliasError, "inherited parameters"):
+                aliases.verify_alias({**show, "parameters": parameters}, base_source=source,
+                                     context=65536, base_parameters=params)
+
     def test_names_preserve_model_tag_and_normalize_context(self) -> None:
         self.assertEqual(aliases.alias_name("CJ-Desktop", "96k", "qwen3.8:27b"), "cj-desktop-96k-qwen3.8:27b")
         self.assertEqual(aliases.parse_context("98304"), ("96k", 98304))

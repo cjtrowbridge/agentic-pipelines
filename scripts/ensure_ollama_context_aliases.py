@@ -163,7 +163,17 @@ def from_source(show: dict[str, Any]) -> tuple[tuple[str, str], ...]:
     return sources
 
 
-def verify_alias(show: dict[str, Any], *, base_source: tuple[tuple[str, str], ...], context: int) -> None:
+def inherited_parameters(show: dict[str, Any]) -> tuple[tuple[str, str], ...]:
+    parameters = show.get("parameters")
+    if not isinstance(parameters, str):
+        raise AliasError("model has no inspectable parameters")
+    return tuple(sorted((parts[0].lower(), parts[1].strip())
+                        for line in parameters.splitlines()
+                        if len(parts := line.split(None, 1)) == 2 and parts[0].lower() != "num_ctx"))
+
+
+def verify_alias(show: dict[str, Any], *, base_source: tuple[tuple[str, str], ...], context: int,
+                 base_parameters: tuple[tuple[str, str], ...] | None = None) -> None:
     parameters = show.get("parameters")
     if not isinstance(parameters, str):
         raise AliasError("alias has no inspectable parameters")
@@ -172,6 +182,8 @@ def verify_alias(show: dict[str, Any], *, base_source: tuple[tuple[str, str], ..
         raise AliasError(f"alias context mismatch: expected {context}, found {contexts or 'none'}")
     if from_source(show) != base_source:
         raise AliasError("alias base model source does not match the selected base")
+    if base_parameters is not None and inherited_parameters(show) != base_parameters:
+        raise AliasError("alias inherited parameters do not match the selected base (including MTP)")
 
 
 def ensure_aliases(container: str, model: str, contexts: list[str], *, check_only: bool, timeout: int, hostname: str) -> int:
@@ -190,6 +202,7 @@ def ensure_aliases(container: str, model: str, contexts: list[str], *, check_onl
     base = api_json(endpoint, "/api/show", {"model": model}, timeout=timeout)
     limit = model_limit(base)
     source = from_source(base)
+    base_parameters = inherited_parameters(base)
     if any(count > limit for count in requested.values()):
         raise AliasError(f"requested context exceeds base model limit of {limit} tokens")
 
@@ -198,7 +211,7 @@ def ensure_aliases(container: str, model: str, contexts: list[str], *, check_onl
         try:
             if canonical_name(alias) in names:
                 existing = api_json(endpoint, "/api/show", {"model": alias}, timeout=timeout)
-                verify_alias(existing, base_source=source, context=count)
+                verify_alias(existing, base_source=source, context=count, base_parameters=base_parameters)
                 print(f"PASS {alias}: present, context={count}")
             elif check_only:
                 raise AliasError("missing (check mode; no changes made)")
@@ -207,7 +220,7 @@ def ensure_aliases(container: str, model: str, contexts: list[str], *, check_onl
                 if result.get("status") != "success":
                     raise AliasError(f"creation did not report success: {result.get('status')!r}")
                 verified = api_json(endpoint, "/api/show", {"model": alias}, timeout=timeout)
-                verify_alias(verified, base_source=source, context=count)
+                verify_alias(verified, base_source=source, context=count, base_parameters=base_parameters)
                 created += 1
                 print(f"PASS {alias}: created, context={count}")
             passed += 1
