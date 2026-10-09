@@ -4,6 +4,10 @@
 
 Authentication, especially `gh`/Git authentication, will not work inside the agent sandbox. Always run authentication checks and authenticated commands (`gh`, Git fetch/pull/push) in the actual host terminal outside the sandbox, using the host’s existing credential store/keyring. Use the tool’s outside-sandbox execution mode. Never diagnose expired credentials or ask the operator to log in again based on a sandbox failure; verify on the host first.
 
+## High priority: immediately preserve atomic context
+
+Assume you have extremely limited context (short-term memory). Do not count on remembering things. Notes in plans and journals should be decomposed into actually-atomic detail and include any appropriate references to other files or resources related to the entry. After everything you do, immediately update plans and journals and assume you won't necessarily be able to remember details you don't explicitly write down after each action. Do not be overly verbose or you won't be able to find the details you need. If you notice yourself reasoning in circles, stop doing that. Don't walk through an entire situation more than once unless there is a compelling reason to do that, and only if there is some genuinely new and salient informatoin that actually warrants it.
+
 ## Purpose
 
 Agentic Pipelines is a prompt-first framework for designing, operating, reviewing, and improving local agentic pipelines. Prompts and task-specific playbooks are the primary product; templates and references provide shared contracts; runtime code is supporting execution infrastructure.
