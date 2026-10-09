@@ -10,14 +10,16 @@ The host's model, container, local inference settings, measured stage budgets, `
 
 ## Procedure
 
-1. Confirm the exact base model, published context limit, Docker container, and host memory. Record a lower operating cap if the full model context cannot run.
+1. Read host-owned alias policy first. Preserve its tiers, naming grammar, approved base identities, and bootstrap generator; never create a parallel alias set. Use the framework defaults below only where the host declares no override. Confirm the exact base model, published context limit, Docker container, and host memory. Record a lower operating cap if the full model context cannot run.
 2. Measure each stage's complete session plus completion reserve. Choose the smallest context preset that fits; retain separate declared `num_ctx` and `num_predict` values.
-3. Use aliases named `[hostname]-[context]-[model name]`, for example `cj-desktop-96k-qwen3.8:27b`. Follow the linked reference for hostname normalization, 1k/4k/64k/96k/upper-preset examples, context units, conflict behavior, and runtime `num_ctx` precedence.
-4. Add `scripts/ensure_ollama_context_aliases.py` to the host's selected versioned bootstrap. Pass the base model and each wanted context; use `--check` in its read-only probe and omit it in its repair. For example:
+3. Framework defaults are 1k/4k/16k/32k/64k/96k plus a verified upper preset. Use aliases named `[hostname]-[context]-[model name]`, for example `cj-desktop-96k-qwen3.8:27b`. Follow the linked reference for hostname normalization, preset examples, context units, conflict behavior, and runtime `num_ctx` precedence.
+4. For hosts adopting framework defaults, add `scripts/ensure_ollama_context_aliases.py` to the host's selected versioned bootstrap. Pass the base model and each wanted context; use `--check` in its read-only probe and omit it in its repair. For example:
 
    ```text
-   python agentic-pipelines/scripts/ensure_ollama_context_aliases.py --container ollama --model qwen3.8:27b --context 1k --context 4k --context 96k --check
+   python agentic-pipelines/scripts/ensure_ollama_context_aliases.py --container ollama --model qwen3.8:27b --context 1k --context 4k --context 16k --context 32k --context 64k --context 96k --context 256k --check
    ```
+
+   This complete example assumes a verified 256k upper preset; lower it to the host/model limit. Hosts with their own policy use their own generator instead.
 
 5. Run the host bootstrap and verify each alias, model offloading, and representative latency. A missing base or conflicting existing alias requires an explicit host decision; the script never pulls or replaces it. Align the selected alias with the request-level `num_ctx`.
 

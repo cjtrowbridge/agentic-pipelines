@@ -94,25 +94,27 @@ class OllamaContextAliasTests(unittest.TestCase):
         with patch.object(aliases, "docker_endpoint", return_value="http://127.0.0.1:11434"), patch.object(aliases, "api_json", side_effect=fake.api):
             output = StringIO()
             with redirect_stdout(output):
-                status = aliases.ensure_aliases("ollama", "qwen3.8:27b", ["1k", "96k"], check_only=True, timeout=15, hostname="CJ-Desktop")
+                status = aliases.ensure_aliases("ollama", "qwen3.8:27b", ["1k", "16k", "32k", "96k"], check_only=True, timeout=15, hostname="CJ-Desktop")
             self.assertEqual(status, 1)
             self.assertEqual(fake.creates, [])
-            self.assertIn("TOTAL pass=0 fail=2 created=0", output.getvalue())
+            self.assertIn("TOTAL pass=0 fail=4 created=0", output.getvalue())
 
             output = StringIO()
             with redirect_stdout(output):
-                status = aliases.ensure_aliases("ollama", "qwen3.8:27b", ["1k", "96k"], check_only=False, timeout=15, hostname="CJ-Desktop")
+                status = aliases.ensure_aliases("ollama", "qwen3.8:27b", ["1k", "16k", "32k", "96k"], check_only=False, timeout=15, hostname="CJ-Desktop")
             self.assertEqual(status, 0)
-            self.assertEqual(len(fake.creates), 2)
-            self.assertEqual(fake.creates[1]["parameters"], {"num_ctx": 98304})
-            self.assertIn("TOTAL pass=2 fail=0 created=2", output.getvalue())
+            self.assertEqual(len(fake.creates), 4)
+            self.assertEqual(fake.creates[1]["parameters"], {"num_ctx": 16384})
+            self.assertEqual(fake.creates[2]["parameters"], {"num_ctx": 32768})
+            self.assertEqual(fake.creates[3]["parameters"], {"num_ctx": 98304})
+            self.assertIn("TOTAL pass=4 fail=0 created=4", output.getvalue())
 
             output = StringIO()
             with redirect_stdout(output):
-                status = aliases.ensure_aliases("ollama", "qwen3.8:27b", ["1k", "96k"], check_only=False, timeout=15, hostname="CJ-Desktop")
+                status = aliases.ensure_aliases("ollama", "qwen3.8:27b", ["1k", "16k", "32k", "96k"], check_only=False, timeout=15, hostname="CJ-Desktop")
             self.assertEqual(status, 0)
-            self.assertEqual(len(fake.creates), 2)
-            self.assertIn("TOTAL pass=2 fail=0 created=0", output.getvalue())
+            self.assertEqual(len(fake.creates), 4)
+            self.assertIn("TOTAL pass=4 fail=0 created=0", output.getvalue())
 
     def test_mtp_multiple_sources_create_and_repeat_without_replacement(self) -> None:
         fake = FakeOllama()
