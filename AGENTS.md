@@ -1,5 +1,9 @@
 # Agentic Pipelines Agent Instructions
 
+## High priority: authentication requires the host terminal
+
+Authentication, especially `gh`/Git authentication, will not work inside the agent sandbox. Always run authentication checks and authenticated commands (`gh`, Git fetch/pull/push) in the actual host terminal outside the sandbox, using the host’s existing credential store/keyring. Use the tool’s outside-sandbox execution mode. Never diagnose expired credentials or ask the operator to log in again based on a sandbox failure; verify on the host first.
+
 ## Purpose
 
 Agentic Pipelines is a prompt-first framework for designing, operating, reviewing, and improving local agentic pipelines. Prompts and task-specific playbooks are the primary product; templates and references provide shared contracts; runtime code is supporting execution infrastructure.
