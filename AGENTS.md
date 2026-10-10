@@ -44,6 +44,7 @@ For combined tasks, follow dependency order: design before building prompts; con
 | Bootstrap or update Agentic Pipelines in a host | `playbooks/how_to_bootstrap_framework_submodule_into_host_repo.md` or `playbooks/how_to_update_submodule_and_synthesize_host_overrides.md` |
 | Create, check, or maintain a host bootstrap | `playbooks/how_to_create_and_maintain_host_bootstrap.md` |
 | Set up or review host VS Code pipeline entrypoints | `playbooks/how_to_set_up_pipeline_entrypoints_in_vscode.md` |
+| Authenticate or repair git/gh push and pull in an agent shell | `playbooks/how_to_use_git_and_gh_credentials_in_agent_shells.md` |
 | Change this framework | `playbooks/how_to_change_the_pipelines_framework.md` |
 
 If a listed playbook is absent, use the framework-change route rather than substituting unrelated legacy instructions.
