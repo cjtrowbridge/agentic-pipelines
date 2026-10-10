@@ -17,7 +17,7 @@ environment:
   OLLAMA_KV_CACHE_TYPE: q8_0
 ```
 
-Pin Flash Attention only where appropriate — the backend must actually support and be able to compile the FA kernel (CUDA with FA-capable tensor cores, or a prebuilt build known to ship it). Add it to the same environment block on such platforms:
+Flash Attention is mandatory only where appropriate: the selected hardware and backend must support it and be able to compile the FA kernel, or use a verified prebuilt kernel. On unsupported platforms, leave Flash Attention disabled, record the incompatibility, and continue verifying the remaining requirements. Lack of Flash Attention alone is not a stop condition and does not prove Q8 is unsupported. Add it to the same environment block on supported platforms:
 
 ```yaml
   OLLAMA_FLASH_ATTENTION: "1"
@@ -39,6 +39,11 @@ Verify the installed extension exposes this key and that the effective value is 
 
 The required outcomes are Q8 KV caching and 45-minute inference waits. Their implementation must follow the actual project, machine, provider version and model format; this playbook does not prescribe one universal bootstrap or deployment layout.
 
+Q8 target and active draft K/V cache verification remains mandatory regardless
+of Flash Attention eligibility. If the actual backend cannot meet that cache
+requirement without Flash Attention, report the demonstrated Q8 incompatibility
+and stop for that reason; do not infer it solely from GPU architecture.
+
 Context aliases must preserve the complete selected model definition. For MTP models such as Qwen3.8, inspect every model/draft component exposed by the installed backend; do not require exactly one FROM entry or validate only the first weight source. Some versions expose multiple FROM entries, while others expose FROM plus DRAFT. Create the alias from the existing named model so its complete definition is inherited, override only the intended context parameter, and verify all source components and the existing MTP parameters remain intact. Do not reconstruct it from one blob or disable MTP to make verification pass.
 
 ## Procedure
@@ -53,4 +58,4 @@ Context aliases must preserve the complete selected model definition. For MTP mo
 
 Record separate target and MTP/draft Q8 K/V runner evidence, effective 45-minute provider/transport settings, model/context/residency configuration, draft acceptance and cold-versus-warm timings. Configuration-only verification is not a live performance result.
 
-Stop and report unsupported Q8/Flash Attention, an unconfigurable shorter inference timeout, insufficient context/memory, or a residency change outside host authority. Do not silently downgrade either mandated setting.
+Stop and report demonstrated unsupported Q8 caching, an unconfigurable shorter inference timeout, insufficient context/memory, or a residency change outside host authority. Unsupported Flash Attention alone is not a blocker; leave it disabled and continue. Do not silently downgrade Q8 caching or 45-minute inference waits.
