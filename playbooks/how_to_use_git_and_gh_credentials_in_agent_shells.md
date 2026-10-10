@@ -10,9 +10,10 @@ An agent shell cannot push, pull, or `gh`-write against GitHub; a push fails wit
 
 ## Facts
 
-- The agent shell is a real command environment, not a sandbox. Its only Git/`gh` constraint is the absence of a stored credential plus a hard non-interactive policy. No stored credential exists until this procedure creates one; VS Code's interactive IDE prompt does not create one for the shell.
-- Injected, non-negotiable constraints: `credential.interactive=never` and `GIT_TERMINAL_PROMPT=0`. Git therefore never opens a terminal prompt and fails fast instead. `safe.bareRepository=explicit` and `core.fsmonitor=false` are unrelated to credentials; do not change them.
-- The credential is host-scoped and persistent once written to `~/.config/gh/hosts.yml`. Solving it once for one repository solves it for every repository the operator owns or can access.
+- Per `AGENTS.md`, authentication (including every `gh`/Git authenticated command) must run in the host terminal outside the agent sandbox, using the host's existing credential store or keyring. A sandbox failure or a `context deadline exceeded` device flow is not evidence that the credential is broken; never ask the operator to log in again on that basis — verify on the host first.
+- Agent shells are additionally constrained by injected, non-negotiable settings: `credential.interactive=never` and `GIT_TERMINAL_PROMPT=0`. Git therefore never opens a terminal prompt and fails fast instead. `safe.bareRepository=explicit` and `core.fsmonitor=false` are unrelated to credentials; do not change them.
+- A stored credential (e.g. `~/.config/gh/hosts.yml`) is host-scoped and persistent once created; VS Code's interactive IDE prompt does not create one for the shell. Solving it once for one repository solves it for every repository the operator owns or can access.
+- Permission is per-repository: an account may have push on one repository and only pull on another (e.g. the host repository vs. the `agentic-pipelines` framework repository). A 403 after a successful read proves a permission gap, not a credential defect — fix the collaborator role, do not re-authenticate.
 - Never disable `credential.interactive=never`, `GIT_TERMINAL_PROMPT`, or `safe.bareRepository` to make a push succeed. That masks the real defect and weakens the non-interactive guarantee.
 
 ## Procedure
@@ -31,7 +32,7 @@ An agent shell cannot push, pull, or `gh`-write against GitHub; a push fails wit
    - `gh auth status`
    - `git config --global --get-all credential.https://github.com.helper` must show `!gh auth git-credential`.
    - Prove read: `git ls-remote https://github.com/<owner>/<repo>.git HEAD` returns a SHA.
-5. Re-run the originally failing operation (e.g. `git push`) and confirm success. If the remote URL is SSH while the credential is HTTPS-based, either keep using the HTTPS remote or install SSH with `gh ssh-key` plus the agent's `ssh-add` step; do not mix an unconfigured SSH remote with an HTTPS credential and expect one to satisfy the other.
+5. Re-run the originally failing operation (e.g. `git push`) in the host terminal and confirm success. If the remote URL is SSH while the credential is HTTPS-based, either keep using the HTTPS remote or install SSH with `gh ssh-key` plus the agent's `ssh-add` step; do not mix an unconfigured SSH remote with an HTTPS credential and expect one to satisfy the other. A `Permission ... denied` (403) after a successful read means the account lacks push on that specific repository: add it as a collaborator with Write, or push from an account that has it — do not re-authenticate and do not treat the sandbox as the cause.
 6. Guard the credential. Confirm `~/.config/gh/hosts.yml`, `~/.git-credentials`, `api.yaml`, private keys, and any `.env` are all ignored (`git check-ignore -v <path>` for each) and never staged. If any is untracked and not ignored, add it to `.gitignore` in the same checkpoint; never commit it.
 
 ## Outputs
