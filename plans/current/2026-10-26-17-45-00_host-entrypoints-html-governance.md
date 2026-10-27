@@ -70,3 +70,13 @@ compiled synthetic fixture preserving shadowing, nested else, switch/type-switch
 and continue targets. Full framework suite: 194 tests, only the previously
 recorded unrelated Cerebras 363-word failure, two skips. Canonical framework
 source gate: 75 files, zero failures. No inspected host code executed.
+
+### Select clause grammar correction
+
+- [x] Distinguish select send/receive/binding grammar from clause body actions
+  in checker and migration proposals; inline clause bodies must still fail.
+- [x] Regress both valid communications and real inline violations before
+  publishing and advancing runtime dependency.
+
+Select correction:100 focused source tests and6 migration tests pass; valid
+channel clauses pass, inline bodies still fail. Source gates pass before commit.

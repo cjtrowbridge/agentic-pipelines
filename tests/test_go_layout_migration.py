@@ -83,6 +83,13 @@ fmt.Print(x)
         self.assertEqual([], manual)
         self.assertEqual([], inspect_go(result, PATTERN)[1])
 
+    def test_select_binding_stays_in_clause_and_body_is_split(self):
+        source = HEADER + 'package fixture\nfunc run(ch chan int) {\nselect {\ncase value := <-ch: println(value)\ncase ch <- 1: return\n}\n}\n'
+        result, manual = candidate(source)
+        self.assertEqual([], manual)
+        self.assertIn('case value := <-ch:', result)
+        self.assertEqual([], inspect_go(result, PATTERN)[1])
+
     def test_invalid_syntax_has_no_candidate(self):
         with self.assertRaises(ValueError):
             candidate(HEADER + 'package fixture\nfunc broken(\n')

@@ -36,6 +36,8 @@ func inspectLayout(file *ast.File, positions *token.FileSet) []string {
 	exempt := make(map[ast.Node]bool)
 	ast.Inspect(file, func(node ast.Node) bool {
 		switch typed := node.(type) {
+		case *ast.CommClause:
+			exempt[typed.Comm] = true
 		case *ast.ForStmt:
 			exempt[typed.Init] = true
 			exempt[typed.Post] = true

@@ -36,6 +36,14 @@ class GoSourceTests(unittest.TestCase):
         _, issues = self.inspect('func run() {\nfor i := 0; i < 3; i++ {\nprintln(i)\n}\n}\n')
         self.assertEqual([], issues)
 
+    def test_select_communication_is_clause_grammar(self):
+        _, issues = self.inspect('func run(ch chan int) {\nselect {\ncase value := <-ch:\nprintln(value)\ncase ch <- 1:\ndefault:\n}\n}\n')
+        self.assertEqual([], issues)
+
+    def test_select_inline_body_still_fails(self):
+        _, issues = self.inspect('func run(ch chan int) {\nselect {\ncase <-ch: println(1)\n}\n}\n')
+        self.assertTrue(any('multiple statements' in issue for issue in issues))
+
     def test_inline_function_body_fails(self):
         _, issues = self.inspect('func run() { println(1) }\n')
         self.assertTrue(any('block body' in issue for issue in issues))
