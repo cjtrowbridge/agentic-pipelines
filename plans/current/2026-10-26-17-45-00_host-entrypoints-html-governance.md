@@ -129,3 +129,14 @@ continuation authorization covers narrow parsing repairs without exclusions.
 - [x] Accept standalone case grammar while rejecting combined commands.
 - [x] Verify nine new regressions; all 127 focused source cases and 81-file framework gate pass.
 - [ ] Publish exact tested tree and verify host receipt before runtime pin advancement.
+
+## R11 continuation: nested check inside Git hooks
+
+A real runtime commit exposed inherited Git hook selectors redirecting the
+trusted helper's framework self-check into the host index. Standalone staged
+checks passed; the actual hook correctly blocked the commit. R11 repair must
+isolate only the nested framework process while preserving host staged inputs.
+
+- [x] Clear Git environment selectors only for the trusted framework self-check/build.
+- [x] Exercise actual Go-source commits: valid staged source passes; invalid staged source still fails even with valid working-tree bytes.
+- [ ] Publish tested dependency and verify host receipt before retrying runtime commit.

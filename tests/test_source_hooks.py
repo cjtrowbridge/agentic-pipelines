@@ -44,6 +44,30 @@ class SourceHookTests(unittest.TestCase):
     def commit(self):
         return self.git('-c', 'user.name=Governance Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'fixture')
 
+    def test_go_hook_isolates_framework_but_keeps_host_staging(self):
+        config_path = self.root / 'api.sample.yaml'
+        config = yaml.safe_load(config_path.read_text())
+        config['code']['languages']['.go'] = {
+            'adapter': 'go', 'comment_pattern': r'(?://[^\n]*|/\*[\s\S]*?\*/)',
+        }
+        config_path.write_text(yaml.safe_dump(config))
+        source = self.root / 'src/value.go'
+        header = '// Preserve a synthetic value.\n// Never execute inspected source.\npackage fixture\n'
+        source.write_text(header + 'var value = 1\n')
+        with (self.root / 'src/README.md').open('a') as inventory:
+            inventory.write('- `value.go`: Synthetic Go value.\n')
+        self.assertEqual(0, self.installer().returncode)
+        self.git('add', '.')
+        result = self.commit()
+        self.assertEqual(0, result.returncode, result.stderr)
+        source.write_text(header + 'func run() { println(1) }\n')
+        self.git('add', 'src/value.go')
+        source.write_text(header + 'var value = 1\n')
+        result = self.commit()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn('block body', result.stderr)
+        self.assertNotIn('trusted Go parser build blocked', result.stderr)
+
     def test_hook_blocks_invalid_staged_source(self):
         self.assertEqual(0, self.installer().returncode)
         self.module.write_text(HEADER + 'value = 1\n' * 401, encoding='utf-8')

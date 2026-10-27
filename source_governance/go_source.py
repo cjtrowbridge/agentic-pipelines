@@ -24,16 +24,18 @@ def parser_binary(helper="go_parser"):
         raise ValueError("unknown trusted Go helper")
     # Retain the temporary directory for this checker process's lifetime.
     temporary = tempfile.TemporaryDirectory(prefix="source-go-parser-")
+    # Git exports host-repository selectors into hooks. They must not redirect
+    # the separate framework self-check; the outer staged snapshot keeps them.
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
     checked = subprocess.run(
         [sys.executable, str(FRAMEWORK / "scripts/check_source_governance.py"),
          "--repo-root", str(FRAMEWORK)],
-        capture_output=True, text=True, timeout=60, check=False,
+        capture_output=True, text=True, timeout=60, check=False, env=environment,
     )
     if checked.returncode:
         temporary.cleanup()
         raise ValueError("trusted Go parser build blocked by framework source gate")
     binary = Path(temporary.name) / "parser"
-    environment = dict(os.environ)
     environment.update(GOTOOLCHAIN="local", GOWORK="off", GOENV="off", GO111MODULE="off", GOFLAGS="")
     built = subprocess.run(
         ["go", "build", "-o", str(binary), str(FRAMEWORK / "source_governance" / helper / "main.go")],

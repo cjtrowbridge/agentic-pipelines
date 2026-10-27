@@ -211,3 +211,8 @@ remains counted even when it looks like a comment. It does not execute input.
 Unquoted command substitutions and complex delimiters remain fail-closed;
 here-strings have no body. Standalone `case` terminators are grammar, while a
 terminator sharing a line with commands still fails the action-layout check.
+
+The trusted Go helper's framework self-check runs with Git environment variables
+cleared so a host commit hook cannot redirect it to the host index or worktree.
+The outer host check retains its original environment and validates the actual
+staged index, including rejected staged bytes when working-tree bytes are valid.
