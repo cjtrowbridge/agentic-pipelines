@@ -49,6 +49,10 @@ code:
     - tests
     - templates
   languages:
+    # Only the trusted parser bootstrap helper uses cstyle here; Go hosts use go.
+    .go:
+      adapter: cstyle
+      comment_pattern: '(?://[^\n]*|(?s:/\*.*?\*/))'
     .py:
       adapter: python
       comment_pattern: '(?:#[^\n]*|(?s:""".*"""|\x27\x27\x27.*\x27\x27\x27))'

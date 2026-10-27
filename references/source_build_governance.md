@@ -151,3 +151,20 @@ script/style bytes count conservatively and receive existing C-style layout
 checks. Inline handlers, executable URLs and inline style attributes must
 move to governed source; malformed comments/unclosed embedded content fail.
 This is source governance, not an HTML validator or browser security audit.
+
+## Go source
+
+Use `adapter: go` and `comment_pattern: '(?://[^\n]*|(?s:/\*.*?\*/))'`
+for Go hosts. The installed Go standard parser distinguishes composite data
+literals from executable statement blocks. For-clause separators and type-switch
+bindings are grammar; inline function/block bodies and multiple statements on a
+line still fail. An if initializer plus condition remains separate actions under
+this policy. Raw strings count as executable data, and source line directives
+cannot alter physical line accounting. Syntax errors fail closed.
+
+The adapter compiles only its trusted framework helper, once per checker process,
+after the framework's own canonical source gate passes. The helper deliberately
+uses the conservative C-style adapter in framework configuration to avoid a
+recursive parser build. Installed local Go is required; automatic toolchain
+fetching and host workspace selection are disabled. No inspected source is
+compiled or executed. Missing toolchains and failed prerequisite checks block.

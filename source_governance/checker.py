@@ -11,6 +11,7 @@ from .configuration import SOURCE_SUFFIXES, load_configuration
 from .python_source import inspect_python
 from .text_source import inspect_text
 from .html_source import inspect_html
+from .go_source import inspect_go
 
 
 def check(snapshot):
@@ -52,6 +53,8 @@ def check(snapshot):
             language = languages[extension]
             if language["adapter"] == "python":
                 count, findings = inspect_python(text, language["comment_pattern"])
+            elif language["adapter"] == "go":
+                count, findings = inspect_go(text, language["comment_pattern"])
             elif language["adapter"] == "html":
                 count, findings = inspect_html(text, language["comment_pattern"])
             else:

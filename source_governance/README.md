@@ -12,3 +12,5 @@ This directory owns source governance assets.
 - `text_source.py`: Lex comments and quoted literals for shell, PowerShell and C-style source.
 
 - `html_source.py`: Parse actual HTML comments while preserving embedded source accounting and layout enforcement.
+
+- `go_source.py`: Gate the trusted parser build and validate Go syntax, layout and lexical line accounting.

@@ -22,7 +22,7 @@ Key: `[ ]` pending task, `[x]` completed task, `[?]` needs validation, `[-]` clo
 - [x] Add HTML-aware comment accounting; retain executable/data/attribute content, inspect embedded script/style and refuse unsupported inline executable attributes.
 - [x] Test worktree/staged checks, valid cases and genuine size/inventory/layout failures, and build refusal.
 - [x] Update framework policy/README/config documentation; run focused and full tests and source gate.
-- [ ] Commit/publish dependency; verify remote receipt before runtime pin advances.
+- [x] Commit/publish dependency; verify remote receipt before runtime pin advances (`6256777`).
 
 No host entrypoint, model policy, data or live service is changed here.
 
@@ -31,3 +31,22 @@ zero failures. Full suite: 165 tests, one existing failure and two skips;
 Cerebras playbook is 363 words at unchanged upstream HEAD `9847070`, exceeding
 the pre-existing test's <350 rule. No unrelated guidance changed.
 Publication is authorized by the runtime operator; receipt follows push.
+
+## R11 continuation: Go syntax compatibility
+
+The authorized host source migration exposed generic C-style false positives
+for Go composite literals and for-clause grammar. Extend only language parsing,
+using the installed Go parser; preserve size, headers, inventories and rejection
+of compressed executable statements. Runtime/operator R11 authorization covers
+this prerequisite repair; no root or language exemption is introduced.
+
+- [x] Add Go parser-backed layout/counting adapter; inspected code is parsed, never executed.
+- [x] Guard compilation of the trusted helper with the framework's own source gate; host source cannot choose helper paths or commands.
+- [x] Regress valid composites/loop grammar, real inline actions, raw literals, header/size limits and staged checks.
+- [ ] Publish tested dependency before host mapping/pointer advancement.
+
+Go continuation verification: 96 focused source tests pass; framework source
+gate passes (72 files). Full suite before final guard regression: 184 tests,
+one unchanged Cerebras playbook word-count failure, two skips. Parser uses
+physical source lines despite //line directives; local-only module-free helper
+compilation is preceded by the framework source gate. No inspected code runs.

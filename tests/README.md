@@ -30,3 +30,6 @@ This directory owns tests assets.
 - `test_software_build_entrypoints.py`: Verify host software-build VS Code examples and their shared failing gate.
 
 - `test_source_host_contracts.py`: Verify exact root launchers and HTML comments against size, inventory, staged and build gates.
+
+- `test_source_go.py`: Regress Go parser grammar, real compressed statements, raw literals and line accounting.
+- `test_source_go_repository.py`: Verify staged Go parsing and retained size/inventory enforcement.
