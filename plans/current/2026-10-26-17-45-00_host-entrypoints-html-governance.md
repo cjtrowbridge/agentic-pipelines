@@ -1,12 +1,12 @@
 ---
 plan_id: 2026-10-26-17-45-00_host-entrypoints-html-governance
-title: Preserve governed host entrypoints and parse HTML comments
-summary: Narrow R11 repair for explicitly declared root launchers and HTML source accounting without weakening limits or inventories.
+title: Host source governance compatibility and bounded migration
+summary: R11 exact entrypoints, language-aware enforcement and guarded source-preserving migration without weakening limits or inventories.
 status: current
 created_at: 2026-10-26-17-45-00
 ---
 
-# Host entrypoints and HTML governance
+# Host source governance compatibility and bounded migration
 
 Authorized by runtime operator October 26: repair in owning framework repo,
 publish dependency before advancing runtime pointer; preserve all enforcement.
@@ -56,3 +56,17 @@ compilation is preceded by the framework source gate. No inspected code runs.
 - [x] Reject if/switch initializer actions even when the header spans lines;
   physical-line uniqueness alone must not permit a condition-assignment bypass.
 - [x] Regress multiline headers (98 focused tests pass); publication receipt follows.
+
+### Authorized R11 host source migration support
+
+- [x] Supply a parse-only Go edit-proposal helper for scoped initializer and
+  whitespace repairs; no automatic checker mutations or source execution.
+- [x] Verify lexical scope, nested else/switch, comment refusal and retained
+  tokens; gate the helper's own compilation before use.
+- [ ] Publish the tested helper before host migration use.
+
+Migration verification: five focused regressions pass, including a governed
+compiled synthetic fixture preserving shadowing, nested else, switch/type-switch
+and continue targets. Full framework suite: 194 tests, only the previously
+recorded unrelated Cerebras 363-word failure, two skips. Canonical framework
+source gate: 75 files, zero failures. No inspected host code executed.

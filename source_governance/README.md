@@ -14,3 +14,4 @@ This directory owns source governance assets.
 - `html_source.py`: Parse actual HTML comments while preserving embedded source accounting and layout enforcement.
 
 - `go_source.py`: Gate the trusted parser build and validate Go syntax, layout and lexical line accounting.
+- `go_layout.py`: Prepare syntax-validated, nonoverlapping Go migration candidates without writing host files.

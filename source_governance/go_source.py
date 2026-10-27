@@ -19,7 +19,9 @@ FRAMEWORK = Path(__file__).resolve().parents[1]
 
 
 @lru_cache(maxsize=1)
-def parser_binary():
+def parser_binary(helper="go_parser"):
+    if helper not in {"go_parser", "go_layout"}:
+        raise ValueError("unknown trusted Go helper")
     # Retain the temporary directory for this checker process's lifetime.
     temporary = tempfile.TemporaryDirectory(prefix="source-go-parser-")
     checked = subprocess.run(
@@ -34,7 +36,7 @@ def parser_binary():
     environment = dict(os.environ)
     environment.update(GOTOOLCHAIN="local", GOWORK="off", GOENV="off", GO111MODULE="off", GOFLAGS="")
     built = subprocess.run(
-        ["go", "build", "-o", str(binary), str(FRAMEWORK / "source_governance/go_parser/main.go")],
+        ["go", "build", "-o", str(binary), str(FRAMEWORK / "source_governance" / helper / "main.go")],
         capture_output=True, text=True, timeout=120, check=False,
         cwd=temporary.name, env=environment,
     )

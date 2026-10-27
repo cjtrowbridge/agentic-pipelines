@@ -168,3 +168,18 @@ uses the conservative C-style adapter in framework configuration to avoid a
 recursive parser build. Installed local Go is required; automatic toolchain
 fetching and host workspace selection are disabled. No inspected source is
 compiled or executed. Missing toolchains and failed prerequisite checks block.
+
+## Authorized Go layout migration
+
+`source_governance.go_layout.candidate(text)` prepares an explicit migration
+candidate without writing or executing inspected source. Its trusted helper
+is source-gated before compilation. Header initializers move into an enclosing
+lexical block spanning the entire if/else or switch; for-clause grammar and
+type-switch bindings remain intact. Statement whitespace edits use physical
+AST positions, not regex substitutions over literals. Overlaps and invalid
+syntax fail closed. Comment-bearing headers require manual review.
+
+Use only under an approved host source-migration task. Inspect candidates and
+retain before/after evidence before adoption; the ordinary checker never
+automatically fixes files. Passing source checks are not runtime regression
+proof. Preserve the host's full build/test and publication requirements.
