@@ -183,3 +183,11 @@ Use only under an approved host source-migration task. Inspect candidates and
 retain before/after evidence before adoption; the ordinary checker never
 automatically fixes files. Passing source checks are not runtime regression
 proof. Preserve the host's full build/test and publication requirements.
+
+## JavaScript grammar
+
+Hosts may select `javascript` for `.js` when GJS (SpiderMonkey Reflect.parse)
+and `requirements-source-javascript.txt` are declared bootstrap dependencies.
+The parser reads source as data and never executes it. Missing dependencies or
+unrecognized syntax fail closed. Physical literal lines and embedded actions
+remain enforced; regexes, object data and arrow grammar are not statements.

@@ -1,0 +1,2 @@
+# Optional JavaScript source adapter; GJS is a host package prerequisite.
+esprima==4.0.1

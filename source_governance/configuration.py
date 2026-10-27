@@ -9,7 +9,7 @@ import re
 import yaml
 
 
-ADAPTERS = {"python", "shell", "powershell", "cstyle", "html", "go"}
+ADAPTERS = {"python", "shell", "powershell", "cstyle", "html", "go", "javascript"}
 SOURCE_SUFFIXES = {
     ".py", ".pyw", ".sh", ".bash", ".ps1", ".psm1", ".go", ".rs",
     ".js", ".jsx", ".ts", ".tsx", ".c", ".h", ".cc", ".cpp", ".hpp",

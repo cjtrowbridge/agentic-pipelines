@@ -34,3 +34,5 @@ This directory owns tests assets.
 - `test_source_go.py`: Regress Go parser grammar, real compressed statements, raw literals and line accounting.
 - `test_source_go_repository.py`: Verify staged Go parsing and retained size/inventory enforcement.
 - `test_go_layout_migration.py`: Regress initializer scope, branch/loop behavior, comments, literals and no source execution.
+
+- `test_source_javascript.py`: Regress JS literals, grammar, real violations, physical counts and no inspected-code execution.

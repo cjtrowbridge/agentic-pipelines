@@ -12,6 +12,7 @@ from .python_source import inspect_python
 from .text_source import inspect_text
 from .html_source import inspect_html
 from .go_source import inspect_go
+from .javascript_source import inspect_javascript
 
 
 def check(snapshot):
@@ -55,6 +56,8 @@ def check(snapshot):
                 count, findings = inspect_python(text, language["comment_pattern"])
             elif language["adapter"] == "go":
                 count, findings = inspect_go(text, language["comment_pattern"])
+            elif language["adapter"] == "javascript":
+                count, findings = inspect_javascript(text, language["comment_pattern"])
             elif language["adapter"] == "html":
                 count, findings = inspect_html(text, language["comment_pattern"])
             else:

@@ -15,3 +15,5 @@ This directory owns source governance assets.
 
 - `go_source.py`: Gate the trusted parser build and validate Go syntax, layout and lexical line accounting.
 - `go_layout.py`: Prepare syntax-validated, nonoverlapping Go migration candidates without writing host files.
+
+- `javascript_source.py`: Parse JavaScript without execution and enforce physical source, header and statement contracts.

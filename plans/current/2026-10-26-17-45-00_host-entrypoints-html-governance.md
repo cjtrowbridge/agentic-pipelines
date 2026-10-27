@@ -90,3 +90,15 @@ channel clauses pass, inline bodies still fail. Source gates pass before commit.
 Declaration inventory:101 source tests and6 migration tests pass. Physical
 byte spans retain docs and exclude function-like raw string content; no host
 source executed. Publication follows owning source-gated commit.
+
+### JavaScript grammar correction (authorized R11 continuation)
+
+Confirmed host defects: regex quantifiers mistaken for blocks, regex semicolons
+as actions, template interpolation read as code and arrow comparison as assignment.
+- [x] Add explicit parser-backed JavaScript adapter with declared GJS/esprima dependencies.
+- [x] Regress real actions, embedded assignments, literals, physical size and no execution.
+- [ ] Publish owning dependency before runtime mapping/pin advancement.
+
+JavaScript verification:110 source tests pass, including9 dedicated JS cases.
+Missing dependencies, malformed syntax and real embedded actions fail closed;
+regex/template/arrow/object syntax passes. No application source executed.
