@@ -4,6 +4,7 @@ Valid literals and loop grammar pass; compressed statements, invalid syntax,
 missing headers and executable multiline data remain governed.
 """
 
+import json
 import subprocess
 import unittest
 from unittest.mock import patch
@@ -26,6 +27,18 @@ class GoSourceTests(unittest.TestCase):
                 parser_binary.__wrapped__()
         self.assertEqual(1, commands.call_count)
         self.assertIn('check_source_governance.py', str(commands.call_args))
+
+    def test_declaration_spans_ignore_function_text_in_literals(self):
+        source = HEADER + 'package fixture\nvar sample = `func pretend() {}`\n// Real method purpose.\n// Retain this comment with its declaration.\nfunc (r *Record) Read() {}\n'
+        _, binary = parser_binary()
+        result = subprocess.run([str(binary)], input=source, capture_output=True, text=True, check=True)
+        functions = json.loads(result.stdout)['Functions']
+        self.assertEqual(1, len(functions))
+        function = functions[0]
+        self.assertEqual(('Read', '*Record'), (function['Name'], function['Receiver']))
+        retained = source.encode()[function['Start']:function['End']].decode()
+        self.assertTrue(retained.startswith('// Real method purpose.'))
+        self.assertTrue(retained.endswith('func (r *Record) Read() {}'))
 
     def test_composite_literals_are_data(self):
         count, issues = self.inspect('var values = []int{1, 2}\nvar empty = struct{}{}\n')

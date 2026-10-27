@@ -80,3 +80,13 @@ source gate: 75 files, zero failures. No inspected host code executed.
 
 Select correction:100 focused source tests and6 migration tests pass; valid
 channel clauses pass, inline bodies still fail. Source gates pass before commit.
+
+### Parser-backed declaration inventory
+
+- [x] Expose physical function spans and receiver identities for authorized
+  host decomposition; retain declaration comments and ignore string lookalikes.
+- [x] Regress spans and existing source/migration contracts before publication.
+
+Declaration inventory:101 source tests and6 migration tests pass. Physical
+byte spans retain docs and exclude function-like raw string content; no host
+source executed. Publication follows owning source-gated commit.

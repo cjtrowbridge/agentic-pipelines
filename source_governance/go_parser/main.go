@@ -21,12 +21,22 @@ type Lexeme struct {
 	Comment bool
 }
 
+// Function identifies a real top-level declaration for bounded source splitting.
+// Physical byte spans exclude lookalike function text inside comments or strings.
+type Function struct {
+	Name string
+	Receiver string
+	Start int
+	End int
+}
+
 // Report keeps syntax errors distinct from policy layout findings.
 // Invalid input cannot be certified by a partial syntax tree.
 type Report struct {
 	Tokens []Lexeme
 	Issues []string
 	Error string
+	Functions []Function
 }
 
 // inspectLayout distinguishes statement bodies from composite literal data.
@@ -108,6 +118,27 @@ func inspect(source []byte) Report {
 		return result
 	}
 	result.Issues = inspectLayout(file, positions)
+	for _, declaration := range file.Decls {
+		function, ok := declaration.(*ast.FuncDecl)
+		if !ok {
+			continue
+		}
+		span := Function{}
+		span.Name = function.Name.Name
+		start := function.Pos()
+		if function.Doc != nil {
+			start = function.Doc.Pos()
+		}
+		span.Start = positions.PositionFor(start, false).Offset
+		span.End = positions.PositionFor(function.End(), false).Offset
+		if function.Recv != nil && len(function.Recv.List) > 0 {
+			receiver := function.Recv.List[0].Type
+			left := positions.PositionFor(receiver.Pos(), false).Offset
+			right := positions.PositionFor(receiver.End(), false).Offset
+			span.Receiver = string(source[left:right])
+		}
+		result.Functions = append(result.Functions, span)
+	}
 	tokens := token.NewFileSet()
 	input := tokens.AddFile("input.go", tokens.Base(), len(source))
 	var lexer scanner.Scanner
