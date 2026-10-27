@@ -17,3 +17,5 @@ This directory owns source governance assets.
 - `go_layout.py`: Prepare syntax-validated, nonoverlapping Go migration candidates without writing host files.
 
 - `javascript_source.py`: Parse JavaScript without execution and enforce physical source, header and statement contracts.
+
+- `dependencies.py`: Verify exact upstream vendored-file manifests without excluding unlisted source or directory inventories.

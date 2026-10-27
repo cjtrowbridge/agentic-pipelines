@@ -8,6 +8,7 @@ from pathlib import PurePosixPath
 import re
 
 from .configuration import SOURCE_SUFFIXES, load_configuration
+from .dependencies import pinned_dependencies
 from .python_source import inspect_python
 from .text_source import inspect_text
 from .html_source import inspect_html
@@ -18,6 +19,7 @@ from .javascript_source import inspect_javascript
 def check(snapshot):
     config = load_configuration(snapshot)
     snapshot.include_roots(config["roots"])
+    dependencies = pinned_dependencies(snapshot, config)
     issues = []
     counts = {}
     directories = set(snapshot.directories)
@@ -49,6 +51,8 @@ def check(snapshot):
             issues.append(f"{name}: no configured language/comment pattern")
             continue
         sources.setdefault(str(path.parent), []).append(path.name)
+        if name in dependencies:
+            continue
         try:
             text = snapshot.read(name)
             language = languages[extension]

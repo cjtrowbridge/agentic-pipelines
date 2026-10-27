@@ -104,3 +104,15 @@ Missing dependencies, malformed syntax and real embedded actions fail closed;
 regex/template/arrow/object syntax passes. No application source executed.
 
 - [x] Parse native ES-module imports/exports without resolving or executing dependencies; covered by unavailable-import regression.
+
+### Exact third-party distribution identity
+
+Host already retains Bootstrap5.3.8 and Chart.js4.5.1 manifests with upstream
+version/source/license and hashes. First-party formatting must not rewrite those
+locked distributions. Add exact-manifest recognition, retaining source inventory
+and all checks for unlisted/changed files; no vendor-directory exclusion.
+- [x] Regress matching, changed, unlisted, unsafe and staged dependency identity.
+- [ ] Publish owning dependency before host adoption.
+
+Dependency verification:118 focused source tests pass, including seven exact
+manifest identity/inventory/unlisted/staged/BOM/provenance cases. No broad exclusions.

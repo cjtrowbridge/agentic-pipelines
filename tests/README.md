@@ -36,3 +36,5 @@ This directory owns tests assets.
 - `test_go_layout_migration.py`: Regress initializer scope, branch/loop behavior, comments, literals and no source execution.
 
 - `test_source_javascript.py`: Regress JS literals, grammar, real violations, physical counts and no inspected-code execution.
+
+- `test_source_dependencies.py`: Verify exact third-party manifest identity while retaining unlisted-source and inventory enforcement.

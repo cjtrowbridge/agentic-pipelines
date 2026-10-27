@@ -51,15 +51,21 @@ class Snapshot:
                     self.files.add(path)
                     self.modes.setdefault(path, "100644")
 
-    def git(self, *args):
+    def git_bytes(self, *args):
         result = subprocess.run(
             ["git", "-C", str(self.root), *args],
             capture_output=True,
             check=True,
         )
-        return result.stdout.decode("utf-8")
+        return result.stdout
+
+    def git(self, *args):
+        return self.git_bytes(*args).decode("utf-8")
 
     def read(self, name):
+        return self.read_bytes(name).decode("utf-8-sig")
+
+    def read_bytes(self, name):
         parts = PurePosixPath(name).parts
         if not parts or ".." in parts or PurePosixPath(name).is_absolute():
             raise ValueError(f"unsafe repository path: {name}")
@@ -68,7 +74,7 @@ class Snapshot:
         if self.modes[name] == "120000":
             raise ValueError(f"symlink is not permitted for governed input: {name}")
         if self.staged:
-            return self.git("show", f":{name}")
+            return self.git_bytes("show", f":{name}")
         path = self.root / name
         if not path.resolve().is_relative_to(self.root):
             raise ValueError(f"path escapes repository: {name}")
@@ -77,4 +83,4 @@ class Snapshot:
                 break
             if parent.is_symlink():
                 raise ValueError(f"symlink is not permitted for governed input: {name}")
-        return path.read_text(encoding="utf-8-sig")
+        return path.read_bytes()

@@ -191,3 +191,14 @@ and `requirements-source-javascript.txt` are declared bootstrap dependencies.
 The parser reads source as data and never executes it. Missing dependencies or
 unrecognized syntax fail closed. Physical literal lines and embedded actions
 remain enforced; regexes, object data and arrow grammar are not statements.
+
+## Pinned third-party distribution files
+
+`code.vendored_dependencies` may list exact JSON manifests beneath a declared
+root/vendor directory. Each records name, version, HTTPS upstream source and
+distribution URLs, license, and exact `files` SHA-256 values. Only matching
+listed bytes are third-party dependencies rather than first-party authored
+source; preserve upstream license and distribution bytes. Directory/file
+inventories remain required. Unlisted vendor source gets every normal source
+check; missing, modified, unsafe or overlapping dependency entries fail closed.
+Repinning a manifest is a reviewable dependency change, never automatic repair.
