@@ -48,6 +48,14 @@ class GoSourceTests(unittest.TestCase):
         _, issues = self.inspect('func run() {\nif ok := true; ok {\nprintln(ok)\n}\n}\n')
         self.assertTrue(any('multiple statements' in issue for issue in issues))
 
+    def test_multiline_initializer_cannot_hide_combined_header_actions(self):
+        _, issues = self.inspect('func run() {\nif\nok := true; ok {\nprintln(ok)\n}\n}\n')
+        self.assertTrue(any('multiple statements in if header' in issue for issue in issues))
+
+    def test_switch_initializer_remains_separate_from_binding(self):
+        _, issues = self.inspect('func run() {\nswitch\nvalue := 1; value {\ncase 1:\nprintln(value)\n}\n}\n')
+        self.assertTrue(any('multiple statements in switch header' in issue for issue in issues))
+
     def test_type_switch_binding_is_grammar(self):
         _, issues = self.inspect('func run(value any) {\nswitch typed := value.(type) {\ncase string:\nprintln(typed)\n}\n}\n')
         self.assertEqual([], issues)

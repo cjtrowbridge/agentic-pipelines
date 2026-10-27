@@ -50,3 +50,9 @@ gate passes (72 files). Full suite before final guard regression: 184 tests,
 one unchanged Cerebras playbook word-count failure, two skips. Parser uses
 physical source lines despite //line directives; local-only module-free helper
 compilation is preceded by the framework source gate. No inspected code runs.
+
+### Multiline initializer enforcement
+
+- [x] Reject if/switch initializer actions even when the header spans lines;
+  physical-line uniqueness alone must not permit a condition-assignment bypass.
+- [x] Regress multiline headers (98 focused tests pass); publication receipt follows.

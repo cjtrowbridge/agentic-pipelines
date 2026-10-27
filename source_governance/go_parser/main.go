@@ -39,8 +39,25 @@ func inspectLayout(file *ast.File, positions *token.FileSet) []string {
 		case *ast.ForStmt:
 			exempt[typed.Init] = true
 			exempt[typed.Post] = true
+		case *ast.IfStmt:
+			if typed.Init != nil {
+				exempt[typed.Init] = true
+				line := positions.PositionFor(typed.If, false).Line
+				issues = append(issues, fmt.Sprintf("%d: multiple statements in if header; split initializer into a scoped statement", line))
+			}
+		case *ast.SwitchStmt:
+			if typed.Init != nil {
+				exempt[typed.Init] = true
+				line := positions.PositionFor(typed.Switch, false).Line
+				issues = append(issues, fmt.Sprintf("%d: multiple statements in switch header; split initializer into a scoped statement", line))
+			}
 		case *ast.TypeSwitchStmt:
 			exempt[typed.Assign] = true
+			if typed.Init != nil {
+				exempt[typed.Init] = true
+				line := positions.PositionFor(typed.Switch, false).Line
+				issues = append(issues, fmt.Sprintf("%d: multiple statements in switch header; split initializer into a scoped statement", line))
+			}
 		}
 		return true
 	})
