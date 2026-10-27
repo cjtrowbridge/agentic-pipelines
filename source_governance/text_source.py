@@ -6,6 +6,8 @@ Report compressed actions conservatively; semantic simplicity remains review wor
 
 import re
 
+from source_governance.shell_literals import consume_bodies, heredoc_at
+
 
 def inspect_text(text, adapter, pattern, *, counted_rows=None):
     if adapter not in {"shell", "powershell", "cstyle"}:
@@ -19,12 +21,19 @@ def inspect_text(text, adapter, pattern, *, counted_rows=None):
     header_comments = []
     before_code = True
     visible = []
+    pending = []
     while offset < len(text):
         char = text[offset]
         if char.isspace():
             visible.append(char)
             row += char.count("\n")
             offset += 1
+            if char == "\n" and pending:
+                offset, next_row, payload_rows = consume_bodies(text, offset, row, pending)
+                code.update(payload_rows)
+                visible.append("\n" * (next_row - row))
+                row = next_row
+                pending.clear()
             continue
         if offset == 0 and text.startswith("#!"):
             end = text.find("\n", offset)
@@ -59,6 +68,17 @@ def inspect_text(text, adapter, pattern, *, counted_rows=None):
             continue
         before_code = False
         code.add(row)
+        if adapter == "shell" and text.startswith("<<<", offset):
+            visible.append("0")
+            offset += 3
+            continue
+        if adapter == "shell" and text.startswith("<<", offset):
+            heredoc = heredoc_at(text, offset)
+            if heredoc:
+                delimiter, offset = heredoc
+                pending.append(delimiter)
+                visible.append("0")
+                continue
         if char in {'"', "'", "`"}:
             quote = char
             end = offset + 1
@@ -79,6 +99,8 @@ def inspect_text(text, adapter, pattern, *, counted_rows=None):
             continue
         visible.append(char)
         offset += 1
+    if pending:
+        raise ValueError("unterminated shell heredoc declaration")
     header = "\n".join(header_comments)
     if len(header.splitlines()) < 2 or not any(c.isalpha() for c in header):
         issues.append("1: missing multiline responsibility header")
@@ -95,6 +117,8 @@ def inspect_layout(visible, adapter):
             if "<<" in line:
                 issues.append(f"{row}: heredoc syntax needs a dedicated language adapter")
             simple = re.sub(r";\s*(?:then|do)\s*$", "", line)
+            if simple.strip() in {";;", ";&", ";;&"}:
+                continue
             if ";" in simple:
                 issues.append(f"{row}: split shell actions onto separate lines")
         else:

@@ -116,3 +116,16 @@ and all checks for unlisted/changed files; no vendor-directory exclusion.
 
 Dependency verification:118 focused source tests pass, including seven exact
 manifest identity/inventory/unlisted/staged/BOM/provenance cases. No broad exclusions.
+
+## R11 continuation: shell literal boundaries
+
+Host shell contracts use heredocs for literal help, Python input and rendered
+configuration. The generic adapter misclassified Python shifts and semicolons
+inside those bodies and rejected standalone case terminators. Operator R11
+continuation authorization covers narrow parsing repairs without exclusions.
+
+- [x] Parse simple heredoc declarations and queued/tab-stripped bodies; retain every payload row in size enforcement.
+- [x] Retain fail-closed complex delimiters and unquoted executable substitution; distinguish here-strings.
+- [x] Accept standalone case grammar while rejecting combined commands.
+- [x] Verify nine new regressions; all 127 focused source cases and 81-file framework gate pass.
+- [ ] Publish exact tested tree and verify host receipt before runtime pin advancement.

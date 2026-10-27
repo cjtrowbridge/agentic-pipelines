@@ -202,3 +202,12 @@ source; preserve upstream license and distribution bytes. Directory/file
 inventories remain required. Unlisted vendor source gets every normal source
 check; missing, modified, unsafe or overlapping dependency entries fail closed.
 Repinning a manifest is a reviewable dependency change, never automatic repair.
+
+## Shell literal boundaries
+
+The shell adapter recognizes simple identifier heredoc delimiters, quoted or
+unquoted, queued bodies and tab-stripping `<<-`. Every payload/delimiter row
+remains counted even when it looks like a comment. It does not execute input.
+Unquoted command substitutions and complex delimiters remain fail-closed;
+here-strings have no body. Standalone `case` terminators are grammar, while a
+terminator sharing a line with commands still fails the action-layout check.

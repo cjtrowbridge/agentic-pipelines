@@ -19,3 +19,5 @@ This directory owns source governance assets.
 - `javascript_source.py`: Parse JavaScript without execution and enforce physical source, header and statement contracts.
 
 - `dependencies.py`: Verify exact upstream vendored-file manifests without excluding unlisted source or directory inventories.
+
+- `shell_literals.py`: Parse simple heredoc delimiters and count payload rows without executing input.

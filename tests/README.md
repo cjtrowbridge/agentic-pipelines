@@ -38,3 +38,5 @@ This directory owns tests assets.
 - `test_source_javascript.py`: Regress JS literals, grammar, real violations, physical counts and no inspected-code execution.
 
 - `test_source_dependencies.py`: Verify exact third-party manifest identity while retaining unlisted-source and inventory enforcement.
+
+- `test_source_shell.py`: Verify heredoc data size, case grammar and continued action rejection.
