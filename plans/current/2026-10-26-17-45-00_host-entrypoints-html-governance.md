@@ -102,3 +102,5 @@ as actions, template interpolation read as code and arrow comparison as assignme
 JavaScript verification:110 source tests pass, including9 dedicated JS cases.
 Missing dependencies, malformed syntax and real embedded actions fail closed;
 regex/template/arrow/object syntax passes. No application source executed.
+
+- [x] Parse native ES-module imports/exports without resolving or executing dependencies; covered by unavailable-import regression.

@@ -15,7 +15,14 @@ const Gio = imports.gi.Gio;
 const ByteArray = imports.byteArray;
 const file = Gio.File.new_for_path(ARGV[0]);
 const [, data] = file.load_contents(null);
-print(JSON.stringify(Reflect.parse(ByteArray.toString(data), {loc: true})));
+const text = ByteArray.toString(data);
+let tree;
+try {
+  tree = Reflect.parse(text, {loc: true});
+} catch (error) {
+  tree = Reflect.parse(text, {loc: true, target: "module"});
+}
+print(JSON.stringify(tree));
 """
 
 

@@ -31,6 +31,10 @@ class JavaScriptSourceTests(unittest.TestCase):
         body = 'const value = options.signal?.aborted;\nfor (let i = 0; i < 2; i++) {\ncall(i);\n}\n'
         self.assertEqual([], self.inspect(body)[1])
 
+    def test_module_imports_and_exports_are_parsed_without_execution(self):
+        body = 'import {value} from "./unavailable.js";\nexport function read() {\nreturn value;\n}\n'
+        self.assertEqual([], self.inspect(body)[1])
+
     def test_multiple_statements_and_inline_body_fail(self):
         for body in ['a(); b();\n', 'if (ready) call();\n', 'const f = () => { call(); };\n']:
             self.assertTrue(self.inspect(body)[1], body)
