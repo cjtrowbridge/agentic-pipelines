@@ -1,7 +1,7 @@
 """
 Load only public code governance from YAML and validate fail-closed invariants.
 Local inference values are neither interpreted nor returned in diagnostics.
-Public templates establish reproducible source policy and local parity.
+Standalone public source policy establishes reproducible checks without runtime configuration.
 """
 
 from pathlib import PurePosixPath
@@ -30,7 +30,12 @@ def mapping(text):
 
 
 def load_configuration(snapshot):
-    config = mapping(snapshot.read("api.sample.yaml"))
+    policy = "source-governance.yaml"
+    if policy not in snapshot.files:
+        policy = "api.sample.yaml"
+    if policy not in snapshot.files:
+        raise ValueError("source changes require source-governance.yaml; no API configuration is required")
+    config = mapping(snapshot.read(policy))
     if config.get("max_lines") != 400:
         raise ValueError("code.max_lines must be 400")
     roots = config.get("roots")
@@ -59,10 +64,6 @@ def load_configuration(snapshot):
         except re.error:
             raise ValueError(f"invalid comment_pattern for {extension}") from None
     validate_entrypoints(config, snapshot)
-    if not snapshot.staged and (snapshot.root / "api.yaml").exists():
-        local = mapping((snapshot.root / "api.yaml").read_text(encoding="utf-8-sig"))
-        if local != config:
-            raise ValueError("local api.yaml code mapping differs from tracked api.sample.yaml")
     return config
 
 

@@ -23,7 +23,16 @@ def main():
     args = parser.parse_args()
     print("source governance: inspecting staged index" if args.staged else "source governance: inspecting source tree")
     try:
-        counts, issues = check(Snapshot(args.repo_root, args.staged))
+        snapshot = Snapshot(args.repo_root, args.staged)
+        if args.staged:
+            changed = snapshot.git("diff", "--cached", "--name-only", "-z").split("\0")
+            entries = snapshot.git("ls-files", "--stage", "-z").split("\0")
+            gitlinks = {entry.split("\t", 1)[1] for entry in entries if entry.startswith("160000 ")}
+            docs_only = all(Path(name).suffix.lower() == ".md" or name in gitlinks for name in changed if name)
+            if docs_only:
+                print("source governance: no staged source/policy changes; runtime API files not required")
+                return 0
+        counts, issues = check(snapshot)
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
         print(f"source governance: FAIL: {error}", file=sys.stderr)
         return 1

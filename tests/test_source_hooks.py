@@ -44,6 +44,18 @@ class SourceHookTests(unittest.TestCase):
     def commit(self):
         return self.git('-c', 'user.name=Governance Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'fixture')
 
+    def test_documentation_commit_needs_no_api_file(self):
+        (self.root / 'api.sample.yaml').unlink()
+        (self.root / 'README.md').write_text('Documentation checkpoint.\n')
+        self.assertEqual(0, self.installer().returncode)
+        self.git('add', 'README.md')
+        result = self.commit()
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.git('add', 'src')
+        result = self.commit()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn('source-governance.yaml', result.stderr)
+
     def test_go_hook_isolates_framework_but_keeps_host_staging(self):
         config_path = self.root / 'api.sample.yaml'
         config = yaml.safe_load(config_path.read_text())

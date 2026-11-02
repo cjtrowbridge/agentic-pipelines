@@ -59,13 +59,15 @@ fail explicitly, never silently certify source they cannot parse.
 
 ## Configuration and canonical check
 
-Track the public `code` mapping in `api.sample.yaml`; copy the same mapping into
-ignored local `api.yaml`. The checker uses the tracked mapping for reproducible local checks and compares
-an existing local mapping against it. A missing or different local mapping fails;
-it must not weaken policy. It never reads or prints endpoint credentials and
-needs no model service. Configure `comment_pattern` for each extension/adapter.
-Only parser-recognized comments matching that pattern are excluded. A pattern
-that matches ordinary code cannot remove code lines from the count.
+Track public source rules in `source-governance.yaml` under `code`. The legacy
+`api.sample.yaml` code mapping remains a compatibility fallback, not a required
+API file. Never read or compare local `api.yaml` for source governance; runtime
+configuration and credentials are irrelevant to commit validation.
+
+Staged commits with no source or source-policy changes require no policy/API file.
+Source-changing commits and full-tree/build checks still validate the complete
+source tree and require standalone source policy (or the legacy public fallback).
+A documentation-only pass is not a claim of full-tree source conformance.
 
 Run `python agentic-pipelines/scripts/check_source_governance.py --repo-root .`
 from a host; omit the submodule prefix within the framework. The recursive check
@@ -140,8 +142,7 @@ declared source root with a configured language. The declaration records
 the interface; review must verify actual delegation, not infer it from a
 filename. The launcher still receives ordinary language, header, 400-line
 and layout checks and must be inventoried in root `README.md`. The target
-receives its normal checks. Undeclared root source remains an error. Local
-configuration parity and staged checking include the entire contract.
+receives its normal checks. Undeclared root source remains an error. Staged checking includes the entire source contract.
 
 Configure `.html` with `adapter: html` and `comment_pattern: '<!--[\s\S]*?-->'`.
 Only parser-recognized HTML comments matching that pattern are excluded;

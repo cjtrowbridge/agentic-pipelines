@@ -99,12 +99,15 @@ class SourceRepositoryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'must be 400'):
             self.inspect()
 
-    def test_local_config_parity_without_model_credentials(self):
+    def test_local_api_configuration_is_not_source_policy(self):
         self.write('api.yaml', yaml.safe_dump({'code': self.config, 'authentication': {'api_key': 'SECRET'}}))
         self.assertEqual([], self.inspect()[1])
         self.write('api.yaml', 'code: {}\n')
-        with self.assertRaisesRegex(ValueError, 'differs'):
-            self.inspect()
+        self.assertEqual([], self.inspect()[1])
+        self.write('source-governance.yaml', yaml.safe_dump({'code': self.config}))
+        (self.root / 'api.sample.yaml').unlink()
+        self.git('rm', '--cached', '--ignore-unmatch', 'api.sample.yaml')
+        self.assertEqual([], self.inspect()[1])
 
     def test_valid_index_is_independent_of_invalid_worktree(self):
         self.git('add', '.')
