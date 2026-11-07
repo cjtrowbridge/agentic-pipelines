@@ -1,5 +1,9 @@
 # Agentic Pipelines Agent Instructions
 
+## High priority: explicit permission required for new branches
+
+Agents must never create a new Git branch or include new-branch creation in a plan without the user's explicit permission for that branch creation. This applies to local and remote branches, including branches created indirectly through worktrees, tools, scripts, automation, or delegated agents. Permission to implement changes, create a plan, commit, push, or open a pull request does not imply permission to create a branch. Work on the existing branch unless branch creation has been explicitly authorized. If a new branch is necessary, request permission before planning or performing its creation; do not treat silence or a workflow convention as approval.
+
 ## High priority: authentication requires the host terminal
 
 Authentication, especially `gh`/Git authentication, will not work inside the agent sandbox. Always run authentication checks and authenticated commands (`gh`, Git fetch/pull/push) in the actual host terminal outside the sandbox, using the host’s existing credential store/keyring. Use the tool’s outside-sandbox execution mode. Never diagnose expired credentials or ask the operator to log in again based on a sandbox failure; verify on the host first.

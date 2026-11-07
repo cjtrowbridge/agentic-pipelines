@@ -2,6 +2,7 @@
 
 Format: `last_modified | path | title | summary`
 
+2026-11-06-21-02-12 | plans/past/2026-11-06-21-01-24_require-explicit-branch-permission.md | Require explicit permission before branch creation or planning | Establish canonical branch permission policy and publish on the existing framework branch.
 2026-11-02-12-27-40 | plans/past/2026-11-02-12-30-00_remove-api-file-commit-dependency.md | Remove API configuration dependency from source commit checks | User-authorized independent source policy and documentation-only commit checks.
 2026-11-02-10-40-19 | plans/past/2026-10-18-21-12-49_vscode-reasoning-selector.md | VS Code reasoning selector guidance | Require Cerebras reasoning selector fields, remove effort aliases, and document Ollama feasibility.
 2026-11-02-10-40-19 | plans/past/2026-10-18-00-10-00_host-owned-build-governance.md | Correct governance to host-owned VS Code pipelines | Remove unauthorized GitHub Actions integration and apply software-build gates through host-owned VS Code entrypoints.

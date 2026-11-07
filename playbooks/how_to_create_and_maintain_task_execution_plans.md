@@ -9,6 +9,7 @@ Define a repeatable workflow for creating, selecting, executing, revising, and a
 ## Prerequisites
 
 * Read `README.md` and `AGENTS.md`.
+* Follow the canonical branch-permission rule in `AGENTS.md`: do not include new-branch creation in a plan unless the user has explicitly authorized that branch creation.
 * Plans directories exist:
   * `./plans/future/`
   * `./plans/current/`
