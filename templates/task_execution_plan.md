@@ -1,33 +1,32 @@
 ---
 plan_id: YYYY-MM-DD-HH-mm-ss_slug
 title: Plan Title
-summary: One-sentence summary of what this plan accomplishes.
+summary: Observable outcome this plan delivers.
 status: future
 created_at: YYYY-MM-DD-HH-mm-ss
 ---
 
 # Plan Title
 
+Explain the deliverable, problem and intended outcome. Link/name the exact governing roadmap entry when present; record absence otherwise. Follow host mapping rules.
+
+## Outcome and constraints
+
+State acceptance conditions and behavior, compatibility, authority and resource constraints to preserve. Record existing authorization and material unresolved decisions.
+
+## Simplest path and uncertainty
+
+Describe the direct implementation using existing code. Identify what must be learned before adding a mechanism. Decompose only until the next useful implementation and check are clear.
+
 Key: `[ ]` pending task, `[x]` completed task, `[?]` needs validation, `[-]` closed task
 
-- [ ] 1. Abstract objective.
-  - [ ] 1.1 Major workstream.
-    - [ ] 1.1.1 Specific sub-workstream.
-      - [ ] 1.1.1.1 Atomic executable task.
+- [ ] Deliver the observable behavior.
+- [ ] Review its complete path and verify relevant acceptance conditions.
 
-- [ ] 2. Verification objective.
-  - [ ] 2.1 Validation workstream.
-    - [ ] 2.1.1 Atomic validation task.
+## Evidence and completion
 
-## Authoring Rules
+Select proportionate checks and relevant measurements. Record environment, baseline/result, limitations and finding dispositions; link shared evidence. Stop when acceptance and relevant budgets are met. No measurements are needed for unrelated costs.
 
-- Use filename format: `YYYY-MM-DD-HH-mm-ss_slug.md`.
-- Use lowercase, hyphenated slugs (letters, numbers, hyphens only).
-- Include required front matter keys only: `plan_id`, `title`, `summary`, `status`, `created_at`.
-- Do not add modification-time fields to YAML front matter.
-- Decompose from abstract goals to atomic tasks that can be executed without further decomposition.
-- Use `[-]` for intentionally de-scoped/closed items that are not completed implementation.
-- Keep plan location aligned to status:
-  - `plans/future/`: queued work
-  - `plans/current/`: actively executed work
-  - `plans/past/`: archived work with no planned follow-up
+## Authoring and lifecycle
+
+Use the filename and matching plan_id shown above, lowercase hyphenated slug, and only the five front-matter keys. Host formats take precedence. Keep future/current/past aligned with actual work and maintain roadmap links/indexes together. Implementation steps need not become components or separate plans.

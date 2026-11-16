@@ -1,54 +1,19 @@
-# Change Plan Template
+# Proposed change
 
-This template captures a proposed scope and approval request.
-It does not authorize execution by itself; execution authority comes from approved checklist items in an active plan file under `./plans/`.
+This is proposal context, not independent execution authority. Link the governing plan and record the user's existing authorization; do not request it again for the same scope.
 
-## Active Plan Context
+## Outcome and scope
 
-- Active plan path: `[plans/.../plan-file.md]`
-- Checklist items to execute in this checkpoint:
-  1. `[item id/title]`
-  2. `[item id/title]`
-- Proposed plan revisions required before execution (if any):
-  - `[none | proposed new/updated checklist items]`
+State the observable result, acceptance conditions, protected behavior and material exclusions. Link the roadmap entry where applicable.
 
-## Goal
+## Simplest implementation
 
-[What outcome this change should produce]
+Identify the existing path to change, likely files, meaningful uncertainty and the next useful check. Explain any additional abstraction, state owner or asynchronous boundary. Do not require exhaustive atomic steps.
 
-## Scope
+## Verification and completion
 
-[What is included]
+State relevant behavior checks, cost measurements where justified, comparison conditions and the stopping rule. Record unavailable evidence explicitly.
 
-## Non-Goals
+## Authority
 
-[What is intentionally out of scope]
-
-## Files to Modify
-
-1. `path/to/file`
-   - [Why this file changes]
-2. `path/to/another-file`
-   - [Why this file changes]
-
-## Atomic Steps
-
-1. [First implementation step]
-2. [Second implementation step]
-3. [Plan checklist updates]
-4. [Documentation and index updates]
-5. [Verification]
-
-## Risks / Tradeoffs
-
-- [Risk or tradeoff]
-
-## Verification Plan
-
-- [How success will be checked]
-- [How active plan item completion will be verified]
-- [How index refresh (if affected) will be verified]
-
-## Approval Request
-
-Proposed changes are scoped to the active plan items and files above. Approve this plan and any listed plan revisions?
+Identify only decisions outside existing authorization that require approval. Routine implementation adjustments within the approved outcome are recorded in the plan and may proceed.

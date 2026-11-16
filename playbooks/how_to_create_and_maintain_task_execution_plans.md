@@ -1,120 +1,25 @@
 # Playbook: Create and Maintain Task Execution Plans
 
-*Status: Draft*
+## Use when
 
-## Objective
+Planning, implementing, reviewing or archiving a coherent deliverable.
 
-Define a repeatable workflow for creating, selecting, executing, revising, and archiving plan files so all implementation remains bound to approved atomic checklist items.
+## Load
 
-## Prerequisites
+`AGENTS.md`, the governing roadmap if present, applicable host planning rules, `templates/task_execution_plan.md`, and `references/deliverable_driven_simplicity.md`.
 
-* Read `README.md` and `AGENTS.md`.
-* Follow the canonical branch-permission rule in `AGENTS.md`: do not include new-branch creation in a plan unless the user has explicitly authorized that branch creation.
-* Plans directories exist:
-  * `./plans/future/`
-  * `./plans/current/`
-  * `./plans/past/`
-* Per-folder indexes exist:
-  * `./plans/future/index.md`
-  * `./plans/current/index.md`
-  * `./plans/past/index.md`
-* Plan format requirements:
-  * YAML front matter with `plan_id`, `title`, `summary`, `status`, `created_at`
-  * Key line must be: Key: `[ ]` pending task, `[x]` completed task, `[?]` needs validation, `[-]` closed task
-  * Decomposition from abstract goals to atomic executable tasks
-  * Template: `./templates/task_execution_plan.md`
+## Procedure
 
-## Step-by-Step Instructions
+1. Select the plan matching the authorized outcome. Ask only if governing scope is materially ambiguous. Preserve unrelated work and explicit branch-permission boundaries.
+2. State outcome, protected behavior, simplest implementation, uncertainty, acceptance evidence and stopping condition. Decompose only until the next useful implementation/check is clear. Do not turn checklist detail into architecture or additional plans automatically.
+3. Compare roadmap and plan scope, status, sequencing, dependencies and acceptance. Preserve host one-to-one mappings and links. Record a missing roadmap explicitly; do not invent one merely for this procedure.
+4. Record existing user authorization. Request approval only for unauthorized work or material changes to scope, behavior, authority, irreversible actions or cost. Routine implementation discoveries within the approved outcome require plan updates, not renewed permission.
+5. Use `YYYY-MM-DD-HH-mm-ss_slug.md` and matching `plan_id`, with `title`, `summary`, `status`, `created_at`. Keep the template's status key. Host-established formats take precedence.
+6. Promote `future` to `current` before implementation. Implement a coherent outcome and review its complete path for correctness, simplification and relevant costs. Mark completed items `[x]`, uncertain verification `[?]`, and intentionally closed items `[-]`.
+7. Record material findings and dispositions. For selected improvements compare baseline and result, retain or revert, and stop at acceptance. Keep unavailable device evidence explicit.
+8. Archive to `past` when no work remains, respecting host lifecycle rules. Update affected roadmap links and regenerate framework indexes with `python scripts/regenerate_plan_indexes.py`; use host index tooling/formats for host plans.
+9. Record concise evidence and handoff in the journal. Review the diff and scope before proposing a commit; this playbook does not authorize commit, push or branch creation.
 
-1. **Find or Confirm Active Plan**
-   * Check `./plans/current/index.md` for an existing active plan.
-   * If multiple candidates exist, ask the user which plan governs this checkpoint.
-   * If no suitable active plan exists, continue to Step 2.
+## Output and verification
 
-2. **Create or Select the Governing Plan**
-    * If work is new:
-       * Create a new plan in `./plans/future/` using `YYYY-MM-DD-HH-mm-ss_slug.md`.
-       * Keep slug lowercase and hyphenated (letters, numbers, hyphens only).
-       * Keep `plan_id` exactly equal to the filename stem.
-       * Decompose tasks down to atomic checklist items before requesting implementation approval.
-       * Use a minimum quick-start scaffold:
-         * top-level objective checklist item,
-         * decomposed implementation workstream items,
-         * decomposed verification workstream items.
-    * If work is already in-flight:
-       * Move/promote the plan to `./plans/current/` immediately before the first non-trivial implementation edit.
-
-3. **Bind the Task Run to Plan Items**
-   * Identify exact checklist items that will be worked in this checkpoint.
-   * Include the active plan path and targeted checklist item IDs in the change plan summary.
-   * Treat `./templates/change_plan.md` output as proposal-only context; it does not authorize execution by itself.
-   * Do not execute work that is not explicitly represented by approved checklist items.
-
-4. **Request Approval Before Execution**
-   * Present:
-     * active plan path,
-     * checklist items to execute,
-     * files expected to change,
-     * verification approach.
-   * Ask for explicit approval before making non-trivial file edits.
-
-5. **Execute Only Approved Atomic Plan Tasks**
-    * Implement exactly the approved checklist scope.
-    * Mark completed items as `[x]`.
-    * Mark uncertain outcomes as `[?]` with follow-up validation items.
-    * Mark intentionally de-scoped work as `[-]` (closed).
-
-6. **Handle Mid-Run Divergence**
-   * If new required work appears or assumptions fail:
-     * Stop implementation.
-     * Propose a plan revision with atomic checklist updates.
-     * Request explicit approval for the revised plan scope before continuing.
-
-7. **Maintain Plan Lifecycle State**
-   * `future -> current` immediately before the first non-trivial implementation edit.
-   * `current -> past` when no further work is planned and all remaining items are either complete or intentionally closed.
-   * Keep only actively executed plans in `./plans/current/`.
-   * It is valid for `./plans/current/` to be empty when no plan is active.
-
-8. **Refresh Plan Indexes**
-   * Ensure each affected status index includes current entries in one-line format:
-     * `last_modified | path | title | summary`
-   * Order:
-     * `future/current`: filesystem last-write time descending.
-     * `past`: `created_at` descending.
-   * Run `python scripts/regenerate_plan_indexes.py` after plan create/update/move/archive.
-   * If this framework is mounted as `./agentic-pipelines` in a host repo using host-owned `./plans/`, run:
-     * `python agentic-pipelines/scripts/regenerate_plan_indexes.py --repo-root .`
-
-9. **Checkpoint Summary Requirements**
-   * Before commit/push flow, summarize:
-     * active plan path,
-     * checklist items changed,
-     * lifecycle moves (`future/current/past`) if any,
-     * index files refreshed.
-   * Ensure journal checkpoint details reference the same plan path and checklist deltas.
-
-10. **Verification**
-   * Confirm all implemented changes map to checklist items in the active plan.
-   * Confirm plan front matter and key line remain valid.
-   * Confirm plan indexes match filesystem state for affected plan directories.
-   * Confirm no work was executed outside approved plan scope.
-
-## Anti-Patterns
-
-* Executing work without an active approved plan.
-* Treating playbooks as direct execution authority without plan binding.
-* Expanding scope silently instead of proposing plan revisions.
-* Marking plan items complete without corresponding implementation evidence.
-* Leaving stale plans in `./plans/current/` after work has ended.
-
-## Lifecycle Compliance
-
-Prompt -> Select/Create Plan (using relevant playbook guidance) -> Request approval -> Execute approved plan atoms -> Plan update -> Docs update -> Verification.
-
-If this occurs inside a git repo:
-* Review `git status` and relevant diffs.
-* Ensure checkpoint summary includes active plan path and checklist item changes.
-* Suggest a commit message that summarizes the completed checkpoint.
-* Commit after approved checkpoint completion.
-
+A traceable plan with authorized outcome, evidence, truthful status and resolved links. Verify behavior proportionately; structural plan checks do not establish product correctness.

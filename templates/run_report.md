@@ -40,4 +40,6 @@
 
 {{ recommendations_or_no_change }}
 
+For material findings, record fix/defer/reject/no-change, rationale and governing plan or requirement. Selected improvements record baseline, expected benefit, regression checks and comparison method. After authorized execution, link comparable results, limitations and retain/revert/defer disposition. Do not report a proposed experiment as a measured improvement. Stop when acceptance and relevant budgets are met.
+
 Observations and metrics above are recorded facts or deterministic calculations. Hypotheses and recommendations are advisory and require the normal approval workflow before changing a pipeline.

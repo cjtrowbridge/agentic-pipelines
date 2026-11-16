@@ -16,7 +16,7 @@ Turning a user goal into an entity-oriented pipeline proposal or package.
 7. Declare every lossy semantic derivative, its limited authority, preservation/omission policy, cache identity, fallback, and downstream source access.
 8. Put exact preparation, schema/resource/render gates, state, evidence, promotion, and rollback in deterministic code. Never provide PDFs directly to a model; supply the linked validated derived text—not the PDF.
 9. For software builds, use `playbooks/how_to_govern_source_and_builds.md`. Map host actions to VS Code tasks and the canonical pipeline to launch.json.
-10. Define golden fixtures and efficiency measures before adding semantic microstages. Audit the staged design and request material user decisions.
+10. Compare the direct baseline with proposed mechanisms using `references/deliverable_driven_simplicity.md`: justify extra state, concurrency and stages; remove work first. Define fixtures, relevant budgets and completion before adding mechanisms. Audit the design and request material user decisions.
 
 ## Output and verification
 A reviewable package tracing every goal to an authoritative mechanism, coherent semantic unit, example strategy, review scope, exact gates, evidence, fixtures, and escalation. Reject semantic laundering, context fragmentation, unjustified stage splits, lossy source substitution, scope escape, retry ratchets, unsafe writes, or unbounded cycles.

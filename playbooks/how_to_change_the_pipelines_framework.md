@@ -15,7 +15,7 @@ Changing framework prompts, playbooks, policy, templates, references, runtime co
 
 1. Identify the active plan and exact checklist items authorizing the change.
 2. Inspect repository status and preserve unrelated/user-owned work.
-3. If required work is absent from the plan, stop and obtain approval for an atomic revision.
+3. Record routine implementation adjustments within the authorized outcome; seek approval only for material scope or constraint changes.
 4. Apply only approved changes, keeping prompts, playbooks, references, templates, schemas, code, and documentation consistent.
 5. Verify behavior and prompt/playbook routing in proportion to risk.
 6. Update checklist states and regenerate plan indexes after plan edits or lifecycle moves.
@@ -31,7 +31,7 @@ Changing framework prompts, playbooks, policy, templates, references, runtime co
 
 ## Stop conditions
 
-- Required work is outside the approved plan.
+- Required work exceeds the authorized outcome or material constraints.
 - A change would overwrite user/host-owned content or credentials.
 - Evidence contradicts the plan's assumptions.
 - Required verification cannot be run or produces unexplained failure.

@@ -17,6 +17,10 @@ An agent should load the universal router, identify its task, and then load only
 7. Run state, artifacts, threads, and reports preserve machine evidence.
 8. `journal/` preserves the human/agent metaconversation about framework and pipeline design.
 
+## Deliverable-driven engineering
+
+Use [deliverable-driven simplicity](../references/deliverable_driven_simplicity.md) when planning or reviewing implementation. Coherent outcomes govern decomposition; clear state ownership and justified mechanisms govern implementation; relevant measurements and explicit dispositions govern iteration. This does not add runtime stages or require ordinary hosts to run an inference pipeline.
+
 ## Deterministic-first pipeline design
 
 An agentic pipeline is not a chain of model calls. It is a deterministic program with occasional, tightly bounded inference stages.

@@ -13,7 +13,7 @@ Entity/goal contract, semantic-unit and example strategy, protected invariants, 
 4. Apply the cheapest authoritative exact gates before bounded semantic review. Safe representation repair belongs in code; meaning-changing repair belongs in the scoped semantic session.
 5. Choose retained self-audit for routine reversible work. Require a consequence or empirical justification for independent or claim-level high-assurance review.
 6. For revisions, review the requested delta and direct consequences. Unchanged accepted content is non-blocking unless the delta creates a contradiction or exact violation.
-7. Define malformed output, disagreement, finite progress-tested repair, quarantine, human escalation, promotion, and rejected-evidence behavior.
+7. Define malformed output, disagreement, finite repair, quarantine, escalation, promotion and rejected-evidence behavior. Review redundant gates and failure ownership using `references/deliverable_driven_simplicity.md`; checks protect requirements, not reviewer preferences.
 8. Build versioned golden cases for examples, unsupported content, omission, low-overlap equivalence, high-overlap contradiction, scope escape, operator intent, context reduction, lossy intermediates, and high-assurance exceptions. Measure false accepts/rejects and retry cost.
 
 ## Output and verification

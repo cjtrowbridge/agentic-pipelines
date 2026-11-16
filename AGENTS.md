@@ -8,9 +8,9 @@ Agents must never create a new Git branch or include new-branch creation in a pl
 
 Authentication, especially `gh`/Git authentication, will not work inside the agent sandbox. Always run authentication checks and authenticated commands (`gh`, Git fetch/pull/push) in the actual host terminal outside the sandbox, using the host’s existing credential store/keyring. Use the tool’s outside-sandbox execution mode. Never diagnose expired credentials or ask the operator to log in again based on a sandbox failure; verify on the host first.
 
-## High priority: immediately preserve atomic context
+## Preserve useful context
 
-Assume you have extremely limited context (short-term memory). Do not count on remembering things. Notes in plans and journals should be decomposed into actually-atomic detail and include any appropriate references to other files or resources related to the entry. After everything you do, immediately update plans and journals and assume you won't necessarily be able to remember details you don't explicitly write down after each action. Do not be overly verbose or you won't be able to find the details you need. If you notice yourself reasoning in circles, stop doing that. Don't walk through an entire situation more than once unless there is a compelling reason to do that, and only if there is some genuinely new and salient informatoin that actually warrants it.
+Record decisions, evidence, unresolved questions and the next useful action in the governing plan/journal at material checkpoints. Keep notes concise and linked to their sources; do not decompose them recursively or duplicate the same narrative after every tool call. If reasoning repeats without new evidence, return to the recorded decision and identify the missing fact.
 
 ## Purpose
 
@@ -35,6 +35,7 @@ For combined tasks, follow dependency order: design before building prompts; con
 
 | Task | Primary playbook |
 | --- | --- |
+| Plan, implement or review a coherent deliverable | `playbooks/how_to_create_and_maintain_task_execution_plans.md` |
 | Design a pipeline from a goal | `playbooks/how_to_design_a_pipeline.md` |
 | Create or revise worker/reviewer/repair prompts | `playbooks/how_to_build_pipeline_prompts.md` |
 | Design deterministic and semantic validation | `playbooks/how_to_design_pipeline_validation.md` |
@@ -58,6 +59,9 @@ For combined tasks, follow dependency order: design before building prompts; con
 If a listed playbook is absent, use the framework-change route rather than substituting unrelated legacy instructions.
 
 ## Universal invariants
+
+- Deliver outcomes with the fewest interacting mechanisms. Plan coherent acceptance conditions rather than recursive atomic decomposition; justify new abstractions, state and concurrency with concrete requirements. Give mutable state a clear owner and remove unnecessary work before accelerating it.
+- Review complete paths for simplification and relevant resource costs. Material findings need an explicit disposition; selected improvements need comparable before/after evidence and regression checks. Stop when acceptance and relevant budgets are met. Use `references/deliverable_driven_simplicity.md` for planning, implementation and improvement reviews; ordinary host development does not require running a pipeline.
 
 - Source and build governance is mandatory: follow `references/source_build_governance.md`. Keep first-party source under top-level roots declared in tracked `source-governance.yaml` under `code` (legacy `api.sample.yaml` remains supported); local API configuration is never a commit prerequisite. Staged documentation/gitlink-only commits require no source-policy file; stable root launchers require exact `code.entrypoints` contracts and retain all checks. Each source file has at most 400 counted lines, one logical action per line, and a multiline responsibility header. Every source directory has a README inventory. Declare language-specific `comment_pattern` values; exclude only recognized comments from line accounting. Run the canonical `scripts/check_source_governance.py` before every commit. When a host pipeline includes software building, it must run this check before every software build. A failed check must block the commit/build; no advisory gate, ignored exit status, or ungoverned alternate build path. Install the staged pre-commit hook through host bootstrap. Expose host software-build actions through VS Code tasks and route the canonical pipeline in `launch.json` through the same bootstrap and failing gate. Do not impose a software build on a data-analysis or other pipeline that has no software-build stage. Decompose violations rather than hide them.
 - Never use an LLM where deterministic logic is sufficient. LLM output is untrusted and may satisfy only the narrow contract declared for that stage.
@@ -91,7 +95,7 @@ If a listed playbook is absent, use the framework-change route rather than subst
 
 ## Framework changes
 
-For changes to this repository, load `playbooks/how_to_change_the_pipelines_framework.md`. The approved active plan is execution authority. Stop and request a plan revision when needed work is not represented there. Plan files live under `plans/future/`, `plans/current/`, and `plans/past/`; regenerate indexes with `python scripts/regenerate_plan_indexes.py` after plan changes or lifecycle moves.
+For changes to this repository, load `playbooks/how_to_change_the_pipelines_framework.md`. The approved active plan records execution authority. Update routine implementation details within the authorized outcome; request approval for material scope or constraint changes, not rediscovered permission for already authorized work. Plan files live under `plans/future/`, `plans/current/`, and `plans/past/`; regenerate indexes with `python scripts/regenerate_plan_indexes.py` after plan changes or lifecycle moves.
 
 ## Host/submodule use
 

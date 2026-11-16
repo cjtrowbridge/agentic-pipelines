@@ -13,7 +13,9 @@ Human-readable run narrative, machine report, deterministic trajectory/cohort me
 4. Compare first attempts with accepted or terminal trajectories. Assess examples, initial prompt, context, schema, semantic-unit boundaries, lossy intermediates, validator/reviewer authority, provider, orchestration, or infeasible goal.
 5. Identify semantic laundering, context fragmentation, reviewer scope escape, operator-intent demotion, repeated/changing feedback, non-progress, prompt growth, exact work sent to inference, and false rejection.
 6. Prefer improving initial examples, prompt, context, schema, or scope before adding a stage or validator. Require evidence, expected benefit, regression risk, fixture, and safe sample scope; reject one-off prompt accretion and unsupported ceremony.
-7. Accept, revise, defer, reject, or record no change; analysis cannot execute it.
+7. Use `references/deliverable_driven_simplicity.md` to consider eliminating work, state and redundant gates before adding mechanisms. Select relevant quality/resource budgets and comparable workloads; record measurement overhead and unavailable evidence.
+8. Give each material finding a disposition: fix within authorized scope, defer to an identified requirement with a reason, reject, or no change. Selected improvements need baseline, expected benefit, regression checks and comparison method in the governing plan.
+9. After an authorized change, compare results and retain or revert; stop at acceptance. Analysis cannot authorize mutations or retries.
 
 ## Output
 A reviewed advisory disposition with evidence, risks, required approvals, and next action.
